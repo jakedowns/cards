@@ -2,7 +2,13 @@
   "name": "CardOS",
   "version": "0.0.1",
   "description": "experimental system builder",
-  "main": "server/server.js",
+  "main": "server/server.mjs",
   "author": "jakedowns",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.26.1"
+  },
+  "devDependencies": {
+    "vite": "^2.9.5"
+  }
 }

@@ -1,10 +1,19 @@
-const http = require('http');
-const fs = require('fs').promises;
+import http from 'http';
+import {promises as fs} from 'fs';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+console.log('__dirname',__dirname);
+
+import ServerAPI from './server-api.mjs';
+const SERVER_API = new ServerAPI();
 
 const hostname = '127.0.0.1';
 const port = 3090;
 
-const ROOT = __dirname + '/../';
+const ROOT = __dirname + '/..';
 
 const loadFile = function(path,res){
     return fs.readFile(ROOT + path)
@@ -19,7 +28,7 @@ const loadFile = function(path,res){
             res.end(data);
         })
         .catch(err => {
-            console.error(err);
+            //console.error(err);
             res.statusCode = 404;
             res.end(JSON.stringify(err));
         });
@@ -28,10 +37,16 @@ const loadFile = function(path,res){
 const server = http.createServer((req, res) => {
     res = res;
     // basic routing
+    console.log('loading',req.url);
+    if(req.url.startsWith('/api/')){
+        SERVER_API.request(req, res);
+        return
+    }
     switch(req.url){
         case '/':
-            loadFile('client/index.html',res);
+            loadFile('/client/index.html',res);
             break;
+
         default:
             // static asseets
             loadFile(req.url,res);
@@ -43,3 +58,5 @@ const server = http.createServer((req, res) => {
 server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
+
+export default server;

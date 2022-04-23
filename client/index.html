@@ -1,10 +1,114 @@
 <html>
     <head>
+        <script src="https://unpkg.com/vue@3"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <style>
+            .primary_view {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+            }
+            .card {
+                width: 250px;
+                height: 350px;
+            }
+            .card .inner {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                text-align: center;
 
+                /* overflow:hidden; */
+
+                /* background-color: #f1f1f1; */
+                /* margin: 10px; */
+                /* padding: 10px; */
+                /* border-radius: 10px; */
+                perspective: 1000px;
+
+                transition: transform 0.8s;
+                transform-style: preserve-3d;
+            }
+            .card.flipped .inner {
+                transform: rotateY(180deg);
+            }
+            .card .front, .card .back {
+                position: absolute;
+                box-sizing: border-box;
+                width: 100%;
+                height: 100%;
+                -webkit-backface-visibility: hidden; /* Safari */
+                backface-visibility: hidden;
+                padding: 10px;
+            }
+            .card .back {
+                transform: rotateY(180deg);
+            }
+            .card-title {
+                font-size: 20px;
+                font-weight: bold;
+            }
+            .card-text {
+                font-size: 16px;
+            }
+            .card-button {
+                font-size: 16px;
+                font-weight: bold;
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+        </style>
     </head>
     <body>
-        <div id="#app">
-            
+        <div id="app">
+            <div v-if="state.loading">
+                Loading...
+            </div>
+            <div v-else-if="state.error">
+                <p>Error: {{ state.error }}</p>
+            </div>
+            <div v-else :style="tableTopStyle">
+                <div class="deck-list">
+                    list of recent / fav decks here
+                </div>
+                <div class="search">
+                    search / quick action box
+                </div>
+                <div class="primary_view">
+                    <div
+                        class="focused_deck"
+                        :set="focused_deck = state.decks[state.player.focused_deck]">
+                        <!-- focused deck: {{ state.player.focused_deck }} -->
+                        <div v-for="(card_name,key) in focused_deck.card_order" :key="card_name"
+                        class="card"
+
+                        :altText="JSON.stringify(card)"
+
+                        :set="card = focused_deck.cards[card_name]"
+                        :class="{flipped:focused_deck.cards[card_name]?.flipped}"
+                        @click="focused_deck.cards[card_name]?.flipped ? setCard(card_name,'flipped',false) : action('nextCard')">
+                            <div class="inner" :style="cardStyle">
+                                <div class="front" :style="cardFrontStyle">
+                                    <div class="text">{{card?.front?.text ?? '?'}}</div>
+                                </div>
+                                <div class="back" :style="cardBackStyle">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <script src="/client/client.mjs" type="module"></script>
     </body>
