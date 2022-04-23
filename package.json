@@ -1,0 +1,8 @@
+{
+  "name": "CardOS",
+  "version": "0.0.1",
+  "description": "experimental system builder",
+  "main": "server/server.js",
+  "author": "jakedowns",
+  "license": "MIT"
+}
