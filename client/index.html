@@ -10,9 +10,21 @@
                 justify-content: center;
                 height: 100vh;
             }
+            .current-hand {
+                position: relative;
+                margin: 0 auto;
+                display: block;
+                width: 250px;
+                height: 350px;
+            }
             .card {
                 width: 250px;
                 height: 350px;
+                position: absolute;
+                perspective: 1000px;
+            }
+            .card.focused {
+                z-index: 10;
             }
             .card .inner {
                 position: relative;
@@ -26,12 +38,12 @@
                 /* margin: 10px; */
                 /* padding: 10px; */
                 /* border-radius: 10px; */
-                perspective: 1000px;
+
 
                 transition: transform 0.8s;
                 transform-style: preserve-3d;
             }
-            .card.flipped .inner {
+            .card:not(.flipped) .inner {
                 transform: rotateY(180deg);
             }
             .card .front, .card .back {
@@ -42,6 +54,14 @@
                 -webkit-backface-visibility: hidden; /* Safari */
                 backface-visibility: hidden;
                 padding: 10px;
+            }
+            .card .front {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+            .card .front .actions .action {
+                cursor: pointer;
             }
             .card .back {
                 transform: rotateY(180deg);
@@ -85,21 +105,47 @@
                     search / quick action box
                 </div>
                 <div class="primary_view">
-                    <div
-                        class="focused_deck"
-                        :set="focused_deck = state.decks[state.player.focused_deck]">
-                        <!-- focused deck: {{ state.player.focused_deck }} -->
-                        <div v-for="(card_name,key) in focused_deck.card_order" :key="card_name"
-                        class="card"
+                    <div class="current-hand" v-if="active_hand">
+                        <div class="card"
 
-                        :altText="JSON.stringify(card)"
+                            v-for="(card_name,key) in active_hand.hand_order"
+                            :key="card_name"
+                            :altText="JSON.stringify(card)"
 
-                        :set="card = focused_deck.cards[card_name]"
-                        :class="{flipped:focused_deck.cards[card_name]?.flipped}"
-                        @click="focused_deck.cards[card_name]?.flipped ? setCard(card_name,'flipped',false) : action('nextCard')">
+                            :class="{
+                                focused: player.focused_card === card_name,
+                                flipped: cardFromDeck(card_name)?.flipped
+                            }"
+
+                            :set-card="card = cardFromDeck(card_name)"
+
+                            @click=" !cardFromDeck(card_name)?.flipped
+                                ? setCard(card_name,'flipped',true)
+                                : void(0);">
+
                             <div class="inner" :style="cardStyle">
-                                <div class="front" :style="cardFrontStyle">
+                                <!-- only show front if card is flipped -->
+                                <div class="front"
+                                    v-if="card?.flipped"
+                                    :style="cardFrontStyle">
                                     <div class="text">{{card?.front?.text ?? '?'}}</div>
+                                    <div class="inputs">
+                                        <div v-for="(input,key) in card?.inputs">
+                                            <label for="input.name">
+                                                {{input.label}}
+                                            </label>
+                                            <input v-bind="input" />
+                                        </div>
+                                    </div>
+                                    <div class="actions"
+                                        v-if="card?.actions">
+                                        <div class="action"
+                                            v-for="(action,key) in card?.actions"
+                                            :key="key"
+                                            @click="act(action.name)">
+                                            {{actions?.[action.name]?.label}}
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="back" :style="cardBackStyle">
 
