@@ -39,12 +39,67 @@
                 /* padding: 10px; */
                 /* border-radius: 10px; */
 
-
                 transition: transform 0.8s;
+
                 transform-style: preserve-3d;
             }
+            .card .inner .front {
+                text-align: left;
+            }
+            .card.no-transition .inner {
+                transition: none;
+            }
+            /* show back when not flipped */
             .card:not(.flipped) .inner {
                 transform: rotateY(180deg);
+            }
+            /* .card.pulled-out-left .inner {
+                transform: translateX(-300px) translateY(-50px) rotateY(-45deg) rotateZ(12deg);
+            } */
+            /* .card.position-stacked:not(.flipped) .inner {
+                transform: translateX(0) translateY(0) rotateY(180deg) rotateZ(0);
+            } */
+            /* .card.full-rotate-back:not(.flipped) .inner {
+                transform: translateX(0) translateY(0) rotateY(-180deg) rotateZ(0);
+            } */
+            .card.animation-top-to-back {
+                animation: outLeftAndBack 1s;
+                animation-timing-function: ease-in-out;
+            }
+            @keyframes outLeftAndBack{
+                0% {
+                    transform: translateX(0) translateY(0) rotateY(0deg) rotateZ(0);
+                }
+                50% {
+                    transform: translateX(-300px) translateY(-50px) rotateY(-45deg) rotateZ(12deg);
+                }
+                90% {
+                    transform: translateX(3px) translateY(-3px) rotateY(-180deg) rotateZ(6deg);
+                }
+                100% {
+                    transform: translateX(0) translateY(0) rotateY(-180deg) rotateZ(0);
+                }
+            }
+            .card.animation-outRightToFront {
+                animation: outRightAndFront 1s;
+                animation-timing-function: ease-in-out;
+            }
+            @keyframes outRightAndFront {
+                0% {
+                    transform: translateX(0) translateY(0) rotateY(180deg) rotateZ(0);
+                }
+                50% {
+                    transform: translateX(300px) translateY(-50px) rotateY(45deg) rotateZ(-12deg);
+                    z-index: 9000;
+                }
+                90% {
+                    transform: translateX(-3px) translateY(-3px) rotateY(0deg) rotateZ(-6deg);
+                    z-index: 9000;
+                }
+                100% {
+                    transform: translateX(0) translateY(0) rotateY(0deg) rotateZ(0);
+                    z-index: 9000;
+                }
             }
             .card .front, .card .back {
                 position: absolute;
@@ -60,17 +115,39 @@
                 flex-direction: column;
                 justify-content: space-between;
             }
+            .card .front .actions {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                background-color: #51389B;
+                border-radius: 0.5rem;
+                padding: 1rem;
+            }
             .card .front .actions .action {
                 cursor: pointer;
+                border-radius: 0.5rem;
+
+                background-color: #220F56; /* primary */
+                padding: 0.5rem;
+
+                outline: none;
+                color: #fff;
+                box-shadow: 0px 0px 0px transparent;
+                border: 0px solid transparent;
+                text-shadow: 0px 0px 0px transparent;
+                font-size: 16px;
+            }
+            .card .actions .action:hover {
+                background-color: #331D72; /* secondary */
             }
             .card .back {
                 transform: rotateY(180deg);
             }
-            .card-title {
-                font-size: 20px;
+            .card .title {
+                font-size: 32px;
                 font-weight: bold;
             }
-            .card-text {
+            .card .text {
                 font-size: 16px;
             }
             .card-button {
@@ -87,6 +164,55 @@
                 margin: 4px 2px;
                 cursor: pointer;
             }
+            .card .debug {
+                color: red;
+                font-family: monospace;
+                position: absolute;
+                width: 250;
+                z-index: 9;
+                background: black;
+            }
+            /* TODO: make this more dynamic */
+            .card.stack-2 {
+                transform: translateX(300px);
+            }
+        </style>
+        <!-- deck list -->
+        <style>
+            .deck-list {
+                display: flex;
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: flex-start;
+                width: 100vw;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: auto;
+                height: 100px;
+            }
+            .deck-list .deck {
+                transition: .2s ease-in-out;
+                transform:translateY(-60%) scale(0.5);
+                width: 250px;
+                height: 350px;
+                border-radius: .5rem;
+                background-color: #51389B;
+                color: #fff;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                font-size: 24px;
+                font-weight: bold;
+                text-align: left;
+                padding: 1rem;
+                box-sizing: content-box;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            .deck-list .deck:hover {
+                transform: translateY(-59%) scale(0.6);
+            }
         </style>
     </head>
     <body>
@@ -99,55 +225,129 @@
             </div>
             <div v-else :style="tableTopStyle">
                 <div class="deck-list">
-                    list of recent / fav decks here
+                    <!-- TODO: need a deck_list_order attribute so more frequently / recently used items appear leftmost -->
+                    <div v-for="(deck,name) in player.hands" :key="deck.name" class="deck"
+                        @click="focusDeck(name)">
+                        <div>{{deck?.name ?? name}}</div>
+                        <!-- todo: close deck option to put deck away -->
+                    </div>
+                    <div class="deck"
+                    @click="createDeckAndFocus('blank')">
+                        <div>new deck</div>
+                    </div>
+                    <!-- todo: button to Open a deck that has been put away, or Create a new deck -->
+                    <!-- todo: welcome deck is evergreen even when put away, it is only hidden from deck-dock -->
+                    <!-- welcome deck contains primary cards like the "Create Deck" card and the "Create Card" card and the "New Player" card and the "Switch Player" card, Player Settings, etc... :) -->
                 </div>
                 <div class="search">
                     search / quick action box
                 </div>
+                <!-- <pre style="color: #fff;">
+                {{ player?.active_hand }}
+                {{ JSON.stringify(active_hand,null,2)}}
+                </pre> -->
                 <div class="primary_view">
-                    <div class="current-hand" v-if="active_hand">
+                    <div class="current-hand empty-deck-at-hand" v-if="active_hand && !active_hand?.card_order?.length">
+                        <div class="card focused flipped">
+                            <div class="inner" :style="cardStyle">
+                                <div class="front" :style="cardFrontStyle">
+                                    <div class="title">
+                                        <!-- {{ player?.active_hand }} deck is empty. Let's create some cards! -->
+                                        uh oh, "{{ player?.active_hand }}" deck has no cards?
+                                    </div>
+                                    <!-- <div class="text">
+                                        Click on a card to add it to your hand.
+                                        Or start typing to add custom cards
+                                    </div>
+                                    <div class="inputs">
+                                        <textarea placeholder="Card Name" name="card_name"></textarea>
+                                    </div>
+                                    <div class="actions">
+                                        <div class="action" @click="createCard">Create Card</div>
+                                    </div> -->
+                                </div>
+                                <div class="back" :style="cardBackStyle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="current-hand" v-if="active_hand && active_hand?.card_order?.length">
                         <div class="card"
 
-                            v-for="(card_name,key) in active_hand.hand_order"
+                            v-for="(card_name,key) in active_hand.card_order"
                             :key="card_name"
-                            :altText="JSON.stringify(card)"
 
                             :class="{
                                 focused: player.focused_card === card_name,
-                                flipped: cardFromDeck(card_name)?.flipped
+                                flipped: cardFromDeck(card_name)?.flipped,
+                                ...cardFromDeck(card_name)?.classnames ?? {},
+                                ...cardFromDeck(card_name)?.instance?.extraClassnames()
                             }"
 
-                            :set-card="card = cardFromDeck(card_name)"
+                            :style="{
+                                ...{zIndex:cardFromDeck(card_name).instance.zIndex},
+                                ...cardFromDeck(card_name)?.style ?? {}
+                            }"
 
-                            @click=" !cardFromDeck(card_name)?.flipped
-                                ? setCard(card_name,'flipped',true)
-                                : void(0);">
+                            :set-card="card = cardFromDeck(card_name)">
+
+                            <!-- <div class="debug">
+                                {{ JSON.stringify(card,null,2) }}
+                            </div> -->
 
                             <div class="inner" :style="cardStyle">
                                 <!-- only show front if card is flipped -->
                                 <div class="front"
-                                    v-if="card?.flipped"
+                                    v-if="card?.flipped || card?.flipping"
                                     :style="cardFrontStyle">
-                                    <div class="text">{{card?.front?.text ?? '?'}}</div>
+                                    <div class="title">
+                                        <!-- {{card?.front?.text ?? ''}} -->
+                                        <dynamic-renderer
+                                            :body="card?.front?.text ?? ''"
+                                            :data="{player}" />
+                                    </div>
+                                    <div class="text" v-if="card?.front?.text_lower?.trim()?.length">
+                                        <!-- {{card?.front?.text ?? ''}} -->
+                                        <dynamic-renderer
+                                            :body="card?.front?.text_lower ?? ''"
+                                            :data="{player}" />
+                                    </div>
                                     <div class="inputs">
+                                        <form @submit.prevent="onCardSubmit">
                                         <div v-for="(input,key) in card?.inputs">
                                             <label for="input.name">
                                                 {{input.label}}
                                             </label>
-                                            <input v-bind="input" />
+                                            <input v-bind="input" v-if="input.type==='text'" />
+                                            <textarea v-if="input.type==='textarea'"
+                                                :name="input?.name"
+                                                :required="input?.required"
+                                                :placeholder="input?.placeholder"
+                                            ></textarea>
+                                            <select v-bind="{
+                                                name: input.name,
+                                                required: input.required,
+                                            }" v-if="input.type==='select'">
+                                                <option v-for="(option,key) in input.options" :value="option.value">
+                                                    {{option.name}}
+                                                </option>
+                                            </select>
                                         </div>
+                                        </form>
                                     </div>
                                     <div class="actions"
                                         v-if="card?.actions">
-                                        <div class="action"
+                                        <button class="action"
                                             v-for="(action,key) in card?.actions"
                                             :key="key"
-                                            @click="act(action.name)">
-                                            {{actions?.[action.name]?.label}}
-                                        </div>
+                                            @click="act(action)">
+                                            {{action?.label ?? actions?.[action.name]?.label ?? action.name}}
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="back" :style="cardBackStyle">
+                                <div class="back" :style="cardBackStyle"
+
+                                    @click="onClickCardBack(card_name)"
+                                >
 
                                 </div>
                             </div>

@@ -5,6 +5,7 @@ import DEFAULT_THEME from './themes/default.theme.mjs';
 // card/deck/pack/etc has no author? assume: system
 export default {
     player: {
+        id: 'player-001',
         name: '',
         active_theme: 'default',
 
@@ -16,6 +17,7 @@ export default {
         // by default "welcome" deck will be cloned into hand
         active_hand: null,
         hands: {},
+        stacks: {},
 
         // favorite_decks
         // favorite_packs
@@ -37,6 +39,9 @@ export default {
             name: 'nextCard',
             label: 'next'
         },
+        goToCard: {
+            name: 'goToCard',
+        }
     },
     decks: {
         welcome: WELCOME_DECK
