@@ -10,7 +10,7 @@ console.log('__dirname',__dirname);
 import ServerAPI from './server-api.mjs';
 const SERVER_API = new ServerAPI();
 
-const hostname = '127.0.0.1';
+const hostname = '0.0.0.0'// '127.0.0.1';
 const port = 3090;
 
 const ROOT = __dirname + '/..';

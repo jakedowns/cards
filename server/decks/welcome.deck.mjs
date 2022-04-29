@@ -18,8 +18,11 @@ export const STARTER_DECK_OPTIONS = [
 ];
 
 export default {
+    id: 'welcome',
+    name: 'welcome',
     cards: {
         welcome: {
+            id: 'welcome',
             name: 'welcome',
             deck_order: 1,
             front: {

@@ -1,6 +1,7 @@
-// storage api for CardOS
+// storage api for CardBox
 
 import DEFAULT_STATE from './default.state.mjs';
+import PlayerState from './player-states/4_26_2022_10_11_am_pst.mjs';
 
 class ServerAPI {
 
@@ -25,6 +26,7 @@ class ServerAPI {
 
     getStateFromDisk(){
         // TODO: load from mysql
+        return {...DEFAULT_STATE, ...{player:PlayerState}};
         return null;
     }
 

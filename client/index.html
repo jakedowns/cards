@@ -22,6 +22,8 @@
                 height: 350px;
                 position: absolute;
                 perspective: 1000px;
+                overflow-y: auto;
+                overflow-x: hidden;
             }
             .card.focused {
                 z-index: 10;
@@ -122,6 +124,9 @@
                 background-color: #51389B;
                 border-radius: 0.5rem;
                 padding: 1rem;
+                margin-left: -10px;
+                margin-right: -11px;
+                margin-bottom: -10px;
             }
             .card .front .actions .action {
                 cursor: pointer;
@@ -191,6 +196,8 @@
                 right: 0;
                 bottom: auto;
                 height: 100px;
+                margin-right: auto; /* align left ⇦ */
+                margin-left: auto; /* align right ⇨ */
             }
             .deck-list .deck {
                 transition: .2s ease-in-out;
@@ -210,6 +217,11 @@
                 box-sizing: content-box;
                 font-family: Arial, Helvetica, sans-serif;
             }
+            .deck-list .deck.focused {
+                transform: translateY(-59.5%) scale(0.6);
+                border: 5px solid white;
+                box-sizing: border-box;
+            }
             .deck-list .deck:hover {
                 transform: translateY(-59%) scale(0.6);
             }
@@ -227,13 +239,21 @@
                 <div class="deck-list">
                     <!-- TODO: need a deck_list_order attribute so more frequently / recently used items appear leftmost -->
                     <div v-for="(deck,name) in player.hands" :key="deck.name" class="deck"
+                        :class="{focused: deck.id === player.active_hand}"
                         @click="focusDeck(name)">
                         <div>{{deck?.name ?? name}}</div>
                         <!-- todo: close deck option to put deck away -->
                     </div>
-                    <div class="deck"
+                    <div class="deck" :style="{justifySelf:'flex-end'}"
                     @click="createDeckAndFocus('blank')">
                         <div>new deck</div>
+                    </div>
+                    <div class="deck" :style="{justifySelf:'flex-end'}">
+                        <div>menu</div>
+                        <ul>
+                            <li>settings</li>
+                            <li>account</li>
+                        </ul>
                     </div>
                     <!-- todo: button to Open a deck that has been put away, or Create a new deck -->
                     <!-- todo: welcome deck is evergreen even when put away, it is only hidden from deck-dock -->
@@ -322,6 +342,7 @@
                                                 :name="input?.name"
                                                 :required="input?.required"
                                                 :placeholder="input?.placeholder"
+                                                @keyup.enter="onCardSubmit"
                                             ></textarea>
                                             <select v-bind="{
                                                 name: input.name,
@@ -335,8 +356,10 @@
                                         </form>
                                     </div>
                                     <div class="actions"
+                                        :style="cardActionsStyle"
                                         v-if="card?.actions">
                                         <button class="action"
+                                            :style="cardActionStyle"
                                             v-for="(action,key) in card?.actions"
                                             :key="key"
                                             @click="act(action)">
@@ -356,6 +379,6 @@
                 </div>
             </div>
         </div>
-        <script src="/client/client.mjs" type="module"></script>
+        <script src="/public/dist/client.js"></script>
     </body>
 </html>

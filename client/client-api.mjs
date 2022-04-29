@@ -36,6 +36,24 @@ class ClientAPI {
                     }
                 }
                 this.state.player.active_hand = 'welcome';
+            }else{
+                for(let hand_name of Object.keys(this.state.player.hands)){
+                    for(let card_id of this.state.player.hands[hand_name].hand_order){
+                        this.state.player.hands[hand_name].cards[card_id] = {
+                            ...this.state.player.hands[hand_name].cards[card_id],
+                            ...{
+                                name: card_id,
+                                deck_name: hand_name,
+                                player_id: this.state.player.id,
+                                // flipped: false, // default face-down
+                                // classnames: {
+                                //     'position-stacked': true
+                                // },
+                                instance: new Card(card_id)
+                            }
+                        }
+                    }
+                }
             }
             this.client.app.state = this.state;
             await Helpers.delay(100);

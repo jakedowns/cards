@@ -315,6 +315,16 @@ class Client {
                 },
 
                 onCardSubmit(event){
+                    if(event.shiftKey){
+                        return;
+                    }
+                    if(this.focused_card?.front?.text === 'Create Card'){
+                        this.createCardFromInput(event);
+                        return;
+                    }
+
+                    // TODO: make this a generic handler // or add some definitions at the card level
+                    // TODO: v-model binding too
                     console.log('onCardSubmit TODO! validate and write to db!',event);
                     // TODO: bind inputs to v-model (slight chance that .value won't be able to be fetched)
                     // since front of card is wrapped in v-if, it could disappear from dom
@@ -517,6 +527,22 @@ class Client {
                         ...{
                             borderRadius: this.currentTheme.cards.globalStyle.borderRadius
                         }
+                    }
+                },
+
+                cardActionsStyle(){
+                    return {
+                        flexDirection: this.focused_card?.actions?.length > 3 ? 'column' : 'row',
+                    }
+                },
+
+                cardActionStyle(){
+                    let flexBasis = '100%';
+                    if(this.focused_card?.actions?.length <= 3){
+                        flexBasis = this.focused_card.actions?.length / 1 + '%';
+                    }
+                    return {
+                        flexBasis
                     }
                 }
             },
