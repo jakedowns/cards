@@ -2,6 +2,11 @@ import http from 'http';
 import {promises as fs} from 'fs';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from "dotenv"
+dotenv.config();
+const HTTP_PORT = process.env?.HTTP_PORT ?? 80;
+const WS_PORT = process.env?.WS_PORT ?? 81;
+const HOSTNAME = process.env?.HOSTNAME ?? '0.0.0.0';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -10,8 +15,8 @@ console.log('__dirname',__dirname);
 import ServerAPI from './server-api.mjs';
 const SERVER_API = new ServerAPI();
 
-const hostname = '0.0.0.0'// '127.0.0.1';
-const port = 3090;
+const hostname = HOSTNAME;
+const port = HTTP_PORT;
 
 const ROOT = __dirname + '/..';
 
@@ -44,7 +49,8 @@ const server = http.createServer((req, res) => {
     }
     switch(req.url){
         case '/':
-            loadFile('/client/index.html',res);
+            // loadFile('/client/index.html',res); // index 2d
+            loadFile('/public/index.html',res); // index 3d
             break;
 
         default:
@@ -61,7 +67,6 @@ server.listen(port, hostname, () => {
 
 // todo: split websocket into separate file
 // Importing the required modules
-const WS_PORT = 8083;
 import {WebSocketServer} from 'ws';
 
 // Creating a new websocket server
@@ -77,6 +82,7 @@ import {
 // Creating connection using websocket
 wss.on("connection", ws => {
     let client_id = `client_${performance.now()}`;
+    // TODO: prevent client id collisions
 
     game.onClientJoin(client_id,ws);
     // sending message

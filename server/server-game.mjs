@@ -1,7 +1,15 @@
+import {
+    performance
+} from 'perf_hooks';
 class ServerGame{
     constructor(){
         this.clients = {};
         this.rooms = {};
+
+        // heartbeat
+        this.ping_interval = setInterval(()=>{
+            this.ping();
+        },1000);
 
         // create a default room for now
         this.rooms.default = {
@@ -90,6 +98,7 @@ class ServerGame{
     ping(){
         this.notifyAllClients({
             message:'PING',
+            time: performance.now(),
             server_client_ids: Object.keys(this.clients)
         })
     }

@@ -23,10 +23,19 @@ const colorLight = new THREE.Color( 0xffffff );
 const animationDuration = 0.5; // seconds
 const reset_delay = 1000;
 
+// const HOST = HOSTNAME;
+const PORT = WS_PORT;
+const WSHOSTNAME = WS_HOSTNAME;
+console.log('hostname?port?',[
+    `${WSHOSTNAME}`,
+    // `${HOST}`,
+    `${PORT}`
+])
+
 class SocketConnection{
     constructor(){
         this.client_id = null;
-        this.ws = new WebSocket("ws://localhost:8083");
+        this.ws = new WebSocket(`ws://${WSHOSTNAME}:${PORT}`);
         this.ws.addEventListener("open", () =>{
             console.log("We are connected");
             //this.ws.send("How are you?");
@@ -45,6 +54,7 @@ class SocketConnection{
             console.log('socket message:',decoded);
             switch(decoded?.message){
                 case 'PING':
+                    document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
                     break;
                 case 'NEW_CLIENT_CONNECTED':
                     break;
@@ -53,6 +63,7 @@ class SocketConnection{
                 case 'WELCOME':
                     this.client_id = decoded.your_client_id;
                     console.log('server says my id is',this.client_id);
+                    document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
                     break;
             }
         });
@@ -531,8 +542,10 @@ function init(){
 
   // init our game instance as window.t
   window.t = new Tabletop();
-  t.setupGame(); // set it up
-  t.startGame(); // start the first round
+  // set it up
+  t.setupGame();
+  // start the first round
+  t.startGame();
 
   // kick off render loop
   render();

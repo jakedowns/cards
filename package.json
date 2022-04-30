@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "description": "experimental system builder",
   "main": "server/server.mjs",
-  "type": "module",
   "author": "jakedowns",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.26.1",
+    "dotenv": "^16.0.0",
     "laravel-mix": "^6.0.43",
     "vue": "^3.2.31",
     "webpack": "^5.72.0",

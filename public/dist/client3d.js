@@ -890,14 +890,19 @@ var colorDark = new THREE.Color(0xb0b0b0);
 var colorLight = new THREE.Color(0xffffff);
 var animationDuration = 0.5; // seconds
 
-var reset_delay = 1000;
+var reset_delay = 1000; // const HOST = HOSTNAME;
+
+var PORT = 3091;
+var WSHOSTNAME = "localhost";
+console.log('hostname?port?', ["".concat(WSHOSTNAME), // `${HOST}`,
+"".concat(PORT)]);
 
 var SocketConnection = /*#__PURE__*/function () {
   function SocketConnection() {
     _classCallCheck(this, SocketConnection);
 
     this.client_id = null;
-    this.ws = new WebSocket("ws://localhost:8083");
+    this.ws = new WebSocket("ws://".concat(WSHOSTNAME, ":").concat(PORT));
     this.ws.addEventListener("open", function () {
       console.log("We are connected"); //this.ws.send("How are you?");
     });
@@ -918,6 +923,7 @@ var SocketConnection = /*#__PURE__*/function () {
 
       switch ((_decoded = decoded) === null || _decoded === void 0 ? void 0 : _decoded.message) {
         case 'PING':
+          document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
           break;
 
         case 'NEW_CLIENT_CONNECTED':
@@ -929,6 +935,7 @@ var SocketConnection = /*#__PURE__*/function () {
         case 'WELCOME':
           this.client_id = decoded.your_client_id;
           console.log('server says my id is', this.client_id);
+          document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
           break;
       }
     });
@@ -1639,11 +1646,11 @@ function init() {
   txtLoader = new THREE.TextureLoader();
   clock = new THREE.Clock(); // init our game instance as window.t
 
-  window.t = new Tabletop();
-  t.setupGame(); // set it up
+  window.t = new Tabletop(); // set it up
 
-  t.startGame(); // start the first round
-  // kick off render loop
+  t.setupGame(); // start the first round
+
+  t.startGame(); // kick off render loop
 
   render();
 }
