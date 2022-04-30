@@ -59,4 +59,43 @@ server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
 
+// todo: split websocket into separate file
+// Importing the required modules
+const WS_PORT = 8083;
+import {WebSocketServer} from 'ws';
+
+// Creating a new websocket server
+const wss = new WebSocketServer({ port: WS_PORT })
+
+import ServerGame from './server-game.mjs';
+const game = new ServerGame();
+
+import {
+    performance
+} from 'perf_hooks';
+
+// Creating connection using websocket
+wss.on("connection", ws => {
+    let client_id = `client_${performance.now()}`;
+
+    game.onClientJoin(client_id,ws);
+    // sending message
+    ws.on("message", data => {
+        console.log(`Client has sent us: ${data}`)
+        game.onClientMessage(client_id,data);
+        ws.send('server says thanks!');
+    });
+    // handling what to do when clients disconnects from server
+    ws.on("close", () => {
+        //console.log("the client has disconnected");
+        game.onClientLeave(client_id);
+    });
+    // handling client connection error
+    ws.onerror = function (err) {
+        //console.log("Some Error occurred")
+        game.onClientError(client_id,err);
+    }
+});
+console.log(`The WebSocket server is running on port ${WS_PORT}`);
+
 export default server;

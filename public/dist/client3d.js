@@ -826,11 +826,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
@@ -892,6 +892,59 @@ var animationDuration = 0.5; // seconds
 
 var reset_delay = 1000;
 
+var SocketConnection = /*#__PURE__*/function () {
+  function SocketConnection() {
+    _classCallCheck(this, SocketConnection);
+
+    this.client_id = null;
+    this.ws = new WebSocket("ws://localhost:8083");
+    this.ws.addEventListener("open", function () {
+      console.log("We are connected"); //this.ws.send("How are you?");
+    });
+    this.client_ids = [];
+    this.ws.addEventListener('message', function (event) {
+      var _decoded;
+
+      console.log(event);
+      var decoded = null;
+
+      try {
+        decoded = JSON.parse(event.data);
+      } catch (e) {
+        console.error(e);
+      }
+
+      console.log('socket message:', decoded);
+
+      switch ((_decoded = decoded) === null || _decoded === void 0 ? void 0 : _decoded.message) {
+        case 'PING':
+          break;
+
+        case 'NEW_CLIENT_CONNECTED':
+          break;
+
+        case 'CLIENT_LEFT':
+          break;
+
+        case 'WELCOME':
+          this.client_id = decoded.your_client_id;
+          console.log('server says my id is', this.client_id);
+          break;
+      }
+    });
+  }
+
+  _createClass(SocketConnection, [{
+    key: "send",
+    value: function send(data) {
+      data.client_id = this.client_id;
+      this.ws.send(JSON.stringify(data));
+    }
+  }]);
+
+  return SocketConnection;
+}();
+
 var Player = /*#__PURE__*/_createClass(function Player(name) {
   _classCallCheck(this, Player);
 
@@ -906,7 +959,8 @@ var Tabletop = /*#__PURE__*/function () {
     _classCallCheck(this, Tabletop);
 
     // table tops have uuids which can be shared / spectated / joined
-    this.id = "id" + performance.now(); // Lights
+    this.id = "id" + performance.now();
+    this.server = new SocketConnection(); // Lights
 
     initLights(); // Table (groundplane)
 
@@ -1586,7 +1640,8 @@ function init() {
   clock = new THREE.Clock(); // init our game instance as window.t
 
   window.t = new Tabletop();
-  t.setupGame();
+  t.setupGame(); // set it up
+
   t.startGame(); // start the first round
   // kick off render loop
 
@@ -1889,12 +1944,22 @@ function onMouseClick(evt) {
         // card faceup
         getFlipTween(_card, 'facedown').start();
         _card.faceUp = false;
+        t.server.send({
+          type: 'flip',
+          direction: 'facedown',
+          card_id: i
+        });
       } else if (!_card.faceUp) {
         // card facedown
         // so turn it faceup
         getFlipTween(_card, 'faceup').start();
         _card.faceUp = true;
         t.game.flipped.push(i);
+        t.server.send({
+          type: 'flip',
+          direction: 'faceup',
+          card_id: i
+        });
       }
     }
   }
@@ -1951,7 +2016,12 @@ function addMatchToHand(i_card_a, i_card_b) {
 }
 
 function moveFlippedToPlayersHand() {
-  // t.currentPlayerHand == t.round.[t.round.current_player]
+  t.server.send({
+    type: 'move_flipped_to_hand',
+    cardA: t.game.flipped[0],
+    cardB: t.game.flipped[1]
+  }); // t.currentPlayerHand == t.round.[t.round.current_player]
+
   t.game.current_player.matches.push(t.game.flipped);
   t.game.current_player.cards.push(t.game.flipped[0], t.game.flipped[1]); // remove cards from their zones so new cards can fill in
 

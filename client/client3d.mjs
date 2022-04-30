@@ -23,6 +23,46 @@ const colorLight = new THREE.Color( 0xffffff );
 const animationDuration = 0.5; // seconds
 const reset_delay = 1000;
 
+class SocketConnection{
+    constructor(){
+        this.client_id = null;
+        this.ws = new WebSocket("ws://localhost:8083");
+        this.ws.addEventListener("open", () =>{
+            console.log("We are connected");
+            //this.ws.send("How are you?");
+        });
+
+        this.client_ids = [];
+
+        this.ws.addEventListener('message', function (event) {
+            console.log(event);
+            let decoded = null;
+            try{
+                decoded = JSON.parse(event.data);
+            }catch(e){
+                console.error(e)
+            }
+            console.log('socket message:',decoded);
+            switch(decoded?.message){
+                case 'PING':
+                    break;
+                case 'NEW_CLIENT_CONNECTED':
+                    break;
+                case 'CLIENT_LEFT':
+                    break;
+                case 'WELCOME':
+                    this.client_id = decoded.your_client_id;
+                    console.log('server says my id is',this.client_id);
+                    break;
+            }
+        });
+    }
+    send(data){
+        data.client_id = this.client_id;
+        this.ws.send(JSON.stringify(data));
+    }
+}
+
 class Player{
     constructor(name){
         this.name = name;
@@ -37,6 +77,8 @@ class Tabletop{
         // table tops have uuids which can be shared / spectated / joined
         this.id = "id"+performance.now();
 
+        this.server = new SocketConnection();
+
         // Lights
         initLights()
 
@@ -48,6 +90,8 @@ class Tabletop{
 
         this.players = [];
         this.players.push(new Player("Player One"));
+
+
     }
 
     setupGame(){
@@ -487,7 +531,7 @@ function init(){
 
   // init our game instance as window.t
   window.t = new Tabletop();
-  t.setupGame();
+  t.setupGame(); // set it up
   t.startGame(); // start the first round
 
   // kick off render loop
@@ -832,12 +876,22 @@ function onMouseClick( evt ){
       if( _card.faceUp ){ // card faceup
         getFlipTween(_card,'facedown').start();
         _card.faceUp = false;
+        t.server.send({
+            type: 'flip',
+            direction: 'facedown',
+            card_id: i
+        })
 
       } else if( !_card.faceUp ) { // card facedown
         // so turn it faceup
         getFlipTween(_card,'faceup').start();
         _card.faceUp = true;
         t.game.flipped.push(i);
+        t.server.send({
+            type: 'flip',
+            direction: 'faceup',
+            card_id: i
+        })
       }
     }
   }
@@ -895,6 +949,11 @@ function addMatchToHand(i_card_a,i_card_b){
 }
 
 function moveFlippedToPlayersHand(){
+  t.server.send({
+    type: 'move_flipped_to_hand',
+    cardA: t.game.flipped[0],
+    cardB: t.game.flipped[1]
+  })
   // t.currentPlayerHand == t.round.[t.round.current_player]
   t.game.current_player.matches.push(t.game.flipped)
   t.game.current_player.cards.push(t.game.flipped[0],t.game.flipped[1])
