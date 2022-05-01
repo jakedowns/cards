@@ -13746,6 +13746,7 @@ __webpack_require__.r(__webpack_exports__);
         } // todo: if player hands have changed size, run this
         // this basically just handles animating matched cards off the table into the players hands
         // todo: need to animate other players cards into the OTHER players hand
+        // todo: rename to update player hand cards (or something)
 
 
         t.addMatchToHand(); //console.log('debugger state changed', new_state);
@@ -21244,7 +21245,7 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "addMatchToHand",
     value: function addMatchToHand() {
-      var _t$app$state$clients$, _t$app$state, _t$app$state$clients, _t$app$state$clients$2;
+      var _t$app$state$client_h, _t$app$state, _t$app$state$client_h2;
 
       //camera.attach(t.cards[i_card_a].mesh)
       //camera.attach(t.cards[i_card_b].mesh)
@@ -21255,11 +21256,13 @@ var Tabletop = /*#__PURE__*/function () {
       //   cards[i_card_b].position.set(-.1,-.5,-1)
       //   cards[i_card_b].rotation.set(1,Math.PI,Math.PI,'XYZ')
       var current_player = t.game.current_player;
-      var hand = (_t$app$state$clients$ = (_t$app$state = t.app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$clients = _t$app$state.clients) === null || _t$app$state$clients === void 0 ? void 0 : (_t$app$state$clients$2 = _t$app$state$clients[t.app.state.my_client_id]) === null || _t$app$state$clients$2 === void 0 ? void 0 : _t$app$state$clients$2.hand) !== null && _t$app$state$clients$ !== void 0 ? _t$app$state$clients$ : [];
+      var hand = (_t$app$state$client_h = (_t$app$state = t.app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$client_h2 = _t$app$state.client_hands) === null || _t$app$state$client_h2 === void 0 ? void 0 : _t$app$state$client_h2[t.app.state.my_client_id]) !== null && _t$app$state$client_h !== void 0 ? _t$app$state$client_h : [];
       var matches_count = hand.length / 2;
       console.log('hand?', hand);
 
-      for (var a = 0; a <= hand.length; a++) {
+      for (var a = 0; (_ref = a < (hand === null || hand === void 0 ? void 0 : hand.length)) !== null && _ref !== void 0 ? _ref : 0; a++) {
+        var _ref;
+
         var i_card = hand[a];
         var card = t.cards[i_card];
         camera.attach(card.mesh); // todo: only run this once
@@ -21453,8 +21456,8 @@ var Deck = /*#__PURE__*/function () {
 
     this.available_cards_history = [];
 
-    for (var i = 0; (_ref = i < (options === null || options === void 0 ? void 0 : options.card_count)) !== null && _ref !== void 0 ? _ref : 52; i++) {
-      var _ref;
+    for (var i = 0; (_ref2 = i < (options === null || options === void 0 ? void 0 : options.card_count)) !== null && _ref2 !== void 0 ? _ref2 : 52; i++) {
+      var _ref2;
 
       this.cards.push(new Card(i));
       this.available_cards.push(i);

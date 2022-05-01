@@ -178,10 +178,10 @@ class Tabletop{
     //   cards[i_card_b].position.set(-.1,-.5,-1)
     //   cards[i_card_b].rotation.set(1,Math.PI,Math.PI,'XYZ')
       const current_player = t.game.current_player;
-      const hand = t.app.state?.clients?.[t.app.state.my_client_id]?.hand ?? [];
+      const hand = t.app.state?.client_hands?.[t.app.state.my_client_id] ?? [];
       let matches_count = hand.length/2;
       console.log('hand?',hand);
-      for(let a = 0; a<=hand.length; a++){
+      for(let a = 0; a<hand?.length ?? 0; a++){
         let i_card = hand[a];
         let card = t.cards[i_card];
         camera.attach(card.mesh); // todo: only run this once

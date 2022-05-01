@@ -175,7 +175,7 @@ class ServerGame{
                 this.match_checks.push({
                     player:this.player_turn,
                     pass: true,
-                    pair_id
+                    pair_id:cardA.pair_id
                 })
 
                 cardA.zone = null;
@@ -196,7 +196,6 @@ class ServerGame{
                 this.match_checks.push({
                     player:this.player_turn,
                     pass: false,
-                    pair_id
                 })
                 let client_ids = Object.keys(this.clients);
                 // switch player turn
@@ -226,12 +225,17 @@ class ServerGame{
     }
 
     ping(){
+        let client_hands = {};
+        for(let a in this.clients){
+            let client = this.clients[a];
+            client_hands[a] = client.hand;
+        }
         this.notifyAllClients({
             message:'PING',
             time: performance.now(),
             state: {
                 client_ids: Object.keys(this.clients),
-                clients: this.clients,
+                client_hands,
                 game_id: this?.game_id,
                 game: this.games?.[this?.game_id],
                 round_id: this?.round_id,

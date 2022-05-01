@@ -95,6 +95,7 @@ export default {
                 // todo: if player hands have changed size, run this
                 // this basically just handles animating matched cards off the table into the players hands
                 // todo: need to animate other players cards into the OTHER players hand
+                // todo: rename to update player hand cards (or something)
                 t.addMatchToHand();
 
 
