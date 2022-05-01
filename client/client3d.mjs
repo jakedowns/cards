@@ -1,6 +1,8 @@
 // This example uses THREE.CatmullRomCurve3 to create a path for a custom Keyframe Track position animation.
 // AnimationClip creation function on line 136
 
+import {createApp} from 'vue'
+import Debugger from './components/debugger.vue';
 // Uncomment line 173 to see the curve helper
 console.clear();
 // Global Variables
@@ -35,42 +37,93 @@ console.log('hostname?port?',[
 class SocketConnection{
     constructor(){
         this.client_id = null;
-        this.ws = new WebSocket(`ws://${WSHOSTNAME}:${PORT}`);
-        this.ws.addEventListener("open", () =>{
-            console.log("We are connected");
-            //this.ws.send("How are you?");
-        });
+        try{
+            this.ws = new WebSocket(`ws://${WSHOSTNAME}:${PORT}`);
 
-        this.client_ids = [];
+            this.ws.addEventListener("open", () =>{
+                console.log("We are connected");
+                //this.ws.send("How are you?");
+            });
+            this.ws.addEventListener('error', event => {
+                console.log('error',event);
+            })
 
-        this.ws.addEventListener('message', function (event) {
-            console.log(event);
-            let decoded = null;
-            try{
-                decoded = JSON.parse(event.data);
-            }catch(e){
-                console.error(e)
-            }
-            console.log('socket message:',decoded);
-            switch(decoded?.message){
-                case 'PING':
-                    document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
-                    break;
-                case 'NEW_CLIENT_CONNECTED':
-                    break;
-                case 'CLIENT_LEFT':
-                    break;
-                case 'WELCOME':
-                    this.client_id = decoded.your_client_id;
-                    console.log('server says my id is',this.client_id);
-                    document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
-                    break;
-            }
-        });
+            this.client_ids = [];
+
+            this.ws.addEventListener('message',  event => {
+                //console.log(event);
+                let decoded = null;
+                try{
+                    decoded = JSON.parse(event.data);
+                }catch(e){
+                    console.error(e,event.data)
+                }
+                if(decoded?.message !== 'PING'){
+                    console.log('socket message:',decoded);
+                }
+                switch(decoded?.message){
+
+                    case 'PING':
+                        // document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
+                        //todo: remove manual linkage:
+                        //window.t.app.state.client_ids = decoded.client_ids;
+                        window.t.app.state = {
+                          ...window.t.app.state,
+                          ...decoded?.state
+                        }
+                        break;
+
+                    case 'NEW_CLIENT_CONNECTED':
+                        // could write to t.state, but
+                        // ping will update us every second of who's connected
+                        // could show a nice alert that someone joined, tho
+                        // but that could also be a reaction to a watcher on state.client_ids
+                        // so, maybe we don't need this event yet
+                        break;
+
+                    case 'CLIENT_LEFT':
+                        // same as above, client observation can happen via ping's client list
+                        // todo: pause game? ask if room host wants to end the round, or end the game, or end the room
+                        break;
+
+                    case 'WELCOME':
+                        this.client_id = decoded.your_client_id;
+                        window.t.app.state.my_client_id = this.client_id;
+                        //console.log('server says my id is',this.client_id);
+                        // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
+                        break;
+
+                    case 'GAME_STATE_UPDATE':
+                        window.t.app.state = {
+                            ...window.t.app.state,
+                            ...decoded?.state
+                        }
+                        break;
+
+                    // case 'ROOM_CREATE_SUCCESS':
+                    //     console.log('room created',decoded);
+                    //     window.t.app.state.room_id = decoded.room_id;
+                    //     window.t.app.state.game_id = decoded.game_id;
+                    //     window.t.app.state.round_id = decoded.round_id;
+                    //     break;
+
+                    case 'ROOM_JOIN_SUCCESS':
+                        window.t.app.state.room_id = decoded.room_id;
+                        break;
+
+                    case 'ROOM_EXIT_SUCCESS':
+                        window.t.app.state.room_id = null;
+                        break;
+                }
+            });
+        }catch(e){
+            console.error(e);
+        }
     }
     send(data){
-        data.client_id = this.client_id;
-        this.ws.send(JSON.stringify(data));
+      console.log('sending',data);
+      data.client_id = this.client_id;
+      this.ws.send(JSON.stringify(data));
     }
 }
 
@@ -113,6 +166,52 @@ class Tabletop{
         this.game.startRound();
     }
 
+    addMatchToHand(){
+      //camera.attach(t.cards[i_card_a].mesh)
+      //camera.attach(t.cards[i_card_b].mesh)
+
+    //   cards[i_card_a].position.set(0,-.5,-1)
+    //   cards[i_card_a].scale.set(.1,.1,.1)
+    //   cards[i_card_a].rotation.set(1,Math.PI,Math.PI,'XYZ')
+
+    //   cards[i_card_b].scale.set(.1,.1,.1)
+    //   cards[i_card_b].position.set(-.1,-.5,-1)
+    //   cards[i_card_b].rotation.set(1,Math.PI,Math.PI,'XYZ')
+      const current_player = t.game.current_player;
+      const hand = t.app.state?.clients?.[t.app.state.my_client_id]?.hand ?? [];
+      let matches_count = hand.length/2;
+      console.log('hand?',hand);
+      for(let a = 0; a<=hand.length; a++){
+        let i_card = hand[a];
+        let card = t.cards[i_card];
+        camera.attach(card.mesh); // todo: only run this once
+        let even = a % 2 == 0;
+        let lerp_max = .07 * matches_count
+
+        let updateTo = {}
+        updateTo.pos_x = lerp(
+          0, // 0 basis
+          lerp_max, // lerp max width
+          (1/matches_count)*(even?a+1:a+2)) // % of lerp
+          -(even?.1:.105) // slight offset for "paired" card
+          -(a*.01) // padding between cards
+          -(lerp_max) // center
+          +(.05)
+        updateTo.pos_y = -0.5 + (0.001 * a);
+        updateTo.pos_z = -1.0 + (0.001 * a);
+
+        updateTo.rot_x = 0.5;//1;
+        updateTo.rot_y = 1;//Math.PI;
+        updateTo.rot_z = 1;//Math.PI;
+
+        updateTo.scale_x = .09 * .65
+        updateTo.scale_y = .09
+        updateTo.scale_z = .09 //
+        // console.log(updateTo);
+        card.tweenTo(updateTo,{duration:300})
+      }
+    }
+
     get deck(){
         return this.game.decks.default;
     }
@@ -129,6 +228,7 @@ class Card{
         this.setupMesh();
 
         // Animation
+        this.face_up = false;
         this.mesh.faceUp = false;
         // this.mesh.mixer = new THREE.AnimationMixer( this.mesh );
         // var flipUpsideClip = createFlipUpsideClip(this.mesh,'faceup');
@@ -295,7 +395,7 @@ class Deck{
         },{
             duration: 150,
             arcTo:{
-                pos_x:'-0.5', // camera left, screen right
+                pos_x:'-2.6', // camera left, screen right
                 // y:'+1',
             }
         });
@@ -306,7 +406,7 @@ class Deck{
         },{
             duration: 150,
             arcTo:{
-                pos_x:'+0.5', // camera right, screen left
+                pos_x:'+2.6', // camera right, screen left
                 // y:'+1',
             }
         });
@@ -326,29 +426,38 @@ class Deck{
 
         // TODO: support multiple cards per zone (think klondike solitaire)
         console.log('dealToLayout',this);
-        for(let izone in layout.zones){
-            let zone = layout.zones[izone];
-            if(!zone.card){
-                let card_index = this.available_cards.pop();
-                zone.card = card_index;
-                this.cards[card_index].zone = izone;
-                // remove card from deckgroup, attach it back to scene root
-                scene.attach(this.cards[card_index].mesh);
-                this.cards[card_index].tweenTo(
-                    {
-                        pos_x: zone.origin.x,
-                        // todo offset by num cards already in the zone
-                        pos_y: zone.origin.y,
-                        pos_z: zone.origin.z
-                    },
-                    {
-                        duration: 1000,
-                    }
-                );
-                console.warn('todo, settle ypos of cards in deck as cards are removed')
-                console.warn('todo deal from other end of array?')
-                await delay(150); // slight delay in dealing
-            }
+        // for(let izone in layout.zones){
+        //     let zone = layout.zones[izone];
+        //     if(!zone.card){
+        //         let card_index = this.available_cards.pop();
+        //         zone.card = card_index;
+        //         this.cards[card_index].zone = izone;
+        //         // ...
+        //     }
+        // }
+        for(let iA in t.app.state.available_cards){
+          let iCard = t.app.state.available_cards[iA];
+          let card = t.app.state.cards[iA];
+          if(card.zone){
+            let zone = layout.zones[card.zone];
+            zone.card = iCard;
+            // remove card from deckgroup, attach it back to scene root
+            scene.attach(t.cards[iCard].mesh);
+            t.cards[iCard].tweenTo(
+                {
+                    pos_x: zone.origin.x,
+                    // todo offset by num cards already in the zone
+                    pos_y: zone.origin.y,
+                    pos_z: zone.origin.z
+                },
+                {
+                    duration: 1000,
+                }
+            );
+            //console.warn('todo, settle ypos of cards in deck as cards are removed')
+            //console.warn('todo deal from other end of array?')
+            await delay(150); // slight delay in dealing
+          }
         }
     }
 }
@@ -392,17 +501,19 @@ class Round{
         await delay(1000);
 
         // shuffle the deck at the start of each round
-        await window.t.deck.shuffle();
+        // server does this now
+        // TODO: we still need to do a dummy animation
+        //await window.t.deck.shuffle();
 
 
-        await delay(1000);
+        //await delay(1000);
 
         // move the deck out of the way
         getMeshTween(t.deckgroup,{
             pos_x: '-8',
         },{
             duration: 1000,
-            easing: TWEEN.Easing.Quadratic.InOut
+            easing: TWEEN.Easing.Quadratic.Out
         }).start();
 
         await delay(1000);
@@ -460,7 +571,7 @@ class Game_PVPMemory{
         // but not Game instances
         this.round = 0;
         this.decks = {};
-        let card_count = 52;
+        let card_count = 4*4;
         this.decks.default = new Deck({card_count});
         this.rounds = [];
         this.player_scores = [];
@@ -481,33 +592,45 @@ class Game_PVPMemory{
         this.rounds.push(round);
         this.current_round.start();
     }
+    flipCard(card_id,face_up){
+      let __card = this.decks.default.cards[card_id];
+      let _card = __card.mesh;
+      _card.faceUp = face_up;//deprecate in favor of next line
+      __card.face_up = face_up;
+      console.log('flipping',card_id,face_up)
+      // animate
+      getFlipTween(_card,face_up?'faceup':'facedown').start();
+    }
     get current_round(){
-        return this.rounds[this.round];
+      console.log('current round?',this.rounds,this.round);
+        return this?.rounds?.[this?.round];
     }
     get current_player(){
-        return this.current_round.current_player;
+      console.log('current round?',this.current_round);
+        return this?.current_round?.current_player;
     }
+    // todo move this server side
     async checkForMatches(){
         // we've flipped 2+ cards,
-        t.game.ignore_clicks = true;
+        t.game.ignore_clicks = true; // server is checking for matches
         // temp: 50/50
-        let match = Math.random() >= 0.5;
+        //let match = Math.random() >= 0.5;
         // TODO: flippedCardsMatch()
         // check for matches
-        if(match){
-            // move cards to players hand
-            await delay(animationDuration*1000);
-            moveFlippedToPlayersHand();
-            await delay(1000);
-            // deal more cards
-            // console.warn('todo: if out of cards, reset')
-            t.deck.dealToLayout(t.game.layout);
+        // if(match){
+        //     // move cards to players hand
+        //     await delay(animationDuration*1000);
+        //     moveFlippedToPlayersHand();
+        //     await delay(1000);
+        //     // deal more cards
+        //     // console.warn('todo: if out of cards, reset')
+        //     //t.deck.dealToLayout(t.game.layout);
 
-        }else{
-            // set a timer, and then flip them back
-            // reset cards
-            resetCards();
-        }
+        // }else{
+        //     // set a timer, and then flip them back
+        //     // reset cards
+        //     resetCards();
+        // }
     }
 }
 
@@ -540,12 +663,29 @@ function init(){
   txtLoader = new THREE.TextureLoader();
   clock = new THREE.Clock();
 
+
   // init our game instance as window.t
   window.t = new Tabletop();
+  window.addEventListener('DOMContentLoaded', ()=>{
+    t.app = createApp({
+      components:{Debugger},
+      template:'<div><debugger :state="state"></debugger></div>',
+      data(){
+          return {
+              state: {
+                  loading:true
+              },
+          }
+      },
+    }).mount('#vue-layer');
+  });
   // set it up
   t.setupGame();
+
+
   // start the first round
-  t.startGame();
+  // !!! wait for server to kick this off...
+  //t.startGame();
 
   // kick off render loop
   render();
@@ -857,11 +997,19 @@ function onMouseClick( evt ){
       mouseClickCoord.x - mouseDownCoord.x,
       mouseClickCoord.y - mouseDownCoord.y
     )
-  console.log({
-    mouseDownCoord,
-    mouseClickCoord,
-    drag_distance
+  // console.log({
+  //   mouseDownCoord,
+  //   mouseClickCoord,
+  //   drag_distance
+  // })
+  console.log('is it my turn?',{
+    my_id:t.app.state.my_Fclient_id,
+    player_turn:t.app.state.player_turn
   })
+  if(t.app.state.my_client_id !== t.app.state.player_turn){
+    console.error('its not your turn');
+    return;
+  }
   // ignore clicks if you dragged the mouse
   if(drag_distance > 10){
     return;
@@ -887,21 +1035,22 @@ function onMouseClick( evt ){
         return;
       }
       if( _card.faceUp ){ // card faceup
-        getFlipTween(_card,'facedown').start();
-        _card.faceUp = false;
+        //getFlipTween(_card,'facedown').start();
+        t.game.flipCard(i,false);
+
         t.server.send({
-            type: 'flip',
+            type: 'FLIP',
             direction: 'facedown',
             card_id: i
         })
 
       } else if( !_card.faceUp ) { // card facedown
         // so turn it faceup
-        getFlipTween(_card,'faceup').start();
-        _card.faceUp = true;
+        t.game.flipCard(i,true)
+
         t.game.flipped.push(i);
         t.server.send({
-            type: 'flip',
+            type: 'FLIP',
             direction: 'faceup',
             card_id: i
         })
@@ -918,71 +1067,28 @@ function lerp(v0,v1,t){
   return v0*(1-t)+v1*t
 }
 
-function addMatchToHand(i_card_a,i_card_b){
-  camera.attach(t.cards[i_card_a].mesh)
-  camera.attach(t.cards[i_card_b].mesh)
+// function moveFlippedToPlayersHand(){
+//   t.server.send({
+//     type: 'move_flipped_to_hand',
+//     cardA: t.game.flipped[0],
+//     cardB: t.game.flipped[1]
+//   })
+//   // t.currentPlayerHand == t.round.[t.round.current_player]
+//   t.game.current_player.matches.push(t.game.flipped)
+//   t.game.current_player.cards.push(t.game.flipped[0],t.game.flipped[1])
+//   // remove cards from their zones so new cards can fill in
+//   const cardA = t.cards[t.game.flipped[0]];
+//   const cardB = t.cards[t.game.flipped[1]];
+//   t.game.layout.zones[cardA.zone].card = null;
+//   t.game.layout.zones[cardB.zone].card = null;
+//   addMatchToHand(t.game.flipped[0],t.game.flipped[1])
+//   t.game.flipped = [];
+//   console.warn('moving flipped cards to players hand',
+//   t.game.current_player.matches,
+//   t.game.current_player.cards)
+//   t.game.ignore_clicks = false;
 
-//   cards[i_card_a].position.set(0,-.5,-1)
-//   cards[i_card_a].scale.set(.1,.1,.1)
-//   cards[i_card_a].rotation.set(1,Math.PI,Math.PI,'XYZ')
-
-//   cards[i_card_b].scale.set(.1,.1,.1)
-//   cards[i_card_b].position.set(-.1,-.5,-1)
-//   cards[i_card_b].rotation.set(1,Math.PI,Math.PI,'XYZ')
-  const current_player = t.game.current_player;
-  let matches_count = current_player.matches.length;
-  for(let a = 1; a<=current_player.cards.length; a++){
-    let i_card = current_player.cards[a-1];
-    let card = t.cards[i_card];
-    let even = a % 2 == 0;
-    let lerp_max = .07 * matches_count
-
-    let updateTo = {}
-    updateTo.pos_x = lerp(
-      0, // 0 basis
-      lerp_max, // lerp max width
-      (1/matches_count)*(even?a+1:a+2)) // % of lerp
-      -(even?.1:.105) // slight offset for "paired" card
-      -(a*.01) // padding between cards
-      -(lerp_max) // center
-      +(.05)
-    updateTo.pos_y = -0.5 + (0.001 * a);
-    updateTo.pos_z = -1.0 + (0.001 * a);
-
-    updateTo.rot_x = 0.5;//1;
-    updateTo.rot_y = Math.PI;
-    updateTo.rot_z = Math.PI;
-
-    updateTo.scale_x = .09 * .65
-    updateTo.scale_y = .09
-    updateTo.scale_z = .09 //
-    // console.log(updateTo);
-    card.tweenTo(updateTo,{duration:300})
-  }
-}
-
-function moveFlippedToPlayersHand(){
-  t.server.send({
-    type: 'move_flipped_to_hand',
-    cardA: t.game.flipped[0],
-    cardB: t.game.flipped[1]
-  })
-  // t.currentPlayerHand == t.round.[t.round.current_player]
-  t.game.current_player.matches.push(t.game.flipped)
-  t.game.current_player.cards.push(t.game.flipped[0],t.game.flipped[1])
-  // remove cards from their zones so new cards can fill in
-  const cardA = t.cards[t.game.flipped[0]];
-  const cardB = t.cards[t.game.flipped[1]];
-  t.game.layout.zones[cardA.zone].card = null;
-  t.game.layout.zones[cardB.zone].card = null;
-  addMatchToHand(t.game.flipped[0],t.game.flipped[1])
-  t.game.flipped = [];
-  console.warn('moving flipped cards to players hand',
-  t.game.current_player.matches,
-  t.game.current_player.cards)
-  t.game.ignore_clicks = false;
-
-}
+// }
 
 function resetCards(){
   t.game.reset_timer = setTimeout(()=>{

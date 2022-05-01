@@ -87,9 +87,9 @@ wss.on("connection", ws => {
     game.onClientJoin(client_id,ws);
     // sending message
     ws.on("message", data => {
-        console.log(`Client has sent us: ${data}`)
+        //console.log(`Client has sent us: ${data}`)
         game.onClientMessage(client_id,data);
-        ws.send('server says thanks!');
+        //ws.send('server says thanks!');
     });
     // handling what to do when clients disconnects from server
     ws.on("close", () => {
