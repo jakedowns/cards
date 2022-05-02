@@ -1,84 +1,92 @@
 <template>
-    <div id="debug" v-show="show">
-        <ul class="details">
-            <li class="my_client_id">My Client ID:
-                <span class="value">{{state?.my_client_id}}</span></li>
+    <div id="debug" >
+        <button @click="show=!show">{{show?'Hide':'Show'}}</button>
+        <div class="inner" v-show="show">
+            <ul class="details">
+                <li class="my_client_id">My Client ID:
+                    <span class="value">{{state?.my_client_id}}</span></li>
 
-            <li class="room_id">Current Room ID:
-                <span class="value">{{state?.room_id ?? 'server-lobby'}}</span></li>
+                <li class="room_id">Current Room ID:
+                    <span class="value">{{state?.room_id ?? 'server-lobby'}}</span></li>
 
-            <li class="game_id">Current Game ID:
-                <span class="value">{{state?.game_id ?? 'no-game'}}</span>
-                &nbsp;
-                <span class="value">{{game?.started ? 'started' : 'not-started'}}</span>
-            </li>
+                <li class="game_id">Current Game ID:
+                    <span class="value">{{state?.game_id ?? 'no-game'}}</span>
+                    &nbsp;
+                    <span class="value">{{game?.started ? 'started' : 'not-started'}}</span>
+                </li>
 
-            <li class="host_id">Current Host ID:
-                <span class="value">{{state?.game_host ?? 'no-host'}}</span>
-                &nbsp;
-                <span :style="{color:im_game_host ? 'green' : 'red'}">You're {{im_game_host ? '' : 'NOT'}} the game host!</span>
-            </li>
+                <li class="host_id">Current Host ID:
+                    <span class="value">{{state?.game_host ?? 'no-host'}}</span>
+                    &nbsp;
+                    <span :style="{color:im_game_host ? 'green' : 'red'}">You're {{im_game_host ? '' : 'NOT'}} the game host!</span>
+                </li>
 
-            <li class="round_id">Current Round ID:
-                <span class="value">{{state?.round_id ?? 'no-round'}}</span>
-                &nbsp;
-                <span class="value">{{round?.started ? 'started' : 'not-started'}}</span></li>
+                <li class="round_id">Current Round ID:
+                    <span class="value">{{state?.round_id ?? 'no-round'}}</span>
+                    &nbsp;
+                    <span class="value">{{round?.started ? 'started' : 'not-started'}}</span></li>
 
 
 
-            <li class="clients">Clients:
-                <span class="value">{{JSON.stringify(state.client_ids) }}</span></li>
+                <li class="clients">Clients:
+                    <span class="value">{{JSON.stringify(state.client_ids) }}</span></li>
 
-            <li>player turn id: {{state.player_turn}}
+                <li>player turn id: {{state.player_turn}}
 
-                <span :style="{color:its_my_turn ? 'green' : 'red'}">It's {{its_my_turn ? '' : 'NOT'}} Your Turn!</span>
+                    <span :style="{color:its_my_turn ? 'green' : 'red'}">It's {{its_my_turn ? '' : 'NOT'}} Your Turn!</span>
 
-            </li>
+                </li>
 
-            <li>player type: {{state.player_type ?? 'connecting'}}</li>
-            <li>player hands:
-                <ul>
-                    <li v-for="player_id in state.client_ids" :key="player_id">
-                        <span v-if="!state.player_hands?.[player_id]?.length">Empty</span>
-                        {{JSON.stringify(state?.player_hands?.[player_id])}}
-                    </li>
-                </ul>
+                <li>player type: {{state.player_type ?? 'connecting'}}</li>
+                <li>player hands:
+                    <ul>
+                        <li v-for="player_id in state.client_ids" :key="player_id">
+                            <span v-if="!state.player_hands?.[player_id]?.length">Empty</span>
+                            {{JSON.stringify(state?.player_hands?.[player_id])}}
+                        </li>
+                    </ul>
 
-            </li>
+                </li>
 
-            <li>Flipped:
-                {{JSON.stringify(state.flipped)}}
-            </li>
+                <li>Flipped:
+                    {{JSON.stringify(state.flipped)}}
+                </li>
 
-            <!--
-            <li v-if="!state?.room_id">
-                <button class="new-room" @click.prevent="new_room">New Room</button>
-            </li>
+                <!--
+                <li v-if="!state?.room_id">
+                    <button class="new-room" @click.prevent="new_room">New Room</button>
+                </li>
 
-            <li v-if="state?.room_id && !state?.game_id"
-                @click.prevent="new_game">
-                <button class="new-game">New Game</button>
-            </li> -->
+                <li v-if="state?.room_id && !state?.game_id"
+                    @click.prevent="new_game">
+                    <button class="new-game">New Game</button>
+                </li> -->
 
-            <li v-if="im_game_host && game_started"
-                @click.prevent="restart_game">
-                <button class="new-game">Restart Game</button>
-            </li>
+                <li v-if="im_game_host && game_started"
+                    @click.prevent="restart_game">
+                    <button class="new-game">Restart Game</button>
+                </li>
 
-            <!-- <li v-if="state?.room_id && state?.game_id && !state?.game?.started"
-                @click.prevent="start_game">
-                <button class="start-game">Start Game</button>
-            </li> -->
+                <li
+                    @click.prevent="start_game">
+                    <button class="new-game">Start Game</button>
+                </li>
 
-            <li>
-                <div class="messages">
-                <div class="message" v-for="(message,i) in messages" :key="i">
-                    <div class="message-text">{{message.type}}</div>
+                <!-- <li v-if="state?.room_id && state?.game_id && !state?.game?.started"
+                    @click.prevent="start_game">
+                    <button class="start-game">Start Game</button>
+                </li> -->
+
+                <li>
+                    <div class="messages">
+                    <div class="message" v-for="(message,i) in messages" :key="i">
+                        <div class="message-text">{{message.type}}</div>
+                    </div>
                 </div>
-            </div>
-            </li>
-        </ul>
-        <div class="bg-blur"></div>
+                </li>
+            </ul>
+            <div class="bg-blur"></div>
+        </div>
 
     </div>
 </template>
