@@ -45,5 +45,5 @@ mix.webpackConfig(webpack => {
 mix.setPublicPath('./public')
 .js('client/client.mjs', 'dist')
 .js('client/client3d.mjs', './public/dist')
-.vue();
+.vue({ version:3});
 
