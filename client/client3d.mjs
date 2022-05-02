@@ -232,7 +232,9 @@ class Tabletop{
     //   cards[i_card_b].position.set(-.1,-.5,-1)
     //   cards[i_card_b].rotation.set(1,Math.PI,Math.PI,'XYZ')
       //const current_player = t.game.current_player;
-      for(let player_id in t.app.state.client_ids){
+      for(let i in t.app.state.client_ids){
+        let player_id = t.app.state.client_ids[i];
+        console.log('updating hands',player_id);
         // let player = t.players[player_id];
         const hand = t.app.state?.client_hands?.[player_id] ?? [];
         let matches_count = hand.length/2;
@@ -244,8 +246,8 @@ class Tabletop{
 
 
           let updateTo = player_id === t.app.state.my_client_id
-            ? getUpdateToPlayersHand(player_id)
-            : getUpdateToOpponentsHand(player_id);
+            ? this.getUpdateToPlayersHand(player_id,a)
+            : this.getUpdateToOpponentsHand(player_id,a);
           console.log(updateTo);
           // TODO: cancel any existing tween
           // TODO: prevent tweens from piling up
@@ -287,7 +289,7 @@ class Tabletop{
       }
     }
 
-    getUpdateToPlayersHand(player_id){
+    getUpdateToPlayersHand(player_id,a){
       const hand = t.app.state?.client_hands?.[player_id] ?? [];
       let matches_count = hand.length/2;
       let even = a % 2 == 0;
@@ -314,7 +316,7 @@ class Tabletop{
       return updateTo;
     }
 
-    getUpdateToOpponentsHand(player_id){
+    getUpdateToOpponentsHand(player_id,a){
       // let player = t.players[player_id];
       const hand = t.app.state?.client_hands?.[player_id] ?? [];
       let matches_count = hand.length/2;
@@ -852,21 +854,29 @@ class Game_PVPMemory{
         this.current_round.start();
     }
     flipCard(card_id,face_up){
-      let __card = this.decks.default.cards[card_id];
+      let __card = t.cards[card_id];
       let _card = __card.mesh;
-      _card.faceUp = face_up;//deprecate in favor of next line
-      __card.face_up = face_up;
-      console.log('flipping',card_id,face_up)
+      // _card.faceUp = face_up;//deprecate in favor of next line
+      // __card.face_up = face_up;
+      console.log('flipping',card_id,face_up,__card.face_up)
       // animate
       // TODO .tweenedToFlipUp // tweenedToFlipDown <bool>
-      if(face_up && !__card.tweenedToFaceUp){
+      if(face_up && !__card.tweenedToFaceUp && !__card.face_up){
+        __card.face_up = true;
         __card.tweenedToFaceUp = true;
         __card.tweenedToFaceDown = false;
-        getFlipTween(_card,'faceup').start();
-      }else if(!face_up && !__card.tweenedToFaceUp){
+        __card.tweening = true;
+        // todo if already tweening cancel it
+        __card.current_tween = getFlipTween(_card,'faceup');
+        __card.current_tween.start();
+      }else if(!face_up && !__card.tweenedToFaceDown && __card.face_up){
+        __card.face_up = false;
         __card.tweenedToFaceUp = false;
         __card.tweenedToFaceDown = true;
-        getFlipTween(_card,'facedown').start();
+        __card.tweening = true;
+        // todo if already tweening cancel it
+        __card.current_tween = getFlipTween(_card,'facedown')
+        __card.current_tween.start();
       }
     }
     get current_round(){
@@ -1384,7 +1394,7 @@ function onTouchEnd(evt){
 }
 
 function onMouseClick( evt ){
-  if(t.game.ignore_clicks || t.deck.shuffling){
+  if(t.app.state.ignore_clicks || t.deck.shuffling){
     return;
   }
   mouseClickCoord = {
@@ -1434,24 +1444,21 @@ function onMouseClick( evt ){
     if(!__card){
       console.warn('card not found',card_id);
     }
-    else if(
-      !__card.tweening
-      //&& __card.zone // todo: revisit
-    ){
+    else {
       // keep_testing = false;
       if(
         // ignore if we already flipped this card over
         t.app.state.flipped.indexOf(card_id)>-1
         // or if it's in the player hand
         || t.game.current_player.cards.indexOf(card_id)>-1
+        // todo: or if it's not in a zone (intersecting only zonegroup.children kind of solves this one)
        ){
          console.log('ignoring click',card_id);
         return;
       }
-      let _card = __card?.mesh;
-      console.log('second turn?',_card.faceUp)
-      if( _card.faceUp ){ // card faceup
-        //getFlipTween(_card,'facedown').start();
+      // let _card = __card?.mesh;
+      // console.log('faceUp?',__card.face_up)
+      if( __card.face_up ){ // card faceup
         t.game.flipCard(card_id,false);
 
         t.server.send({
@@ -1460,11 +1467,14 @@ function onMouseClick( evt ){
             card_id
         })
 
-      } else if( !_card.faceUp ) { // card facedown
+      } else if( !__card.face_up ) { // card facedown
         // so turn it faceup
         t.game.flipCard(card_id,true)
 
         t.app.state.flipped.push(card_id);
+        if(t.app.state.flipped.length > 1){
+          t.app.state.ignore_clicks = true;
+        }
         t.server.send({
             type: 'FLIP',
             direction: 'faceup',

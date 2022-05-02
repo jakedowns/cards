@@ -38,9 +38,9 @@
             <li>player type: {{state.player_type ?? 'connecting'}}</li>
             <li>player hands:
                 <ul>
-                    <li v-for="(player, id) in state.client_ids" :key="id">
-                        <span v-if="!state.client_hands?.[id]?.length">Empty</span>
-                        {{JSON.stringify(state?.client_hands?.[id])}}
+                    <li v-for="player_id in state.client_ids" :key="player_id">
+                        <span v-if="!state.client_hands?.[player_id]?.length">Empty</span>
+                        {{JSON.stringify(state?.client_hands?.[player_id])}}
                     </li>
                 </ul>
 
@@ -115,6 +115,7 @@ export default {
                 if(new_state?.game?.started && !old_state?.game?.started){
                     t.startGame();
                 }
+
                 //console.log('flipped?',new_state.flipped,new_state.cards);
 
                 // todo: loop over all cards
@@ -145,13 +146,25 @@ export default {
                 // todo: if player hands have changed size, run this
                 // this basically just handles animating matched cards off the table into the players hands
                 // todo: need to animate other players cards into the OTHER players hand
-                t.updateCardsInHand();
+                if(JSON.stringify(new_state.client_hands)!==JSON.stringify(old_state.client_hands)){
+                    t.updateCardsInHand();
+                }
 
 
                 //console.log('debugger state changed', new_state);
             },
             deep: true
-        }
+        },
+        // 'state.match_checks': {
+        //     handler(new_state,old_state){
+        //         if(new_state?.length !== old_state?.length){
+        //             console.log('match_checks changed', new_state);
+        //             if(new_state?.)
+        //         }
+        //         //t.updateCardsInHand();
+        //     },
+        //     deep: true
+        // },
     },
 
     methods:{

@@ -26,6 +26,8 @@ class ServerGame{
         this.player_turn = null;
         this.match_checks = [];
         this.player_cursors = {};
+        this.ignore_clicks = false;
+        this.client_hands = {};
 
         // heartbeat
         this.ping_interval = setInterval(this.ping.bind(this),256);
@@ -91,6 +93,7 @@ class ServerGame{
         const room = this.rooms[this.room_id];
         room.players.push(client_id);
         this.player_cursors[client_id] = {x:0,y:0,z:0};
+        this.client_hands[client_id] = [];
         const player_or_spectator = room.players.length <= 2 ? 'player' : 'spectator';
         console.log('players?',room.players.length)
         if(room.players.indexOf(room.player_turn) === -1){
@@ -111,6 +114,7 @@ class ServerGame{
     onClientLeave(client_id){
         console.log('client disconnected',client_id)
         delete this.clients?.[client_id];
+        delete this.client_hands?.[client_id];
 
         // todo: get room(s) for player and loop
         const room = this.rooms[this.room_id];
@@ -243,11 +247,13 @@ class ServerGame{
     async checkForMatch(){
         console.log('check for match',this.flipped.length);
         if(this.flipped.length > 1){
+            this.ignore_clicks = true;
             let cardA = this.cards[this.flipped[0]];
             let cardB = this.cards[this.flipped[1]];
             console.log('match?',cardA.pair_id,cardB.pair_id);
             if(cardA.pair_id === cardB.pair_id){
                 console.log('match found');
+                // todo: do away with match_checks?
                 this.match_checks.push({
                     player:this.player_turn,
                     pass: true,
@@ -257,10 +263,12 @@ class ServerGame{
                 // TODO: pluck out of available cards
 
                 // move pair to player's hand
-                this.clients[this.player_turn].hand = [
-                    ...this.clients[this.player_turn].hand,
+                this.client_hands[this.player_turn] = [
+                    ...this.client_hands[this.player_turn],
                     ...this.flipped
                 ];
+
+                console.log('client hands?',this.client_hands);
 
                 // un-flag
                 this.flipped = [];
@@ -288,6 +296,8 @@ class ServerGame{
                 // switch player turn
                 this.player_turn = this.player_turn === client_ids[0] ? client_ids[1] : client_ids[0];
             }
+            await delay(300);
+            this.ignore_clicks = false;
         }
     }
 
@@ -315,11 +325,11 @@ class ServerGame{
     }
 
     ping(){
-        let client_hands = {};
-        for(let a in this.clients){
-            let client = this.clients[a];
-            client_hands[a] = client.hand;
-        }
+        // let client_hands = {};
+        // for(let a in this.clients){
+        //     let client = this.clients[a];
+        //     client_hands[a] = client.hand;
+        // }
         const room = this.rooms[this.room_id];
         if(room?.players?.indexOf(this.player_turn) === -1){
             this.player_turn = room.players[0];
@@ -334,7 +344,7 @@ class ServerGame{
             state: {
                 room_id: this.room_id,
                 client_ids: Object.keys(this.clients),
-                client_hands,
+                client_hands: this?.client_hands,
                 game_host: this?.game_host,
                 game_id: this?.game_id,
                 game: this.games?.[this?.game_id],
@@ -346,8 +356,11 @@ class ServerGame{
                 flipped: this.flipped,
                 player_turn: this.player_turn,
                 hovered: this.hovered,
-                match_checks: this.match_checks, // todo: subset
-                player_cursors: this.player_cursors
+                // just let server dictate when a card is in a players hand
+                // if the client detects a change in length in the hand, it should re-parent the card from zonegroup to handd
+                // match_checks: this.match_checks, // todo: subset
+                player_cursors: this.player_cursors,
+                ignore_clicks: this.ignore_clicks
             }
         })
     }
