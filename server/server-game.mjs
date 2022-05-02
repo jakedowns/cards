@@ -27,7 +27,8 @@ class ServerGame{
         this.match_checks = [];
         this.player_cursors = {};
         this.ignore_clicks = false;
-        this.client_hands = {};
+        this.player_hands = {};
+        this.player_heads = {};
 
         // heartbeat
         this.ping_interval = setInterval(this.ping.bind(this),256);
@@ -93,19 +94,20 @@ class ServerGame{
         const room = this.rooms[this.room_id];
         room.players.push(client_id);
         this.player_cursors[client_id] = {x:0,y:0,z:0};
-        this.client_hands[client_id] = [];
+        this.player_hands[client_id] = [];
+        this.player_heads[client_id] = [];
         const player_or_spectator = room.players.length <= 2 ? 'player' : 'spectator';
         console.log('players?',room.players.length)
         if(room.players.indexOf(room.player_turn) === -1){
             room.player_turn = room.players[0];
         }
         this.notifyClient(client_id,{
-            message: 'WELCOME',
+            type: 'WELCOME',
             your_client_id: client_id,
             player_or_spectator,
         })
         // this.notifyAllClients({
-        //     message:"NEW_CLIENT_CONNECTED",
+        //     type:"NEW_CLIENT_CONNECTED",
         //     new_client_id:client_id,
         //     player_or_spectator
         // });
@@ -114,7 +116,8 @@ class ServerGame{
     onClientLeave(client_id){
         console.log('client disconnected',client_id)
         delete this.clients?.[client_id];
-        delete this.client_hands?.[client_id];
+        delete this.player_hands?.[client_id];
+        delete this.player_heads?.[client_id];
 
         // todo: get room(s) for player and loop
         const room = this.rooms[this.room_id];
@@ -175,32 +178,52 @@ class ServerGame{
         switch(decoded.type){
             // case 'NEW_ROOM':
             //     this.newRoomGameRound(client_id)
-
             //     break;
+
+            case 'iceCandidate':
+                this.notifyClient(decoded.to,{...decoded,type:'remotePeerIceCandidate'});
+                break;
+
+            case 'mediaOffer':
+                // console.log('mediaOffer from client',client_id,decoded)
+                this.notifyClient(decoded.to,decoded)
+                break;
+
+
+
+            case 'mediaAnswer':
+                this.notifyClient(decoded.to,decoded);
+                break;
+
 
 
             case 'JOIN_ROOM':
                 if(!this.rooms[decoded?.room_id]){
                     this.notifyClient(client_id,{
-                        message:'ROOM_JOIN_ERROR',
+                        type:'ROOM_JOIN_ERROR',
                     });
                     return;
                 }
                 this.rooms[decoded?.room_id]?.players?.push(client_id);
 
                 this.notifyClient(client_id,{
-                    message:'ROOM_JOIN_SUCCESS',
+                    type:'ROOM_JOIN_SUCCESS',
                 });
                 break;
 
             case 'NEW_GAME':
                 this.notifyClient(client_id,{
-                    message:'GAME_CREATE_SUCCESS',
+                    type:'GAME_CREATE_SUCCESS',
                 });
                 break;
 
+            /** pattern emergining: set_player_mesh_position // record_mesh_position */
             case 'SET_PLAYER_CURSOR':
-                this.player_cursors[client_id] = decoded.cursor;
+                this.player_cursors[client_id] = decoded.data;
+                break;
+
+            case 'SET_PLAYER_HEAD':
+                this.player_heads[client_id] = decoded.data;
                 break;
 
             case 'RESTART_GAME':
@@ -214,8 +237,8 @@ class ServerGame{
 
             case 'START_GAME':
                 this.notifyClient(client_id,{
-                    //message:'GAME_START_SUCCESS',
-                    message:'GAME_STATE_UPDATE',
+                    //type:'GAME_START_SUCCESS',
+                    type:'GAME_STATE_UPDATE',
                     state: {
                         //game_id: decoded.game_id,
                         game: {started: true},
@@ -260,15 +283,17 @@ class ServerGame{
                     pair_id:cardA.pair_id
                 })
 
+                await delay(1000); // wait a beat
+
                 // TODO: pluck out of available cards
 
                 // move pair to player's hand
-                this.client_hands[this.player_turn] = [
-                    ...this.client_hands[this.player_turn],
+                this.player_hands[this.player_turn] = [
+                    ...this.player_hands[this.player_turn],
                     ...this.flipped
                 ];
 
-                console.log('client hands?',this.client_hands);
+                console.log('player hands?',this.player_hands);
 
                 // un-flag
                 this.flipped = [];
@@ -325,10 +350,10 @@ class ServerGame{
     }
 
     ping(){
-        // let client_hands = {};
+        // let player_hands = {};
         // for(let a in this.clients){
         //     let client = this.clients[a];
-        //     client_hands[a] = client.hand;
+        //     player_hands[a] = client.hand;
         // }
         const room = this.rooms[this.room_id];
         if(room?.players?.indexOf(this.player_turn) === -1){
@@ -339,12 +364,13 @@ class ServerGame{
         }
         // TODO: if player's ws connection is closed, prune them from the room
         this.notifyAllClients({
-            message:'PING',
+            type:'PING',
             time: performance.now(),
             state: {
                 room_id: this.room_id,
                 client_ids: Object.keys(this.clients),
-                client_hands: this?.client_hands,
+                player_hands: this?.player_hands,
+                player_heads: this?.player_heads,
                 game_host: this?.game_host,
                 game_id: this?.game_id,
                 game: this.games?.[this?.game_id],
@@ -411,7 +437,7 @@ class ServerGame{
 
         // ping will broadcast
         // this.notifyClient(client_id,{
-        //     message:'ROOM_CREATE_SUCCESS',
+        //     type:'ROOM_CREATE_SUCCESS',
         //     room_id:new_room_id,
         //     game_id:new_game_id,
         //     round_id:new_round_id

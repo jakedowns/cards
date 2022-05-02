@@ -87,12 +87,21 @@ class SocketConnection{
       }catch(e){
           console.error(e,event.data)
       }
-      if(decoded?.message !== 'PING'){
+      if(decoded?.type !== 'PING'){
           console.log('socket message:',decoded);
           t.app.$refs.app.messages.push(decoded);
       }
-      switch(decoded?.message){
-
+      // todo: switch on type not message
+      switch(decoded?.type){
+          case 'mediaOffer':
+            t.onMediaOffer(decoded);
+            break;
+          case 'mediaAnswer':
+            t.onMediaAnswer(decoded);
+            break;
+          case 'remotePeerIceCandidate':
+            t.onRemotePeerIceCandidate(decoded);
+            break;
           case 'PING':
               // document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
               //todo: remove manual linkage:
@@ -136,6 +145,9 @@ class SocketConnection{
               t.players[decoded.your_client_id] = new Player(decoded.your_client_id);
               console.log('t.players now',t.players);
               // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
+
+              // request video stream
+              setupVideoStream();
               break;
 
           case 'GAME_STATE_UPDATE':
@@ -165,6 +177,7 @@ class SocketConnection{
       data.client_id = t.app.state.my_client_id;
       if(
         data.type !== 'SET_PLAYER_CURSOR'
+        && data.type !== 'SET_PLAYER_HEAD'
         && data.type !== 'HIGHLIGHT'
       ){
         console.log('sending',data,this.client_id,t.app.state.my_client_id);
@@ -174,15 +187,17 @@ class SocketConnection{
 }
 
 class Player {
-    constructor(name){
-        this.name = name;
+    constructor(player_id){
+        this.player_id = player_id;
         // todo support multiple hands
-        this.matches = [];
-        this.cards = [];
-        this.pointer = new PlayerPointer(name);
+        // this.matches = [];
+        // this.cards = []; // server tells us what cards the player is holding (t.app.state.player_hands)
+        this.pointer = new PlayerPointer(player_id);
+        this.head = new PlayerHead(player_id);
     }
     destroy(){
         this.pointer.destroy();
+        this.head.destroy();
     }
 }
 
@@ -236,7 +251,7 @@ class Tabletop{
         let player_id = t.app.state.client_ids[i];
         console.log('updating hands',player_id);
         // let player = t.players[player_id];
-        const hand = t.app.state?.client_hands?.[player_id] ?? [];
+        const hand = t.app.state?.player_hands?.[player_id] ?? [];
         let matches_count = hand.length/2;
         // console.log('matches_count?',matches_count);
         for(let a = 0; a<hand?.length ?? 0; a++){
@@ -289,8 +304,45 @@ class Tabletop{
       }
     }
 
+    updatePlayerHeads(){
+      for(let player_id in t.app?.state?.player_heads){
+        // let player_id = t.app.state.client_ids[i];
+        if(player_id !== t.app.state.my_client_id){
+          // only render opponent heads
+          let player_head_position = t.app.state.player_heads[player_id];
+          const destination = {
+            pos_x: player_head_position.x * -1.0,
+            pos_y: Math.max(player_head_position.y - 6.0, 2.0),
+            pos_z: player_head_position.z * -1.0,
+          };
+          // var vector = new THREE.Vector3(0, 0, -1);
+          // vector.applyEuler(camera.rotation, camera.rotation.order);
+          // destination.rot_x = vector.x;
+          // destination.rot_y = vector.y;
+          // destination.rot_z = vector.z;
+
+          const head = t?.players?.[player_id]?.head;
+          if(!head?.player_is_me){
+            head?.mesh.lookAt(camera.position);
+          }
+          // console.log('updating player head',
+          // player_head_position,
+          // destination)
+          // IF IS OPPONENT flip x,z
+          // IF IS SPECTATOR leave x,z alone
+          head?.tweenTo(
+            destination,
+            {
+              // duration:'distance'
+              duration:300
+            }
+          );
+        }
+      }
+    }
+
     getUpdateToPlayersHand(player_id,a){
-      const hand = t.app.state?.client_hands?.[player_id] ?? [];
+      const hand = t.app.state?.player_hands?.[player_id] ?? [];
       let matches_count = hand.length/2;
       let even = a % 2 == 0;
       let lerp_max = .07 * matches_count
@@ -318,7 +370,7 @@ class Tabletop{
 
     getUpdateToOpponentsHand(player_id,a){
       // let player = t.players[player_id];
-      const hand = t.app.state?.client_hands?.[player_id] ?? [];
+      const hand = t.app.state?.player_hands?.[player_id] ?? [];
       let matches_count = hand.length/2;
       let even = a % 2 == 0;
       let lerp_max = .07 * matches_count
@@ -350,6 +402,190 @@ class Tabletop{
     get cards(){
         return this.deck.cards;
     }
+
+    async onMediaOffer(decoded){
+      console.log('onMediaOffer',decoded);
+        try {
+          await t.peer.setRemoteDescription(new RTCSessionDescription(decoded.offer));
+          const peerAnswer = await t.peer.createAnswer();
+          await t.peer.setLocalDescription(new RTCSessionDescription(peerAnswer));
+
+          t.server.send({
+            type:'mediaAnswer',
+            answer: peerAnswer,
+            from: t.app.state.my_client_id,
+            to: decoded.from
+          });
+        } catch (error) {
+          console.error('onMediaOffer',error);
+        }
+    }
+
+    async onMediaAnswer(decoded){
+      console.log('onMediaAnswer',decoded)
+      await t.peer.setRemoteDescription(new RTCSessionDescription(decoded.answer));
+    }
+
+    onIceCandidateEvent(event) {
+      const ids = t.app.state.client_ids.slice();
+      // if(ids.length<2){
+      //   console.error('no one to call');
+      // }else if(ids.length > 2){
+      //   console.error('need to figure out multipeer connections');
+      // }else{
+        let my_index = ids.indexOf(t.app.state.my_client_id);
+        ids.splice(my_index,1);
+        console.warn('attempting media offer to peer:',ids);
+      // }
+      t.server.send({
+        type:'iceCandidate',
+        to: ids[0],
+        candidate: event.candidate
+      });
+    };
+
+    async onRemotePeerIceCandidate(data) {
+      try {
+        const candidate = new RTCIceCandidate(data.candidate);
+        await t.peer.addIceCandidate(candidate);
+      } catch (error) {
+        // Handle error
+      }
+    };
+}
+
+class TweenableMesh{
+
+  constructor(player_id){
+    this.player_id = player_id;
+    this.tweening = false;
+    this.setupTexturesAndMaterials();
+    this.setupMesh();
+    scene.add(this.mesh);
+  }
+
+  async tweenTo(destination,{duration=1000}){
+    // console.log('tweenTo',destination);
+    this.destination = destination;
+
+    // todo: accept option to stop,finish,queue tweens
+    if(this.tweening){
+      // console.log('already tweening. should we cancel or finish or block?');
+        return false;
+    }else{
+      // console.log('tweening cursor...');
+    }
+
+    let _mesh = this.mesh;
+    if(!_mesh){
+      console.error('mesh not found',this);
+      return;
+    }
+
+    this.tweening = true;
+
+    // TODO: add ability to include/exclude properties from tween to save overhead
+
+    // let tweenMid = null;
+    // if(options && options.arcTo){
+    //     // optional midpoint
+    //     tweenMid = getMeshTween(_mesh,options.arcTo,300/2);
+    // }
+
+    // magintude
+    let magnitude = this?.mesh?.position?.distanceTo(
+      new THREE.Vector3(
+        destination?.pos_x ?? this?.mesh?.position?.x,
+        destination?.pos_y ?? this?.mesh?.position?.y,
+        destination?.pos_z ?? this?.mesh?.position?.z
+      )
+    );
+    if(duration === 'distance'){
+      // console.log('magnitude',magnitude);
+      duration = lerp(50,1000,(magnitude/6));
+      // console.log('duration',duration)
+    }
+
+    if(magnitude<0.1){
+      this.tweening = false;
+      return;
+    }
+
+    let tweenEnd = getMeshTween(_mesh,destination,{
+        duration,
+        // easing:TWEEN.Easing.Linear.None, //Quadratic.Out,
+        easing:TWEEN.Easing.Quadratic.InOut, //Quadratic.Out,
+        // todo accept easing option
+    });
+
+    // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
+    this.tween = tweenEnd.start();
+
+    await delay(duration);
+
+    // run the tween
+    this.tweening = false;
+  }
+
+  setupTexturesAndMaterials(){
+    // override this...
+  }
+
+  destroy(){
+    scene.remove(this.mesh);
+    this.mesh = null;
+    clearInterval(this.updateInterval);
+  }
+}
+class PlayerHead extends TweenableMesh {
+  constructor(player_id){
+    super(player_id);
+    // this.updateInterval = setInterval(()=>{
+    //   this.mesh.material.color.setHex(
+    //     this.player_id === t.app.state?.game_host ? 0x00ff00 : 0xffff00
+    //   )
+    // },1000);
+  }
+  get player_is_me(){
+    return this.player_id === t.app.state?.my_client_id;
+  }
+  setupTexturesAndMaterials(){
+    // if(this.player_is_me){
+      this.video_texture = new THREE.VideoTexture(
+        this.player_is_me ? t.video : t.opponent_video
+      ); // webcam stream
+      this.video_texture.format = THREE.RGBAFormat;
+    // }
+  }
+  setupMesh(){
+    this.mesh = new THREE.Mesh(
+      // new THREE.SphereGeometry(4.0,8,8),
+      new THREE.PlaneGeometry( 16, 9 ),
+      new THREE.MeshBasicMaterial({
+        // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
+        // wireframe: true,
+        transparent: this.player_is_me ? true : false,
+        opacity: this.player_is_me ? 0.0 : 1.0,
+        map: this.video_texture,
+      })
+    )
+    this.mesh.lookAt(camera.position);
+    // this.mesh.scale.setScalar(.5)
+    this.mesh.position.setScalar(0);
+    this.mesh.name = 'player_head_'+this.player_id;
+    if(this.player_is_me){
+      // this.mesh.position.set(camera.position);
+      // let pos = new Vector3();
+      // camera.getWorldPosition(pos);
+      headUpdateFN(camera.position);
+    }else{
+      // this.mesh.position.set(camera.position);
+      // this.mesh.position.x = camera.position.x * -1;
+      // this.mesh.position.y = camera.position.y;
+      // this.mesh.position.z = camera.position.z * -1;
+    }
+    // this.mesh.rotation.z = Math.PI/2;
+  }
 }
 
 class PlayerPointer{
@@ -751,9 +987,19 @@ class Round{
 
         // animate the camera
         getMeshTween(camera,{
-            pos_y: '+5'
+            // pos_y: '+5'
+            pos_x: 0.9592052270385086,
+            pos_y: 20.10683366362212,
+            pos_z: -21.162843075112743,
+
+            rot_x: -2.3105348483091284,
+            rot_y: 0.01905053709490307,
+            rot_z: 3.120722166273759
         },{
-            duration: 3000
+            duration: 1000,
+            onTick:()=>{
+              updatePlayerHead();
+            }
         }).start();
 
         await delay(1000);
@@ -790,7 +1036,7 @@ class Round{
         this.on_round_end_callback = cb;
     }
     get current_player(){
-        return t.players[t.app.state.player_turn]
+        return t?.players?.[t.app.state?.player_turn]
     }
 }
 class Layout{
@@ -915,6 +1161,7 @@ class Game_PVPMemory{
 init();
 
 function init(){
+
   scene = new THREE.Scene();
   renderer = new THREE.WebGLRenderer({
     antialias: true
@@ -925,8 +1172,8 @@ function init(){
   canvas = renderer.domElement;
   document.body.appendChild(canvas);
 
-  camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
-  camera.position.set( 0, 10, -1.5 );
+  camera = new THREE.PerspectiveCamera(75, 1, 0.01, 5000);
+  camera.position.set( 0, 5, -1.5 );
   scene.add(camera);
   controls = new THREE.OrbitControls(camera, canvas);
 
@@ -943,6 +1190,11 @@ function init(){
 
   // init our game instance as window.t
   window.t = new Tabletop();
+  t.scene = scene;
+  t.camera = camera;
+  t.video = document.getElementById('video');
+  t.opponent_video = document.getElementById('opponent_video');
+
   function checkReady(callback){
     console.log('check ready',document.readyState)
     if(document.readyState === "complete" || document.readyState === "loaded" || document.readyState === "interactive"){
@@ -965,7 +1217,9 @@ function init(){
           return {
               state: {
                   loading:true,
-                  messages: []
+                  messages: [],
+                  player_hands:{},
+                  player_heads:{},
               },
           }
       },
@@ -980,6 +1234,82 @@ function init(){
 
   // kick off render loop
   render();
+}
+
+function setupVideoStream(){
+  // oponent stream
+  const createPeerConnection = () => {
+    return new RTCPeerConnection({
+      iceServers: [
+        {
+          urls: "stun:stun.stunprotocol.org"
+        }
+      ]
+    });
+  };
+
+  t.peer = createPeerConnection();
+  t.peer.onicecandidate = t.onIceCandidateEvent;
+  const gotRemoteStream = event => {
+    const [stream] = event.streams;
+    t.opponent_video.srcObject = stream;
+  };
+
+  t.peer.addEventListener('track', gotRemoteStream);
+
+  if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
+
+    const constraints = {
+      audio: true,
+      video: {
+        width: 1280,
+        height: 720,
+        facingMode: 'user'
+      }
+    };
+
+    navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
+
+      // apply the stream to the video element used in the texture
+
+      stream.getTracks().forEach(track => t.peer.addTrack(track, stream));
+
+      t.video.srcObject = stream;
+      t.video.play();
+
+    } ).catch( function ( error ) {
+
+      console.error( 'Unable to access the camera/webcam.', error );
+
+    } );
+
+  } else {
+
+    console.error( 'MediaDevices interface not available.' );
+
+  }
+
+  t.call = async()=>{
+    const localPeerOffer = await t.peer.createOffer();
+    await t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
+    const ids = t.app.state.client_ids.slice();
+    if(ids.length<2){
+      console.error('no one to call');
+    }else if(ids.length > 2){
+      console.error('need to figure out multipeer connections');
+    }else{
+      let my_index = ids.indexOf(t.app.state.my_client_id);
+      ids.splice(my_index,1);
+      console.warn('attempting media offer to peer:',ids);
+    }
+    t.server.send({
+      type:'mediaOffer',
+      offer: localPeerOffer,
+      from: t.app.state.my_client_id,
+      to: ids[0]
+    })
+  }
+
 }
 
 function render(){
@@ -1133,6 +1463,9 @@ function getMeshTween(mesh,updateTo,options){
       tweenProps.scale_y,
       tweenProps.scale_z,
     )
+    if(options.onTick){
+      options.onTick();
+    }
   }
   const tween = new TWEEN.Tween(tweenProps)
   .to(updateTo, options?.duration ?? 500)
@@ -1248,7 +1581,8 @@ function initTableMesh(){
 // TODO: use SHADER to blend
 // TODO: animate color transition
 async function onMouseMove( evt ){
-  await updateClientCursor();
+  updateClientCursor();
+  updatePlayerHead();
   // TODO: allow user to hover over matches in their hand,
   // but NOT the playfield cards, if it's not currently their turn
   // todo: move up to app-level
@@ -1309,7 +1643,7 @@ function throttle(callback,limit){
   var wait = false;                  // Initially, we're not waiting
     return function () {               // We return a throttled function
         if (!wait) {                   // If we're not waiting
-            callback.call();           // Execute users function
+            callback.call(callback,...arguments);           // Execute users function
             wait = true;               // Prevent future invocations
             setTimeout(function () {   // After a period of time
                 wait = false;          // And allow future invocations
@@ -1317,17 +1651,30 @@ function throttle(callback,limit){
         }
     }
 }
-const updateServerCursor_throttled = throttle(updateServerCursor, 128);
-function updateServerCursor(){
-  const pointer = t.players?.[t.app.state.my_client_id]?.pointer?.mesh;
-  if(!pointer){
-    return;
-  }
+
+function getThrottledUpdateServer(type,delay){
+  return throttle((data)=>{
+    updateServer(type,data);
+  },delay);
+}
+
+// const updateServerThrottled = throttle((type,data)=>{
+//   console.log('updateServerThrottled',{type,data});
+//   // debugger;
+//   updateServer(type,data);
+// }, 128);
+
+function updateServer(type,data){
+  // console.log('updateServer',{type,data})
   t.server.send({
-    type: 'SET_PLAYER_CURSOR',
-    cursor: pointer.position,
+    type,
+    data,
   })
 }
+
+const cusorUpdateFN = getThrottledUpdateServer('SET_PLAYER_CURSOR',128);
+const headUpdateFN = getThrottledUpdateServer('SET_PLAYER_HEAD',128);
+
 function updateClientCursor(){
   // hit test to position pointer
   // mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -1342,14 +1689,31 @@ function updateClientCursor(){
       pointer.position.copy(intersects[ 0 ].point);
       pointer.position.y = pointer.position.y + .5;
 
+      // console.log('cursor position?',pointer.position)
+
       // send a throttled update to the server
-      updateServerCursor_throttled();
+      cusorUpdateFN(pointer.position);
     }
   }else{
     console.warn('player pointer not found')
   }
 
   // t.players[client_id].pointer.mesh.position.set()
+}
+
+function updatePlayerHead(){
+  // console.log('cam pos?', camera.position);
+  headUpdateFN(camera.position);
+  // todo
+  // headUpdateFN({
+  //   pos_x:camera.position.x,
+  //   pos_y:camera.position.y,
+  //   pos_z:camera.position.z,
+
+  //   rot_x:camera.rotation.x,
+  //   rot_y:camera.rotation.y,
+  //   rot_z:camera.rotation.z,
+  // });
 }
 
 
@@ -1433,6 +1797,7 @@ function onMouseClick( evt ){
 
     // TODO: we need to only react to the card that is closest to the camera
     // need to account for occluders too :/
+    let player_id = t.app.state.my_client_id
     const intersects = intersectsGroup(t.zonegroup.children)
     let card_id = intersects?.[0]?.object?.userData?.card_id;
     // console.log('click intersects',{intersects,card_id});
@@ -1450,7 +1815,8 @@ function onMouseClick( evt ){
         // ignore if we already flipped this card over
         t.app.state.flipped.indexOf(card_id)>-1
         // or if it's in the player hand
-        || t.game.current_player.cards.indexOf(card_id)>-1
+        || t.app.state.player_hands[player_id].indexOf(card_id)>-1
+        // todo: or if it's in opponents hand
         // todo: or if it's not in a zone (intersecting only zonegroup.children kind of solves this one)
        ){
          console.log('ignoring click',card_id);

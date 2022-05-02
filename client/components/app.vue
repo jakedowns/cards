@@ -39,8 +39,8 @@
             <li>player hands:
                 <ul>
                     <li v-for="player_id in state.client_ids" :key="player_id">
-                        <span v-if="!state.client_hands?.[player_id]?.length">Empty</span>
-                        {{JSON.stringify(state?.client_hands?.[player_id])}}
+                        <span v-if="!state.player_hands?.[player_id]?.length">Empty</span>
+                        {{JSON.stringify(state?.player_hands?.[player_id])}}
                     </li>
                 </ul>
 
@@ -142,11 +142,12 @@ export default {
                 }
 
                 t.updatePlayerCursors();
+                t.updatePlayerHeads();
 
                 // todo: if player hands have changed size, run this
                 // this basically just handles animating matched cards off the table into the players hands
                 // todo: need to animate other players cards into the OTHER players hand
-                if(JSON.stringify(new_state.client_hands)!==JSON.stringify(old_state.client_hands)){
+                if(JSON.stringify(new_state.player_hands)!==JSON.stringify(old_state.player_hands)){
                     t.updateCardsInHand();
                 }
 
