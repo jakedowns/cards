@@ -16,17 +16,19 @@ class ServerGame{
         };
         this.game_host = null;
         this.rounds = {};
+
+        // TODO: nest these under games[]
         this.cards = [];
         this.zones = [];
         this.available_cards = [];
         this.flipped = [];
+        this.hovered = [];
         this.player_turn = null;
         this.match_checks = [];
+        this.player_cursors = {};
 
         // heartbeat
-        this.ping_interval = setInterval(()=>{
-            this.ping();
-        },1000);
+        this.ping_interval = setInterval(this.ping.bind(this),256);
 
         // create a default room for now
         this.rooms.default = {
@@ -85,20 +87,64 @@ class ServerGame{
         if(!this.room_id){
             this.newRoomGameRound(client_id);
         }
-        console.warn('add player to Room');
-        ws.send(JSON.stringify({
+        // add player to room
+        const room = this.rooms[this.room_id];
+        room.players.push(client_id);
+        this.player_cursors[client_id] = {x:0,y:0,z:0};
+        const player_or_spectator = room.players.length <= 2 ? 'player' : 'spectator';
+        console.log('players?',room.players.length)
+        if(room.players.indexOf(room.player_turn) === -1){
+            room.player_turn = room.players[0];
+        }
+        this.notifyClient(client_id,{
             message: 'WELCOME',
-            your_client_id: client_id
-        }))
-        this.notifyAllClients({
-            message:"NEW_CLIENT_CONNECTED",
-            new_client_id:client_id
-        });
+            your_client_id: client_id,
+            player_or_spectator,
+        })
+        // this.notifyAllClients({
+        //     message:"NEW_CLIENT_CONNECTED",
+        //     new_client_id:client_id,
+        //     player_or_spectator
+        // });
     }
 
     onClientLeave(client_id){
         console.log('client disconnected',client_id)
         delete this.clients?.[client_id];
+
+        // todo: get room(s) for player and loop
+        const room = this.rooms[this.room_id];
+
+        // remove from room
+        let room_player_index = room.players.indexOf(client_id);
+        if(room_player_index>-1){
+            room.players.splice(room_player_index,1);
+        }
+        console.log('clients remaining',Object.keys(this.clients).length);
+        console.log('room.players remaining',room.players.length);
+        // if player was host, change host to next remaining player in room
+        if(room.game_host === client_id){
+            if(room.players.length){
+                // assign new host
+                room.game_host = room.players[0];
+                // make it this players turn
+                if(room.players.indexOf(room.player_turn) === -1){
+                    room.player_turn = room.players[0];
+                }
+            }else{
+                // no players left, remove rounds,game,room
+                delete this.games[this.game_id];
+                this.game_id = null;
+
+                delete this.rounds[this.round_id];
+                this.round_id = null;
+
+                delete this.rooms[this.room_id];
+                this.room_id = null;
+            }
+        }
+        // if all players have left, set host to null; so that the next player to join can become host
+        // if last player in a room, end game, delete room
     }
 
     onClientMessage(client_id,message){
@@ -110,8 +156,10 @@ class ServerGame{
         }catch(e){
             console.error(e)
         }
-        // todo verify they match
-        console.log('todo:validate client request matches',{req_client_id:decoded.client_id,server_client_id:client_id})
+        if(decoded.client_id !== client_id){
+            console.error('client message client_id mismatch',decoded.client_id,client_id)
+            return false;
+        }
         switch(decoded.type){
             // case 'NEW_ROOM':
             //     this.newRoomGameRound(client_id)
@@ -139,6 +187,19 @@ class ServerGame{
                 });
                 break;
 
+            case 'SET_PLAYER_CURSOR':
+                this.player_cursors[client_id] = decoded.cursor;
+                break;
+
+            case 'RESTART_GAME':
+                if(this.game_host === client_id
+                    // already validated above
+                    //&& decoded.client_id === client_id
+                ){
+                    this.newRoomGameRound(client_id);
+                }
+                break;
+
             case 'START_GAME':
                 this.notifyClient(client_id,{
                     //message:'GAME_START_SUCCESS',
@@ -160,38 +221,56 @@ class ServerGame{
 
 
                 break;
+
+            case 'HIGHLIGHT':
+                // this.hovered.push(decoded.card_id);
+                this.hovered = [decoded.card_id];
+                break;
+
             //case 'RESET_FLIPPED':
             //    break;
         }
     }
 
     async checkForMatch(){
+        console.log('check for match',this.flipped.length);
         if(this.flipped.length > 1){
             let cardA = this.cards[this.flipped[0]];
             let cardB = this.cards[this.flipped[1]];
+            console.log('match?',cardA.pair_id,cardB.pair_id);
             if(cardA.pair_id === cardB.pair_id){
                 console.log('match found');
-                this.flipped = [];
                 this.match_checks.push({
                     player:this.player_turn,
                     pass: true,
                     pair_id:cardA.pair_id
                 })
 
+                // TODO: pluck out of available cards
+
+                // move pair to player's hand
+                this.clients[this.player_turn].hand = [
+                    ...this.clients[this.player_turn].hand,
+                    ...this.flipped
+                ];
+
+                // un-flag
+                this.flipped = [];
+
+                // remove from "zone"
+                // TODO: update zone.card = null
                 cardA.zone = null;
                 cardA.player_id = this.player_turn;
 
                 cardB.zone = null;
                 cardB.player_id = this.player_turn;
 
-                // TODO: pluck out of available cards
-                // TODO: move pair to player's hand
-                this.clients[this.player_turn].hand = [...this.clients[this.player_turn].hand, ...this.flipped];
+
             }else{
                 console.log('not a match');
                 // todo delay
                 await delay(1000);
-                this.flipped = [];
+                this.flipped = []; // unflip on client
                 this.ignore_clicks = false;
                 this.match_checks.push({
                     player:this.player_turn,
@@ -219,6 +298,9 @@ class ServerGame{
     }
 
     notifyClient(client_id,message){
+        if(message.message !== 'PING'){
+            console.log('sending client message',client_id,message)
+        }
         // todo: error if no client matches id
         this.clients?.[client_id]?.ws?.send(JSON.stringify(message))
 
@@ -230,12 +312,22 @@ class ServerGame{
             let client = this.clients[a];
             client_hands[a] = client.hand;
         }
+        const room = this.rooms[this.room_id];
+        if(room?.players?.indexOf(this.player_turn) === -1){
+            this.player_turn = room.players[0];
+        }
+        if(room?.players?.indexOf(this?.game_host) === -1){
+            this.game_host = room.players[0];
+        }
+        // TODO: if player's ws connection is closed, prune them from the room
         this.notifyAllClients({
             message:'PING',
             time: performance.now(),
             state: {
+                room_id: this.room_id,
                 client_ids: Object.keys(this.clients),
                 client_hands,
+                game_host: this?.game_host,
                 game_id: this?.game_id,
                 game: this.games?.[this?.game_id],
                 round_id: this?.round_id,
@@ -244,7 +336,10 @@ class ServerGame{
                 available_cards: this.available_cards,
                 //flipped: this.games?.[this?.game_id]?.flipped,
                 flipped: this.flipped,
-                player_turn: this.player_turn
+                player_turn: this.player_turn,
+                hovered: this.hovered,
+                match_checks: this.match_checks, // todo: subset
+                player_cursors: this.player_cursors
             }
         })
     }
@@ -260,7 +355,7 @@ class ServerGame{
         this.round_id = new_round_id;
 
         this.rooms[new_room_id] = {
-            players: Object.keys(this.clients),
+            players: [], //Object.keys(this.clients),
         }
 
         this.game_host = client_id;

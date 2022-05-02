@@ -8,21 +8,47 @@
                 <span class="value">{{state?.room_id ?? 'server-lobby'}}</span></li>
 
             <li class="game_id">Current Game ID:
-                <span class="value">{{state?.game_id ?? 'no-game'}}</span></li>
+                <span class="value">{{state?.game_id ?? 'no-game'}}</span>
+                &nbsp;
+                <span class="value">{{game?.started ? 'started' : 'not-started'}}</span>
+            </li>
 
-            <li class="game_started">Game Started:
-                <span class="value">{{game?.started ? 'true' : 'false'}}</span></li>
+            <li class="host_id">Current Host ID:
+                <span class="value">{{state?.game_host ?? 'no-host'}}</span>
+                &nbsp;
+                <span :style="{color:im_game_host ? 'green' : 'red'}">You're {{im_game_host ? '' : 'NOT'}} the game host!</span>
+            </li>
 
             <li class="round_id">Current Round ID:
-                <span class="value">{{state?.round_id ?? 'no-round'}}</span></li>
+                <span class="value">{{state?.round_id ?? 'no-round'}}</span>
+                &nbsp;
+                <span class="value">{{round?.started ? 'started' : 'not-started'}}</span></li>
 
-            <li class="round_started">Round Started:
-                <span class="value">{{round?.started ? 'true' : 'false'}}</span></li>
+
 
             <li class="clients">Clients:
-                <span class="value">{{JSON.stringify(state?.clients ?? [] )}}</span></li>
+                <span class="value">{{JSON.stringify(state.client_ids) }}</span></li>
 
-            <li>player turn id: {{state.player_turn}}</li>
+            <li>player turn id: {{state.player_turn}}
+
+                <span :style="{color:its_my_turn ? 'green' : 'red'}">It's {{its_my_turn ? '' : 'NOT'}} Your Turn!</span>
+
+            </li>
+
+            <li>player type: {{state.player_type ?? 'connecting'}}</li>
+            <li>player hands:
+                <ul>
+                    <li v-for="(player, id) in state.client_ids" :key="id">
+                        <span v-if="!state.client_hands?.[id]?.length">Empty</span>
+                        {{JSON.stringify(state?.client_hands?.[id])}}
+                    </li>
+                </ul>
+
+            </li>
+
+            <li>Flipped:
+                {{JSON.stringify(state.flipped)}}
+            </li>
 
             <!--
             <li v-if="!state?.room_id">
@@ -34,7 +60,7 @@
                 <button class="new-game">New Game</button>
             </li> -->
 
-            <li v-if="state?.room_id && state?.game_id && state?.game_started"
+            <li v-if="im_game_host && game_started"
                 @click.prevent="restart_game">
                 <button class="new-game">Restart Game</button>
             </li>
@@ -43,8 +69,17 @@
                 @click.prevent="start_game">
                 <button class="start-game">Start Game</button>
             </li> -->
+
+            <li>
+                <div class="messages">
+                <div class="message" v-for="(message,i) in messages" :key="i">
+                    <div class="message-text">{{message.type}}</div>
+                </div>
+            </div>
+            </li>
         </ul>
         <div class="bg-blur"></div>
+
     </div>
 </template>
 
@@ -53,6 +88,12 @@ export default {
 
     props:{
         state:{required:true, default: {}}
+    },
+
+    setup(){
+        return {
+            messages: []
+        }
     },
 
     mounted(){
@@ -92,11 +133,12 @@ export default {
                     }
                 }
 
+                t.updatePlayerCursors();
+
                 // todo: if player hands have changed size, run this
                 // this basically just handles animating matched cards off the table into the players hands
                 // todo: need to animate other players cards into the OTHER players hand
-                // todo: rename to update player hand cards (or something)
-                t.addMatchToHand();
+                t.updateCardsInHand();
 
 
                 //console.log('debugger state changed', new_state);
@@ -145,11 +187,20 @@ export default {
         round(){
             return this.state?.round;
             //return this.state.rounds?.[this.state.round_id];
+        },
+        its_my_turn(){
+            return this.state.player_turn === this.state.my_client_id;
+        },
+        im_game_host(){
+            return this.state.game_host === this.state.my_client_id
+        },
+        game_started(){
+            return this.game?.started;
         }
     }
 }
 </script>
-<style>
+<style lang="scss">
 #debug {
     background: transparent;
     color: #fff;
@@ -158,18 +209,25 @@ export default {
     left: 0;
     right: 0;
     bottom: auto;
-    width: 100%;
-    height: 30px;
-    z-index: 2;
-}
-.details {
-    position: absolute;
-}
-.bg-blur {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    background: rgba(0,0,0,0.5);
-    filter: blur(10px);
+    width: 30vw;
+    height: 100vh;
+
+    .details {
+        z-index: 2;
+        position: relative;
+        font-family: cursive;
+        font-size: 11px;
+    }
+    .bg-blur {
+        z-index: 1;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        filter: blur(10px);
+        pointer-events: none;
+    }
 }
 </style>

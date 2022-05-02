@@ -25,10 +25,15 @@ const loadFile = function(path,res){
         .then(data => {
             res.statusCode = 200;
             console.log(path);
-            if(path.endsWith('.js')||path.endsWith('.mjs')){
+            let path_lower = path.toLowerCase();
+            if(path_lower.endsWith('.js')||path_lower.endsWith('.mjs')){
                 res.setHeader('Content-Type', 'application/javascript');
-            }else if(path.endsWith('.html')){
+            }else if(path_lower.endsWith('.html')){
                 res.setHeader('Content-Type', 'text/html');
+            }else if(path_lower.endsWith('.png')){
+                res.setHeader('Content-Type', 'image/png');
+            }else if(path_lower.endsWith('.jpg')||path_lower.endsWith('.jpeg')){
+                res.setHeader('Content-Type', 'image/jpg');
             }
             res.end(data);
         })

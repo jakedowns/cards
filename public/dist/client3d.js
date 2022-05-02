@@ -13705,6 +13705,11 @@ __webpack_require__.r(__webpack_exports__);
       "default": {}
     }
   },
+  setup: function setup() {
+    return {
+      messages: []
+    };
+  },
   mounted: function mounted() {
     console.log('debugger mounted');
   },
@@ -13746,10 +13751,9 @@ __webpack_require__.r(__webpack_exports__);
         } // todo: if player hands have changed size, run this
         // this basically just handles animating matched cards off the table into the players hands
         // todo: need to animate other players cards into the OTHER players hand
-        // todo: rename to update player hand cards (or something)
 
 
-        t.addMatchToHand(); //console.log('debugger state changed', new_state);
+        t.updateCardsInHand(); //console.log('debugger state changed', new_state);
       },
       deep: true
     }
@@ -13795,6 +13799,9 @@ __webpack_require__.r(__webpack_exports__);
       var _this$state2;
 
       return (_this$state2 = this.state) === null || _this$state2 === void 0 ? void 0 : _this$state2.round; //return this.state.rounds?.[this.state.round_id];
+    },
+    its_my_turn: function its_my_turn() {
+      return this.state.player_turn === this.state.my_client_id;
     }
   }
 });
@@ -13884,22 +13891,30 @@ var _hoisted_23 = {
   "class": "value"
 };
 
-var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
+
+var _hoisted_25 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "new-game"
 }, "Restart Game", -1
 /* HOISTED */
 );
 
-var _hoisted_25 = [_hoisted_24];
+var _hoisted_26 = [_hoisted_25];
 
-var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_27 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "bg-blur"
 }, null, -1
 /* HOISTED */
 );
 
+var _hoisted_28 = {
+  "class": "messages"
+};
+var _hoisted_29 = {
+  "class": "message-text"
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state, _$props$state$room_id, _$props$state2, _$props$state$game_id, _$props$state3, _$options$game, _$props$state$round_i, _$props$state4, _$options$round, _$props$state$clients, _$props$state5, _$props$state6, _$props$state7, _$props$state8;
+  var _$props$state, _$props$state$room_id, _$props$state2, _$props$state$game_id, _$props$state3, _$options$game, _$props$state$round_i, _$props$state4, _$options$round, _$props$state$player_, _$props$state5, _$props$state6, _$props$state7;
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_3, [_hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.my_client_id), 1
   /* TEXT */
@@ -13913,16 +13928,41 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$round = $options.round) !== null && _$options$round !== void 0 && _$options$round.started ? 'true' : 'false'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_21, [_hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state$clients = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : _$props$state5.clients) !== null && _$props$state$clients !== void 0 ? _$props$state$clients : [])), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_21, [_hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
   /* TEXT */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player turn id: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.state.player_turn), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n            <li v-if=\"!state?.room_id\">\n                <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n            </li>\n\n            <li v-if=\"state?.room_id && !state?.game_id\"\n                @click.prevent=\"new_game\">\n                <button class=\"new-game\">New Game</button>\n            </li> "), (_$props$state6 = $props.state) !== null && _$props$state6 !== void 0 && _$props$state6.room_id && (_$props$state7 = $props.state) !== null && _$props$state7 !== void 0 && _$props$state7.game_id && (_$props$state8 = $props.state) !== null && _$props$state8 !== void 0 && _$props$state8.game_started ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
+      color: $props.state.player_turn === $props.state.my_client_id ? 'green' : 'red'
+    })
+  }, "It's " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.state.player_turn === $props.state.my_client_id ? '' : 'NOT') + " Your Turn!", 5
+  /* TEXT, STYLE */
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = $props.state.player_type) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'connecting'), 1
+  /* TEXT */
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player, id) {
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
+      key: id
+    }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_hands[id])), 1
+    /* TEXT */
+    );
+  }), 128
+  /* KEYED_FRAGMENT */
+  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n            <li v-if=\"!state?.room_id\">\n                <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n            </li>\n\n            <li v-if=\"state?.room_id && !state?.game_id\"\n                @click.prevent=\"new_game\">\n                <button class=\"new-game\">New Game</button>\n            </li> "), (_$props$state5 = $props.state) !== null && _$props$state5 !== void 0 && _$props$state5.room_id && (_$props$state6 = $props.state) !== null && _$props$state6 !== void 0 && _$props$state6.game_id && (_$props$state7 = $props.state) !== null && _$props$state7 !== void 0 && _$props$state7.game_started ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
     key: 0,
     onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.restart_game && $options.restart_game.apply($options, arguments);
     }, ["prevent"]))
-  }, _hoisted_25)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                @click.prevent=\"start_game\">\n                <button class=\"start-game\">Start Game</button>\n            </li> ")]), _hoisted_26]);
+  }, _hoisted_26)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                @click.prevent=\"start_game\">\n                <button class=\"start-game\">Start Game</button>\n            </li> ")]), _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_28, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.messages, function (message) {
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+      "class": "message",
+      key: message.id
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.text), 1
+    /* TEXT */
+    )]);
+  }), 128
+  /* KEYED_FRAGMENT */
+  ))])]);
 }
 
 /***/ }),
@@ -21102,103 +21142,120 @@ var colorDark = new THREE.Color(0xb0b0b0);
 var colorLight = new THREE.Color(0xffffff);
 var animationDuration = 0.5; // seconds
 
-var reset_delay = 1000; // const HOST = HOSTNAME;
-
+var reset_delay = 1000;
+var HOST = "0.0.0.0";
+var WEB_PORT = "3090";
 var PORT = 3091;
 var WSHOSTNAME = "localhost";
 console.log('hostname?port?', ["".concat(WSHOSTNAME), // `${HOST}`,
 "".concat(PORT)]);
 
 var SocketConnection = /*#__PURE__*/function () {
-  function SocketConnection() {
-    var _this = this;
+  function SocketConnection() {//this.connectWS();
 
     _classCallCheck(this, SocketConnection);
-
-    this.client_id = null;
-
-    try {
-      this.ws = new WebSocket("ws://".concat(WSHOSTNAME, ":").concat(PORT));
-      this.ws.addEventListener("open", function () {
-        console.log("We are connected"); //this.ws.send("How are you?");
-      });
-      this.ws.addEventListener('error', function (event) {
-        console.log('error', event);
-      });
-      this.client_ids = [];
-      this.ws.addEventListener('message', function (event) {
-        var _decoded, _decoded2, _decoded3, _decoded4;
-
-        //console.log(event);
-        var decoded = null;
-
-        try {
-          decoded = JSON.parse(event.data);
-        } catch (e) {
-          console.error(e, event.data);
-        }
-
-        if (((_decoded = decoded) === null || _decoded === void 0 ? void 0 : _decoded.message) !== 'PING') {
-          console.log('socket message:', decoded);
-        }
-
-        switch ((_decoded2 = decoded) === null || _decoded2 === void 0 ? void 0 : _decoded2.message) {
-          case 'PING':
-            // document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
-            //todo: remove manual linkage:
-            //window.t.app.state.client_ids = decoded.client_ids;
-            window.t.app.state = _objectSpread(_objectSpread({}, window.t.app.state), (_decoded3 = decoded) === null || _decoded3 === void 0 ? void 0 : _decoded3.state);
-            break;
-
-          case 'NEW_CLIENT_CONNECTED':
-            // could write to t.state, but
-            // ping will update us every second of who's connected
-            // could show a nice alert that someone joined, tho
-            // but that could also be a reaction to a watcher on state.client_ids
-            // so, maybe we don't need this event yet
-            break;
-
-          case 'CLIENT_LEFT':
-            // same as above, client observation can happen via ping's client list
-            // todo: pause game? ask if room host wants to end the round, or end the game, or end the room
-            break;
-
-          case 'WELCOME':
-            _this.client_id = decoded.your_client_id;
-            window.t.app.state.my_client_id = _this.client_id; //console.log('server says my id is',this.client_id);
-            // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
-
-            break;
-
-          case 'GAME_STATE_UPDATE':
-            window.t.app.state = _objectSpread(_objectSpread({}, window.t.app.state), (_decoded4 = decoded) === null || _decoded4 === void 0 ? void 0 : _decoded4.state);
-            break;
-          // case 'ROOM_CREATE_SUCCESS':
-          //     console.log('room created',decoded);
-          //     window.t.app.state.room_id = decoded.room_id;
-          //     window.t.app.state.game_id = decoded.game_id;
-          //     window.t.app.state.round_id = decoded.round_id;
-          //     break;
-
-          case 'ROOM_JOIN_SUCCESS':
-            window.t.app.state.room_id = decoded.room_id;
-            break;
-
-          case 'ROOM_EXIT_SUCCESS':
-            window.t.app.state.room_id = null;
-            break;
-        }
-      });
-    } catch (e) {
-      console.error(e);
-    }
   }
 
   _createClass(SocketConnection, [{
+    key: "connectWS",
+    value: function connectWS() {
+      var _this = this;
+
+      this.client_id = null;
+      window.t.app.state.my_client_id = null;
+
+      try {
+        this.ws = new WebSocket("ws://".concat(WSHOSTNAME, ":").concat(PORT));
+        this.ws.addEventListener("open", function () {
+          console.log("We are connected"); //this.ws.send("How are you?");
+        });
+        this.ws.addEventListener('error', function (event) {
+          console.log('error', event);
+        });
+        this.ws.addEventListener('close', function (event) {
+          console.log('ws connection closed. server restarted?'); // reconnect...
+
+          setTimeout(function () {
+            _this.connectWS();
+          }, 1000);
+        });
+        this.ws.addEventListener('message', this.onServerMessage);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, {
+    key: "onServerMessage",
+    value: function onServerMessage(event) {
+      var _decoded, _decoded2, _window$t$app$state$h, _window, _window$t, _window$t$app, _window$t$app$state, _decoded3, _decoded4;
+
+      //console.log(event);
+      var decoded = null;
+
+      try {
+        decoded = JSON.parse(event.data);
+      } catch (e) {
+        console.error(e, event.data);
+      }
+
+      if (((_decoded = decoded) === null || _decoded === void 0 ? void 0 : _decoded.message) !== 'PING') {
+        console.log('socket message:', decoded);
+      }
+
+      switch ((_decoded2 = decoded) === null || _decoded2 === void 0 ? void 0 : _decoded2.message) {
+        case 'PING':
+          // document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
+          //todo: remove manual linkage:
+          //window.t.app.state.client_ids = decoded.client_ids;
+          window.t.app.state.hovered_prev = ((_window$t$app$state$h = (_window = window) === null || _window === void 0 ? void 0 : (_window$t = _window.t) === null || _window$t === void 0 ? void 0 : (_window$t$app = _window$t.app) === null || _window$t$app === void 0 ? void 0 : (_window$t$app$state = _window$t$app.state) === null || _window$t$app$state === void 0 ? void 0 : _window$t$app$state.hovered) !== null && _window$t$app$state$h !== void 0 ? _window$t$app$state$h : []).slice();
+          window.t.app.state = _objectSpread(_objectSpread({}, window.t.app.state), (_decoded3 = decoded) === null || _decoded3 === void 0 ? void 0 : _decoded3.state);
+          break;
+
+        case 'NEW_CLIENT_CONNECTED':
+          // could write to t.state, but
+          // ping will update us every second of who's connected
+          // could show a nice alert that someone joined, tho
+          // but that could also be a reaction to a watcher on state.client_ids
+          // so, maybe we don't need this event yet
+          break;
+
+        case 'CLIENT_LEFT':
+          // same as above, client observation can happen via ping's client list
+          // todo: pause game? ask if room host wants to end the round, or end the game, or end the room
+          break;
+
+        case 'WELCOME':
+          this.client_id = decoded.your_client_id;
+          window.t.app.state.my_client_id = this.client_id;
+          window.t.app.state.player_type = decoded.player_or_spectator;
+          console.log('server says my id is', this.client_id, decoded.your_client_id); // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
+
+          break;
+
+        case 'GAME_STATE_UPDATE':
+          window.t.app.state = _objectSpread(_objectSpread({}, window.t.app.state), (_decoded4 = decoded) === null || _decoded4 === void 0 ? void 0 : _decoded4.state);
+          break;
+        // case 'ROOM_CREATE_SUCCESS':
+        //     console.log('room created',decoded);
+        //     window.t.app.state.room_id = decoded.room_id;
+        //     window.t.app.state.game_id = decoded.game_id;
+        //     window.t.app.state.round_id = decoded.round_id;
+        //     break;
+
+        case 'ROOM_JOIN_SUCCESS':
+          window.t.app.state.room_id = decoded.room_id;
+          break;
+
+        case 'ROOM_EXIT_SUCCESS':
+          window.t.app.state.room_id = null;
+          break;
+      }
+    }
+  }, {
     key: "send",
     value: function send(data) {
-      console.log('sending', data);
-      data.client_id = this.client_id;
+      data.client_id = t.app.state.my_client_id;
+      console.log('sending', data, this.client_id, t.app.state.my_client_id);
       this.ws.send(JSON.stringify(data));
     }
   }]);
@@ -21241,12 +21298,12 @@ var Tabletop = /*#__PURE__*/function () {
     key: "startGame",
     value: function startGame() {
       this.game.startRound();
-    }
-  }, {
-    key: "addMatchToHand",
-    value: function addMatchToHand() {
-      var _t$app$state$client_h, _t$app$state, _t$app$state$client_h2;
+    } // animate the cards within the hand to maintain spacing
+    // also handles animating cards from playfield to hand after a match is validated by the server
 
+  }, {
+    key: "updateCardsInHand",
+    value: function updateCardsInHand() {
       //camera.attach(t.cards[i_card_a].mesh)
       //camera.attach(t.cards[i_card_b].mesh)
       //   cards[i_card_a].position.set(0,-.5,-1)
@@ -21255,45 +21312,97 @@ var Tabletop = /*#__PURE__*/function () {
       //   cards[i_card_b].scale.set(.1,.1,.1)
       //   cards[i_card_b].position.set(-.1,-.5,-1)
       //   cards[i_card_b].rotation.set(1,Math.PI,Math.PI,'XYZ')
-      var current_player = t.game.current_player;
-      var hand = (_t$app$state$client_h = (_t$app$state = t.app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$client_h2 = _t$app$state.client_hands) === null || _t$app$state$client_h2 === void 0 ? void 0 : _t$app$state$client_h2[t.app.state.my_client_id]) !== null && _t$app$state$client_h !== void 0 ? _t$app$state$client_h : [];
+      //const current_player = t.game.current_player;
+      for (var player_id in t.app.state.client_ids) {
+        var _t$app$state$client_h, _t$app$state, _t$app$state$client_h2;
+
+        var player = t.players[player_id];
+        var hand = (_t$app$state$client_h = (_t$app$state = t.app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$client_h2 = _t$app$state.client_hands) === null || _t$app$state$client_h2 === void 0 ? void 0 : _t$app$state$client_h2[player_id]) !== null && _t$app$state$client_h !== void 0 ? _t$app$state$client_h : [];
+        var matches_count = hand.length / 2;
+        console.log('matches_count?', matches_count);
+
+        for (var _a = 0; (_ref = _a < (hand === null || hand === void 0 ? void 0 : hand.length)) !== null && _ref !== void 0 ? _ref : 0; _a++) {
+          var _ref;
+
+          var i_card = hand[_a];
+          var card = t.cards[i_card];
+          camera.attach(card.mesh); // todo: only run this once (if parent isnt already camera)
+
+          var _updateTo = player_id === t.app.state.my_client_id ? getUpdateToPlayersHand(player_id) : getUpdateToOpponentsHand(player_id);
+
+          console.log(_updateTo); // TODO: cancel any existing tween
+          // TODO: prevent tweens from piling up
+
+          if (!card.tweenedToHand) {
+            card.tweenedToHand = true;
+          }
+
+          card.current_tween = card.tweenTo(_updateTo, {
+            duration: 300
+          });
+        }
+      } // TODO: animate cards that are in OTHER players hand...
+
+    }
+  }, {
+    key: "getUpdateToPlayersHand",
+    value: function getUpdateToPlayersHand(player_id) {
+      var _t$app$state$client_h3, _t$app$state2, _t$app$state2$client_;
+
+      // let player = t.players[player_id];
+      var hand = (_t$app$state$client_h3 = (_t$app$state2 = t.app.state) === null || _t$app$state2 === void 0 ? void 0 : (_t$app$state2$client_ = _t$app$state2.client_hands) === null || _t$app$state2$client_ === void 0 ? void 0 : _t$app$state2$client_[player_id]) !== null && _t$app$state$client_h3 !== void 0 ? _t$app$state$client_h3 : [];
       var matches_count = hand.length / 2;
-      console.log('hand?', hand);
+      var even = a % 2 == 0;
+      var lerp_max = .07 * matches_count;
+      var updateto = {};
+      updateTo.pos_x = lerp(0, // 0 basis
+      lerp_max, // lerp max width
+      1 / matches_count * (even ? a + 1 : a + 2)) // % of lerp
+      - (even ? .1 : .105) // slight offset for "paired" card
+      - a * .01 // padding between cards
+      - lerp_max // center
+      + .05;
+      updateTo.pos_y = -0.5 + 0.001 * a;
+      updateTo.pos_z = -1.0 + 0.001 * a;
+      updateTo.rot_x = 0.5; //1;
 
-      for (var a = 0; (_ref = a < (hand === null || hand === void 0 ? void 0 : hand.length)) !== null && _ref !== void 0 ? _ref : 0; a++) {
-        var _ref;
+      updateTo.rot_y = Math.PI;
+      updateTo.rot_z = Math.PI;
+      updateTo.scale_x = .09 * .65;
+      updateTo.scale_y = .09;
+      updateTo.scale_z = .09; //
 
-        var i_card = hand[a];
-        var card = t.cards[i_card];
-        camera.attach(card.mesh); // todo: only run this once
+      return updateTo;
+    }
+  }, {
+    key: "getUpdateToOpponentsHand",
+    value: function getUpdateToOpponentsHand(player_id) {
+      var _t$app$state$client_h4, _t$app$state3, _t$app$state3$client_;
 
-        var even = a % 2 == 0;
-        var lerp_max = .07 * matches_count;
-        var updateTo = {};
-        updateTo.pos_x = lerp(0, // 0 basis
-        lerp_max, // lerp max width
-        1 / matches_count * (even ? a + 1 : a + 2)) // % of lerp
-        - (even ? .1 : .105) // slight offset for "paired" card
-        - a * .01 // padding between cards
-        - lerp_max // center
-        + .05;
-        updateTo.pos_y = -0.5 + 0.001 * a;
-        updateTo.pos_z = -1.0 + 0.001 * a;
-        updateTo.rot_x = 0.5; //1;
+      // let player = t.players[player_id];
+      var hand = (_t$app$state$client_h4 = (_t$app$state3 = t.app.state) === null || _t$app$state3 === void 0 ? void 0 : (_t$app$state3$client_ = _t$app$state3.client_hands) === null || _t$app$state3$client_ === void 0 ? void 0 : _t$app$state3$client_[player_id]) !== null && _t$app$state$client_h4 !== void 0 ? _t$app$state$client_h4 : [];
+      var matches_count = hand.length / 2;
+      var even = a % 2 == 0;
+      var lerp_max = .07 * matches_count;
+      var updateTo = {};
+      updateTo.pos_x = lerp(0, // 0 basis
+      lerp_max, // lerp max width
+      1 / matches_count * (even ? a + 1 : a + 2)) // % of lerp
+      + (even ? .1 : .105) // slight offset for "paired" card
+      + a * .01 // padding between cards
+      + lerp_max // center
+      - .05;
+      updateTo.pos_y = 0.5 + 0.001 * a;
+      updateTo.pos_z = 1.0 + 0.001 * a;
+      updateTo.rot_x = 0.5; //1;
 
-        updateTo.rot_y = 1; //Math.PI;
+      updateTo.rot_y = Math.PI;
+      updateTo.rot_z = -Math.PI;
+      updateTo.scale_x = .09 * .65;
+      updateTo.scale_y = .09;
+      updateTo.scale_z = .09; //
 
-        updateTo.rot_z = 1; //Math.PI;
-
-        updateTo.scale_x = .09 * .65;
-        updateTo.scale_y = .09;
-        updateTo.scale_z = .09; //
-        // console.log(updateTo);
-
-        card.tweenTo(updateTo, {
-          duration: 300
-        });
-      }
+      return updateTo;
     }
   }, {
     key: "deck",
@@ -21311,10 +21420,12 @@ var Tabletop = /*#__PURE__*/function () {
 }();
 
 var Card = /*#__PURE__*/function () {
-  function Card(index) {
+  function Card(index, type) {
     _classCallCheck(this, Card);
 
-    this.index = index;
+    this.index = index; // http://'+HOST+':'+PORT+'
+
+    this.front_image = './public/images/decks/fruits/' + type + '.JPG';
     this.deck_order_index = index; // what order is this card in the deck's available cards array? (saves repeat indexOf calls)
 
     this.setupTexturesAndMaterials();
@@ -21360,7 +21471,8 @@ var Card = /*#__PURE__*/function () {
     key: "setupTexturesAndMaterials",
     value: function setupTexturesAndMaterials() {
       // The Card
-      this.faceUpTexture = txtLoader.load('https://images-na.ssl-images-amazon.com/images/I/61YXNhfzlzL._SL1012_.jpg');
+      // 'https://images-na.ssl-images-amazon.com/images/I/61YXNhfzlzL._SL1012_.jpg'
+      this.faceUpTexture = txtLoader.load(this.front_image);
       this.faceDownTexture = txtLoader.load('https://vignette3.wikia.nocookie.net/yugioh/images/9/94/Back-Anime-2.png/revision/latest?cb=20110624090942'); // faceUpTexture.flipY = false;
 
       this.darkMaterial = new THREE.MeshPhongMaterial({
@@ -21455,11 +21567,17 @@ var Deck = /*#__PURE__*/function () {
     // but for now it's just for checking the previous order versus the current order
 
     this.available_cards_history = [];
+    this.card_types = ['APPLE', 'ORANGE', 'LEMON', 'PEAR', 'BLUEBERRY', 'GRAPES', 'RASPBERRY', 'STRAWBERRY'];
 
     for (var i = 0; (_ref2 = i < (options === null || options === void 0 ? void 0 : options.card_count)) !== null && _ref2 !== void 0 ? _ref2 : 52; i++) {
       var _ref2;
 
-      this.cards.push(new Card(i));
+      this.cards.push(new Card(i, this.card_types[i % 2 === 0 ? i / 2 : (i - 1) / 2]));
+      console.log({
+        i: i,
+        image: this.cards[i].image,
+        pair_id: this.cards[i].pair_id
+      });
       this.available_cards.push(i);
     }
   } // todo allow shuffling indefinitely until player clicks to stop
@@ -21875,15 +21993,24 @@ var Game_PVPMemory = /*#__PURE__*/function () {
 
       __card.face_up = face_up;
       console.log('flipping', card_id, face_up); // animate
+      // TODO .tweenedToFlipUp // tweenedToFlipDown <bool>
 
-      getFlipTween(_card, face_up ? 'faceup' : 'facedown').start();
+      if (face_up && !__card.tweenedToFaceUp) {
+        __card.tweenedToFaceUp = true;
+        __card.tweenedToFaceDown = false;
+        getFlipTween(_card, 'faceup').start();
+      } else if (!face_up && !__card.tweenedToFaceUp) {
+        __card.tweenedToFaceUp = false;
+        __card.tweenedToFaceDown = true;
+        getFlipTween(_card, 'facedown').start();
+      }
     }
   }, {
     key: "current_round",
     get: function get() {
       var _this$rounds;
 
-      console.log('current round?', this.rounds, this.round);
+      // console.log('current round?',this.rounds,this.round);
       return this === null || this === void 0 ? void 0 : (_this$rounds = this.rounds) === null || _this$rounds === void 0 ? void 0 : _this$rounds[this === null || this === void 0 ? void 0 : this.round];
     }
   }, {
@@ -21891,7 +22018,7 @@ var Game_PVPMemory = /*#__PURE__*/function () {
     get: function get() {
       var _this$current_round;
 
-      console.log('current round?', this.current_round);
+      // console.log('current round?',this.current_round);
       return this === null || this === void 0 ? void 0 : (_this$current_round = this.current_round) === null || _this$current_round === void 0 ? void 0 : _this$current_round.current_player;
     } // todo move this server side
 
@@ -21973,7 +22100,7 @@ function init() {
       components: {
         Debugger: _components_debugger_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
       },
-      template: '<div><debugger :state="state"></debugger></div>',
+      template: '<div><debugger :state="state" ref="debugger"></debugger></div>',
       data: function data() {
         return {
           state: {
@@ -21981,18 +22108,20 @@ function init() {
           }
         };
       }
-    }).mount('#vue-layer');
-  }); // set it up
+    }).mount('#vue-layer'); // set it up
 
-  t.setupGame(); // start the first round
-  // !!! wait for server to kick this off...
-  //t.startGame();
-  // kick off render loop
+    t.server.connectWS();
+    t.setupGame(); // start the first round
+    // !!! wait for server to kick this off...
+    //t.startGame();
+  }); // kick off render loop
 
   render();
 }
 
 function render() {
+  var _t, _t$app, _t$app$state4;
+
   if (resize(renderer)) {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
@@ -22003,6 +22132,29 @@ function render() {
   // }
 
   TWEEN.update(); // update all tweens :)
+  // update "hovered" status of cards
+  // todo only run this loop if t.app.state.hovered has changed since last tick
+
+  if ((_t = t) !== null && _t !== void 0 && (_t$app = _t.app) !== null && _t$app !== void 0 && (_t$app$state4 = _t$app.state) !== null && _t$app$state4 !== void 0 && _t$app$state4.hovered) {
+    if (JSON.stringify(t.app.state.hovered) !== JSON.stringify(t.app.state.hovered_prev)) {
+      // console.log('hovered array changed',t.app.state.hovered,t.app.state.hovered_prev);
+      for (var cardi in t.app.state.cards) {
+        cardi = parseInt(cardi);
+        var card = t.cards[cardi]; // console.log(cardi,t.app.state.hovered.indexOf(cardi),card.hovered)
+
+        if (t.app.state.hovered.indexOf(cardi) > -1) {
+          // console.log('setting material to color light')
+          card.hovered = true;
+          card.mesh.material[2].color.set(colorLight);
+          card.mesh.material[3].color.set(colorLight);
+        } else {
+          card.hovered = false;
+          card.mesh.material[2].color.set(colorDark);
+          card.mesh.material[3].color.set(colorDark); // console.log('setting material to color dark')
+        }
+      }
+    }
+  }
 
   renderer.render(scene, camera);
   requestAnimationFrame(render);
@@ -22191,6 +22343,16 @@ function initGround() {
 
 
 function onMouseMove(evt) {
+  var _t2, _t2$app, _t2$app$$refs, _t2$app$$refs$debugge;
+
+  // TODO: allow user to hover over matches in their hand,
+  // but NOT the playfield cards, if it's not currently their turn
+  // todo: move up to app-level
+  // console.log('is it my turn?',t?.app?.$refs?.debugger?.its_my_turn)
+  if (!((_t2 = t) !== null && _t2 !== void 0 && (_t2$app = _t2.app) !== null && _t2$app !== void 0 && (_t2$app$$refs = _t2$app.$refs) !== null && _t2$app$$refs !== void 0 && (_t2$app$$refs$debugge = _t2$app$$refs["debugger"]) !== null && _t2$app$$refs$debugge !== void 0 && _t2$app$$refs$debugge.its_my_turn)) {
+    return;
+  }
+
   var cards = t.cards;
   var keep_testing = true;
 
@@ -22199,11 +22361,21 @@ function onMouseMove(evt) {
 
     if (keep_testing && raycast(card) == true) {
       keep_testing = false;
-      card.material[2].color.set(colorLight);
-      card.material[3].color.set(colorLight);
+
+      if (!cards[i].hovered) {
+        cards[i].hovered = true;
+        t.app.state.hovered = [i];
+        t.server.send({
+          type: 'HIGHLIGHT',
+          card_id: i //cards[i].id,
+
+        });
+      } // card.material[2].color.set( colorLight );
+      // card.material[3].color.set( colorLight );
+
     } else {
-      card.material[2].color.set(colorDark);
-      card.material[3].color.set(colorDark);
+      cards[i].hovered = false; // card.material[2].color.set( colorDark );
+      // card.material[3].color.set( colorDark );
     }
   }
 }
@@ -22260,7 +22432,7 @@ function onMouseClick(evt) {
   // })
 
   console.log('is it my turn?', {
-    my_id: t.app.state.my_Fclient_id,
+    my_id: t.app.state.my_client_id,
     player_turn: t.app.state.player_turn
   });
 
@@ -22293,6 +22465,8 @@ function onMouseClick(evt) {
       || t.game.current_player.cards.indexOf(i) > -1) {
         return;
       }
+
+      console.log('second turn?', _card.faceUp);
 
       if (_card.faceUp) {
         // card faceup
@@ -22338,7 +22512,7 @@ function lerp(v0, v1, t) {
 //   const cardB = t.cards[t.game.flipped[1]];
 //   t.game.layout.zones[cardA.zone].card = null;
 //   t.game.layout.zones[cardB.zone].card = null;
-//   addMatchToHand(t.game.flipped[0],t.game.flipped[1])
+//   updateCardsInHand(t.game.flipped[0],t.game.flipped[1])
 //   t.game.flipped = [];
 //   console.warn('moving flipped cards to players hand',
 //   t.game.current_player.matches,
@@ -22349,8 +22523,8 @@ function lerp(v0, v1, t) {
 
 function resetCards() {
   t.game.reset_timer = setTimeout(function () {
-    for (var a = 0; a < t.game.flipped.length; a++) {
-      var fci = t.game.flipped[a];
+    for (var _a2 = 0; _a2 < t.game.flipped.length; _a2++) {
+      var fci = t.game.flipped[_a2];
       var fc = t.cards[fci].mesh; // fc.actions.flipUpside.stop();
 
       getFlipTween(fc, 'facedown').start(); //  fc.actions.flipDownside.start();

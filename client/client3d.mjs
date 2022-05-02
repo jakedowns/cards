@@ -1,8 +1,23 @@
 // This example uses THREE.CatmullRomCurve3 to create a path for a custom Keyframe Track position animation.
 // AnimationClip creation function on line 136
 
+if (typeof module !== 'undefined' && module?.hot) {
+  module?.hot?.accept('./client3d.mjs', function () {
+    // Do something with the updated library module...
+    console.log('on hot update 1')
+  });
+}
+
+// or
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept('./client3d.mjs', function () {
+    // Do something with the updated library modue…
+    console.log('on hot update 2')
+  });
+}
+
 import {createApp} from 'vue'
-import Debugger from './components/debugger.vue';
+import App from './components/app.vue';
 // Uncomment line 173 to see the curve helper
 console.clear();
 // Global Variables
@@ -14,7 +29,7 @@ var controls, raycaster, mouse, txtLoader, clock, delta = 0;
 // if the user was dragging the camera
 var mouseDownCoord = {x:0,y:0}
 var mouseClickCoord = {x:0,y:0}
-var ground;
+// var ground;
 
 async function delay(t){
     return new Promise(resolve => setTimeout(resolve, t));
@@ -25,7 +40,8 @@ const colorLight = new THREE.Color( 0xffffff );
 const animationDuration = 0.5; // seconds
 const reset_delay = 1000;
 
-// const HOST = HOSTNAME;
+const HOST = HOSTNAME;
+const WEB_PORT = HTTP_PORT;
 const PORT = WS_PORT;
 const WSHOSTNAME = WS_HOSTNAME;
 console.log('hostname?port?',[
@@ -36,106 +52,136 @@ console.log('hostname?port?',[
 
 class SocketConnection{
     constructor(){
-        this.client_id = null;
-        try{
-            this.ws = new WebSocket(`ws://${WSHOSTNAME}:${PORT}`);
+        //this.connectWS();
+    }
+    connectWS(){
+      this.client_id = null;
+      window.t.app.state.my_client_id = null;
+      try{
+          this.ws = new WebSocket(`ws://${WSHOSTNAME}:${PORT}`);
 
-            this.ws.addEventListener("open", () =>{
-                console.log("We are connected");
-                //this.ws.send("How are you?");
-            });
-            this.ws.addEventListener('error', event => {
-                console.log('error',event);
-            })
+          this.ws.addEventListener("open", () =>{
+              console.log("We are connected");
+              //this.ws.send("How are you?");
+          });
+          this.ws.addEventListener('error', event => {
+              console.log('error',event);
+          })
+          this.ws.addEventListener('close', event => {
+            console.log('ws connection closed. server restarted?')
+            // reconnect...
+            setTimeout(()=>{
+              this.connectWS();
+            },1000);
+          })
+          this.ws.addEventListener('message',  this.onServerMessage);
+      }catch(e){
+          console.error(e);
+      }
+    }
+    onServerMessage(event){
+      //console.log(event);
+      let decoded = null;
+      try{
+          decoded = JSON.parse(event.data);
+      }catch(e){
+          console.error(e,event.data)
+      }
+      if(decoded?.message !== 'PING'){
+          console.log('socket message:',decoded);
+          t.app.$refs.app.messages.push(decoded);
+      }
+      switch(decoded?.message){
 
-            this.client_ids = [];
+          case 'PING':
+              // document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
+              //todo: remove manual linkage:
+              //window.t.app.state.client_ids = decoded.client_ids;
+              window.t.app.state.hovered_prev = (window?.t?.app?.state?.hovered ?? []).slice();
+              window.t.app.state = {
+                ...window.t.app.state,
+                ...decoded?.state
+              }
+              break;
 
-            this.ws.addEventListener('message',  event => {
-                //console.log(event);
-                let decoded = null;
-                try{
-                    decoded = JSON.parse(event.data);
-                }catch(e){
-                    console.error(e,event.data)
-                }
-                if(decoded?.message !== 'PING'){
-                    console.log('socket message:',decoded);
-                }
-                switch(decoded?.message){
+          case 'NEW_CLIENT_CONNECTED':
+              // could write to t.state, but
+              // ping will update us every second of who's connected
+              // could show a nice alert that someone joined, tho
+              // but that could also be a reaction to a watcher on state.client_ids
+              // so, maybe we don't need this event yet
+              break;
 
-                    case 'PING':
-                        // document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
-                        //todo: remove manual linkage:
-                        //window.t.app.state.client_ids = decoded.client_ids;
-                        window.t.app.state = {
-                          ...window.t.app.state,
-                          ...decoded?.state
-                        }
-                        break;
+          case 'CLIENT_LEFT':
+              // same as above, client observation can happen via ping's client list
+              // todo: pause game? ask if room host wants to end the round, or end the game, or end the room
+              break;
 
-                    case 'NEW_CLIENT_CONNECTED':
-                        // could write to t.state, but
-                        // ping will update us every second of who's connected
-                        // could show a nice alert that someone joined, tho
-                        // but that could also be a reaction to a watcher on state.client_ids
-                        // so, maybe we don't need this event yet
-                        break;
+          case 'WELCOME':
+              // delete old player if we had a previous connection that got reset
+              // TODO: player accounts, IP addresses, cookies or something to persist client_ids longer
+              if(t.players?.[this.client_id]){
+                t.players[this.client_id].destroy()
+                delete t.players[this.client_id];
+              }
+              this.client_id = decoded.your_client_id;
+              window.t.app.state.my_client_id = this.client_id;
+              window.t.app.state.player_type = decoded.player_or_spectator;
+              console.log(
+                'server says my id is',
+                this.client_id,
+                decoded.your_client_id
+              );
+              // todo: separate spectators
+              t.players[decoded.your_client_id] = new Player(decoded.your_client_id);
+              console.log('t.players now',t.players);
+              // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
+              break;
 
-                    case 'CLIENT_LEFT':
-                        // same as above, client observation can happen via ping's client list
-                        // todo: pause game? ask if room host wants to end the round, or end the game, or end the room
-                        break;
+          case 'GAME_STATE_UPDATE':
+              window.t.app.state = {
+                  ...window.t.app.state,
+                  ...decoded?.state
+              }
+              break;
 
-                    case 'WELCOME':
-                        this.client_id = decoded.your_client_id;
-                        window.t.app.state.my_client_id = this.client_id;
-                        //console.log('server says my id is',this.client_id);
-                        // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
-                        break;
+          // case 'ROOM_CREATE_SUCCESS':
+          //     console.log('room created',decoded);
+          //     window.t.app.state.room_id = decoded.room_id;
+          //     window.t.app.state.game_id = decoded.game_id;
+          //     window.t.app.state.round_id = decoded.round_id;
+          //     break;
 
-                    case 'GAME_STATE_UPDATE':
-                        window.t.app.state = {
-                            ...window.t.app.state,
-                            ...decoded?.state
-                        }
-                        break;
+          case 'ROOM_JOIN_SUCCESS':
+              window.t.app.state.room_id = decoded.room_id;
+              break;
 
-                    // case 'ROOM_CREATE_SUCCESS':
-                    //     console.log('room created',decoded);
-                    //     window.t.app.state.room_id = decoded.room_id;
-                    //     window.t.app.state.game_id = decoded.game_id;
-                    //     window.t.app.state.round_id = decoded.round_id;
-                    //     break;
-
-                    case 'ROOM_JOIN_SUCCESS':
-                        window.t.app.state.room_id = decoded.room_id;
-                        break;
-
-                    case 'ROOM_EXIT_SUCCESS':
-                        window.t.app.state.room_id = null;
-                        break;
-                }
-            });
-        }catch(e){
-            console.error(e);
-        }
+          case 'ROOM_EXIT_SUCCESS':
+              window.t.app.state.room_id = null;
+              break;
+      }
     }
     send(data){
-      console.log('sending',data);
-      data.client_id = this.client_id;
+      data.client_id = t.app.state.my_client_id;
+      console.log('sending',data,this.client_id,t.app.state.my_client_id);
       this.ws.send(JSON.stringify(data));
     }
 }
 
-class Player{
+class Player {
     constructor(name){
         this.name = name;
         // todo support multiple hands
         this.matches = [];
         this.cards = [];
+        this.pointer = new PlayerPointer(name);
+    }
+    destroy(){
+        this.pointer.destroy();
     }
 }
 
+// Playfield?
 class Tabletop{
     constructor(){
         // table tops have uuids which can be shared / spectated / joined
@@ -143,22 +189,23 @@ class Tabletop{
 
         this.server = new SocketConnection();
 
-        // Lights
-        initLights()
-
-        // Table (groundplane)
-        initGround();
+        this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
         this.deckgroup = new THREE.Group();
         scene.add(this.deckgroup);
 
-        this.players = [];
-        this.players.push(new Player("Player One"));
-
-
+        // playfield cards (intersection group)
+        this.zonegroup = new THREE.Group();
+        scene.add(this.zonegroup);
     }
 
     setupGame(){
+        // Lights
+        initLights()
+
+        // Table Top (groundplane)
+        initTableMesh();
+
         this.game = new Game_PVPMemory();
     }
 
@@ -166,7 +213,9 @@ class Tabletop{
         this.game.startRound();
     }
 
-    addMatchToHand(){
+    // animate the cards within the hand to maintain spacing
+    // also handles animating cards from playfield to hand after a match is validated by the server
+    updateCardsInHand(){
       //camera.attach(t.cards[i_card_a].mesh)
       //camera.attach(t.cards[i_card_b].mesh)
 
@@ -177,39 +226,114 @@ class Tabletop{
     //   cards[i_card_b].scale.set(.1,.1,.1)
     //   cards[i_card_b].position.set(-.1,-.5,-1)
     //   cards[i_card_b].rotation.set(1,Math.PI,Math.PI,'XYZ')
-      const current_player = t.game.current_player;
-      const hand = t.app.state?.client_hands?.[t.app.state.my_client_id] ?? [];
-      let matches_count = hand.length/2;
-      console.log('hand?',hand);
-      for(let a = 0; a<hand?.length ?? 0; a++){
-        let i_card = hand[a];
-        let card = t.cards[i_card];
-        camera.attach(card.mesh); // todo: only run this once
-        let even = a % 2 == 0;
-        let lerp_max = .07 * matches_count
+      //const current_player = t.game.current_player;
+      for(let player_id in t.app.state.client_ids){
+        // let player = t.players[player_id];
+        const hand = t.app.state?.client_hands?.[player_id] ?? [];
+        let matches_count = hand.length/2;
+        // console.log('matches_count?',matches_count);
+        for(let a = 0; a<hand?.length ?? 0; a++){
+          let i_card = hand[a];
+          let card = t.cards[i_card];
+          camera.attach(card.mesh); // todo: only run this once (if parent isnt already camera)
 
-        let updateTo = {}
-        updateTo.pos_x = lerp(
-          0, // 0 basis
-          lerp_max, // lerp max width
-          (1/matches_count)*(even?a+1:a+2)) // % of lerp
-          -(even?.1:.105) // slight offset for "paired" card
-          -(a*.01) // padding between cards
-          -(lerp_max) // center
-          +(.05)
-        updateTo.pos_y = -0.5 + (0.001 * a);
-        updateTo.pos_z = -1.0 + (0.001 * a);
 
-        updateTo.rot_x = 0.5;//1;
-        updateTo.rot_y = 1;//Math.PI;
-        updateTo.rot_z = 1;//Math.PI;
-
-        updateTo.scale_x = .09 * .65
-        updateTo.scale_y = .09
-        updateTo.scale_z = .09 //
-        // console.log(updateTo);
-        card.tweenTo(updateTo,{duration:300})
+          let updateTo = player_id === t.app.state.my_client_id
+            ? getUpdateToPlayersHand(player_id)
+            : getUpdateToOpponentsHand(player_id);
+          console.log(updateTo);
+          // TODO: cancel any existing tween
+          // TODO: prevent tweens from piling up
+          if(!card.tweenedToHand){
+            card.tweenedToHand = true;
+          }
+          card.current_tween = card.tweenTo(updateTo,{duration:300})
+        }
       }
+
+      // TODO: animate cards that are in OTHER players hand...
+    }
+
+    updatePlayerCursors(){
+      for(let i in t.app.state.client_ids){
+        let player_id = t.app.state.client_ids[i];
+        if(!t.players?.[player_id]){
+          t.players[player_id] = new Player(player_id);
+        }
+      }
+      for(let b in t.players){
+        if(t.app?.state?.client_ids?.indexOf(b) === -1){
+          t.players[b].destroy();
+        }
+      }
+      for(let i in t.app.state.player_cursors){
+        let player_cursor_position = t.app.state.player_cursors[i];
+        // console.log(i===t.app.,player_cursor_position);
+        if(i !== t.app.state.my_client_id){
+          // console.log('update opponent cursor');
+          // only update other players, let mousemove drive local players cursor so it doesn't fight with server-streaming values
+          t?.players?.[i]?.pointer?.tweenTo({
+            pos_x: player_cursor_position.x,
+            pos_y: player_cursor_position.y,
+            pos_z: player_cursor_position.z,
+          },{duration:'distance'});
+        }
+      }
+    }
+
+    getUpdateToPlayersHand(player_id){
+      const hand = t.app.state?.client_hands?.[player_id] ?? [];
+      let matches_count = hand.length/2;
+      let even = a % 2 == 0;
+      let lerp_max = .07 * matches_count
+      let updateTo = {}
+      updateTo.pos_x = lerp(
+        0, // 0 basis
+        lerp_max, // lerp max width
+        (1/matches_count)*(even?a+1:a+2)) // % of lerp
+        -(even?.1:.105) // slight offset for "paired" card
+        -(a*.01) // padding between cards
+        -(lerp_max) // center
+        +(.05)
+      updateTo.pos_y = -0.5 + (0.001 * a);
+      updateTo.pos_z = -1.0 + (0.001 * a);
+
+      updateTo.rot_x = 0.5;//1;
+      updateTo.rot_y = Math.PI;
+      updateTo.rot_z = Math.PI;
+
+      updateTo.scale_x = .09 * .65
+      updateTo.scale_y = .09
+      updateTo.scale_z = .09 //
+      return updateTo;
+    }
+
+    getUpdateToOpponentsHand(player_id){
+      // let player = t.players[player_id];
+      const hand = t.app.state?.client_hands?.[player_id] ?? [];
+      let matches_count = hand.length/2;
+      let even = a % 2 == 0;
+      let lerp_max = .07 * matches_count
+      let updateTo = {}
+      updateTo.pos_x = lerp(
+        0, // 0 basis
+        lerp_max, // lerp max width
+        (1/matches_count)*(even?a+1:a+2)) // % of lerp
+        +(even?.1:.105) // slight offset for "paired" card
+        +(a*.01) // padding between cards
+        +(lerp_max) // center
+        -(.05)
+      updateTo.pos_y = 0.5 + (0.001 * a);
+      updateTo.pos_z = 1.0 + (0.001 * a);
+
+      updateTo.rot_x = 0.5;//1;
+      updateTo.rot_y = Math.PI;
+      updateTo.rot_z = -Math.PI;
+
+      updateTo.scale_x = .09 * .65
+      updateTo.scale_y = .09
+      updateTo.scale_z = .09 //
+      return updateTo;
     }
 
     get deck(){
@@ -220,9 +344,98 @@ class Tabletop{
     }
 }
 
-class Card{
-    constructor(index){
+class PlayerPointer{
+  constructor(player_id){
+    this.player_id = player_id;
+    this.setupTexturesAndMaterials();
+    this.setupMesh();
+    console.warn('new player pointer');
+    scene.add(this.mesh);
+
+    this.updateInterval = setInterval(()=>{
+      this.mesh.rotation.y -= .01;
+      // todo: call this only on host change
+      this.mesh.material.color.setHex(
+        this.player_id === t.app.state?.game_host ? 0x0000ff : 0xff0000
+      )
+    },16)
+  }
+  async tweenTo(destination,{duration=1000}){
+    this.destination = destination;
+    if(this.tweening){
+      // console.log('already tweening. should we cancel or finish or block?');
+        return false;
+    }else{
+      // console.log('tweening cursor...');
+    }
+    this.tweening = true;
+
+    // TODO: add ability to include/exclude properties from tween to save overhead
+
+    let _mesh = this.mesh;
+    // let tweenMid = null;
+    // if(options && options.arcTo){
+    //     // optional midpoint
+    //     tweenMid = getMeshTween(_mesh,options.arcTo,300/2);
+    // }
+
+    if(duration === 'distance'){
+      // magintude
+      let magnitude = this.mesh.position.distanceTo(
+        new THREE.Vector3(
+          destination.pos_x,
+          destination.pos_y,
+          destination.pos_z
+        )
+      );
+      console.log('magnitude',magnitude);
+      duration = lerp(100,500,(magnitude/10));
+      console.log('duration',duration)
+    }
+
+    let tweenEnd = getMeshTween(_mesh,destination,{
+        duration,
+        // easing:TWEEN.Easing.Linear.None, //Quadratic.Out,
+        easing:TWEEN.Easing.Quadratic.InOut, //Quadratic.Out,
+        // todo accept easing option
+    });
+
+    // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
+    this.tween = tweenEnd.start();
+
+    await delay(duration);
+
+    // run the tween
+    this.tweening = false;
+  }
+  setupTexturesAndMaterials(){
+
+  }
+  setupMesh(){
+    this.mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(.5,8,8),
+      new THREE.MeshBasicMaterial({
+        color: this.player_id === t.app.state?.game_host ? 0x0000ff : 0xff0000,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.5
+      })
+    )
+    // this.mesh.rotation.z = Math.PI/2;
+  }
+
+  destroy(){
+    scene.remove(this.mesh);
+    this.mesh = null;
+    clearInterval(this.updateInterval);
+  }
+}
+
+class Card {
+    constructor(index,type){
         this.index = index;
+        // http://'+HOST+':'+PORT+'
+        this.front_image = './public/images/decks/fruits/'+type+'.JPG';
         this.deck_order_index = index; // what order is this card in the deck's available cards array? (saves repeat indexOf calls)
         this.setupTexturesAndMaterials();
         this.setupMesh();
@@ -230,6 +443,7 @@ class Card{
         // Animation
         this.face_up = false;
         this.mesh.faceUp = false;
+        this.mesh.userData.card_id = index;
         // this.mesh.mixer = new THREE.AnimationMixer( this.mesh );
         // var flipUpsideClip = createFlipUpsideClip(this.mesh,'faceup');
         // var flipDownsideClip = createFlipUpsideClip(this.mesh,'facedown');
@@ -241,6 +455,12 @@ class Card{
         //this.meshs.push(this.mesh);
         //scene.add( this.mesh );
         t.deckgroup.attach(this.mesh);
+
+        // console.log({
+        //   index,
+        //   image:this.front_image,
+        //   // pair_id:this.pair_id
+        // });
 
     }
 
@@ -271,7 +491,8 @@ class Card{
 
     setupTexturesAndMaterials(){
         // The Card
-        this.faceUpTexture = txtLoader.load('https://images-na.ssl-images-amazon.com/images/I/61YXNhfzlzL._SL1012_.jpg');
+        // 'https://images-na.ssl-images-amazon.com/images/I/61YXNhfzlzL._SL1012_.jpg'
+        this.faceUpTexture = txtLoader.load(this.front_image);
         this.faceDownTexture = txtLoader.load('https://vignette3.wikia.nocookie.net/yugioh/images/9/94/Back-Anime-2.png/revision/latest?cb=20110624090942');
         // faceUpTexture.flipY = false;
         this.darkMaterial = new THREE.MeshPhongMaterial({ color: 0x111111 });
@@ -293,10 +514,11 @@ class Card{
         // console.log('card move to point',destination,options);
         // this generates a tween between the current position and the destination
         this.destination = destination;
-        if(this.animating){
+        if(this.tweening){
+          console.log('already tweening. should we cancel or finish or block?');
             return false;
         }
-        this.animating = true;
+        this.tweening = true;
 
         // TODO: add ability to include/exclude properties from tween to save overhead
 
@@ -317,7 +539,7 @@ class Card{
 
 
         // run the tween
-        this.animating = false;
+        this.tweening = false;
     }
 }
 class Deck{
@@ -333,8 +555,19 @@ class Deck{
         // but for now it's just for checking the previous order versus the current order
         this.available_cards_history = [];
 
+        this.card_types = [
+          'APPLE',
+          'ORANGE',
+          'LEMON',
+          'PEAR',
+          'BLUEBERRY',
+          'GRAPES',
+          'RASPBERRY',
+          'STRAWBERRY',
+        ];
+
         for(var i=0; i<options?.card_count ?? 52; i++){
-            this.cards.push(new Card(i));
+            this.cards.push(new Card(i,this.card_types[i%2===0?i/2:(i-1)/2]));
             this.available_cards.push(i);
         }
     }
@@ -435,14 +668,15 @@ class Deck{
         //         // ...
         //     }
         // }
+        // todo: if game is already in progress, skip DEAL animation...
         for(let iA in t.app.state.available_cards){
           let iCard = t.app.state.available_cards[iA];
           let card = t.app.state.cards[iA];
           if(card.zone){
             let zone = layout.zones[card.zone];
             zone.card = iCard;
-            // remove card from deckgroup, attach it back to scene root
-            scene.attach(t.cards[iCard].mesh);
+            // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
+            t.zonegroup.attach(t.cards[iCard].mesh);
             t.cards[iCard].tweenTo(
                 {
                     pos_x: zone.origin.x,
@@ -474,17 +708,22 @@ class Move{
 class Round{
     constructor(){
         this.moves = [];
-        this.players = [];
+        //this.players = [];
         this.current_player_id = 0;
-        for(let i=0; i<t.players.length; i++){
-            // initialize player for round
-            this.players.push({
-                score: 0,
-                cards: [],
-                matches: []
-            })
-        }
-        console.warn('round players',this.players);
+        // for(let i=0; i<t.players.length; i++){
+        //     // initialize player for round
+        //     this.players.push({
+        //         score: 0,
+        //         cards: [],
+        //         matches: []
+        //     })
+        // }
+        // console.warn('round players');
+        // this.player_moves
+        // this.player_scores
+        // this.player_cards
+        // this.player_matches
+        // this.player_hands
     }
     async start(){
         console.log('round start','deck',window.t.deck);
@@ -575,7 +814,10 @@ class Game_PVPMemory{
         this.decks.default = new Deck({card_count});
         this.rounds = [];
         this.player_scores = [];
-        this.flipped = [];
+
+        // server holds this now
+        // this.flipped = [];
+
         this.reset_timer = null;
         this.reset_delay = 1000;
         this.layout = new Layout({
@@ -599,14 +841,23 @@ class Game_PVPMemory{
       __card.face_up = face_up;
       console.log('flipping',card_id,face_up)
       // animate
-      getFlipTween(_card,face_up?'faceup':'facedown').start();
+      // TODO .tweenedToFlipUp // tweenedToFlipDown <bool>
+      if(face_up && !__card.tweenedToFaceUp){
+        __card.tweenedToFaceUp = true;
+        __card.tweenedToFaceDown = false;
+        getFlipTween(_card,'faceup').start();
+      }else if(!face_up && !__card.tweenedToFaceUp){
+        __card.tweenedToFaceUp = false;
+        __card.tweenedToFaceDown = true;
+        getFlipTween(_card,'facedown').start();
+      }
     }
     get current_round(){
-      console.log('current round?',this.rounds,this.round);
+      // console.log('current round?',this.rounds,this.round);
         return this?.rounds?.[this?.round];
     }
     get current_player(){
-      console.log('current round?',this.current_round);
+      // console.log('current round?',this.current_round);
         return this?.current_round?.current_player;
     }
     // todo move this server side
@@ -637,7 +888,6 @@ class Game_PVPMemory{
 init();
 
 function init(){
-
   scene = new THREE.Scene();
   renderer = new THREE.WebGLRenderer({
     antialias: true
@@ -666,26 +916,40 @@ function init(){
 
   // init our game instance as window.t
   window.t = new Tabletop();
-  window.addEventListener('DOMContentLoaded', ()=>{
+  function checkReady(callback){
+    console.log('check ready',document.readyState)
+    if(document.readyState === "complete" || document.readyState === "loaded" || document.readyState === "interactive"){
+      callback();
+    }else{
+      let my_callback = ()=>{
+        console.log('DOM ready');
+        window.removeEventListener('DOMContentLoaded',my_callback);
+        callback();
+      }
+      window.addEventListener('DOMContentLoaded', my_callback);
+    }
+  }
+  checkReady(()=>{
+    // alert('mounting vue');
     t.app = createApp({
-      components:{Debugger},
-      template:'<div><debugger :state="state"></debugger></div>',
+      components:{App},
+      template:'<div><app :state="state" ref="app"></app></div>',
       data(){
           return {
               state: {
-                  loading:true
+                  loading:true,
+                  messages: []
               },
           }
       },
     }).mount('#vue-layer');
+    // set it up
+    t.server.connectWS();
+    t.setupGame();
+    // start the first round
+    // !!! wait for server to kick this off...
+    //t.startGame();
   });
-  // set it up
-  t.setupGame();
-
-
-  // start the first round
-  // !!! wait for server to kick this off...
-  //t.startGame();
 
   // kick off render loop
   render();
@@ -705,6 +969,29 @@ function render(){
   // }
   TWEEN.update(); // update all tweens :)
 
+  // update "hovered" status of cards
+  // todo only run this loop if t.app.state.hovered has changed since last tick
+  if(t?.app?.state?.hovered){
+    if(JSON.stringify(t.app.state.hovered) !== JSON.stringify(t.app.state.hovered_prev)){
+      // console.log('hovered array changed',t.app.state.hovered,t.app.state.hovered_prev);
+      for(let cardi in t.app.state.cards){
+        cardi = parseInt(cardi);
+        let card = t.cards[cardi]
+        // console.log(cardi,t.app.state.hovered.indexOf(cardi),card.hovered)
+        if(t.app.state.hovered.indexOf(cardi) > -1){
+          // console.log('setting material to color light')
+          card.hovered = true;
+          card.mesh.material[2].color.set( colorLight );
+          card.mesh.material[3].color.set( colorLight );
+        }else{
+          card.hovered = false;
+          card.mesh.material[2].color.set( colorDark );
+          card.mesh.material[3].color.set( colorDark );
+          // console.log('setting material to color dark')
+        }
+      }
+    }
+  }
 
   renderer.render( scene, camera );
   requestAnimationFrame( render );
@@ -825,9 +1112,9 @@ function getMeshTween(mesh,updateTo,options){
   return tween;
 }
 
-function initGround(){
+function initTableMesh(){
 
-  ground = new THREE.Mesh(
+  t.tableMesh = new THREE.Mesh(
     new THREE.PlaneBufferGeometry(50, 50),
     new THREE.MeshStandardMaterial({
       //map: txtLoader.load( "https://threejs.org/examples/textures/hardwood2_diffuse.jpg" ),
@@ -836,10 +1123,10 @@ function initGround(){
       color: '#000000'
     })
   );
-  ground.geometry.rotateX(-Math.PI * 0.5);
-  ground.position.set(0, -0.001, 0);
-  ground.receiveShadow = true;
-  scene.add(ground);
+  t.tableMesh.geometry.rotateX(-Math.PI * 0.5);
+  t.tableMesh.position.set(0, -0.001, 0);
+  t.tableMesh.receiveShadow = true;
+  scene.add(t.tableMesh);
 }
 
 // function createFlipUpsideClip( card, side ){ // 'faceup' or 'facedown'
@@ -930,20 +1217,107 @@ function initGround(){
 // TODO: use SHADER to blend
 // TODO: animate color transition
 function onMouseMove( evt ){
-  let cards = t.cards;
-  let keep_testing = true;
-  for(let i = 0; i<cards.length; i++){
-    let card = cards[i].mesh;
-    if( keep_testing && raycast( card ) == true ){
-        keep_testing = false;
-      card.material[2].color.set( colorLight );
-      card.material[3].color.set( colorLight );
-    } else {
-      card.material[2].color.set( colorDark );
-      card.material[3].color.set( colorDark );
+  updateClientCursor();
+  // TODO: allow user to hover over matches in their hand,
+  // but NOT the playfield cards, if it's not currently their turn
+  // todo: move up to app-level
+  // console.log('is it my turn?',t?.app?.$refs?.app?.its_my_turn)
+  if(!t?.app?.$refs?.app?.its_my_turn){
+    return;
+  }
+  // let cards = t.cards;
+  // let keep_testing = true;
+  // for(let i = 0; i<cards.length; i++){
+  //   let card = cards[i].mesh;
+  //   if( keep_testing && raycast( card ) == true ){
+  //       keep_testing = false;
+  //       if(!cards[i].hovered){
+  //         cards[i].hovered = true
+  //         t.app.state.hovered = [i];
+  //         t.server.send({
+  //           type: 'HIGHLIGHT',
+  //           card_id: i, //cards[i].id,
+  //         })
+  //       }
+  //     // card.material[2].color.set( colorLight );
+  //     // card.material[3].color.set( colorLight );
+  //   } else {
+  //     cards[i].hovered = false
+  //     // card.material[2].color.set( colorDark );
+  //     // card.material[3].color.set( colorDark );
+  //   }
+  // }
+  const intersects = intersectsGroup(t.zonegroup.children)
+  // setupRaycast();
+  // let intersects = raycaster.intersectObjects( t.zonegroup.children );
+  // get the first card
+  if(intersects.length){
+    //console.log('looking for card to hover',);
+    const card_id = intersects[0]?.object?.userData?.card_id;
+    //console.log('card id?',card_id);
+    if(card_id !== null){
+      let card = t.cards[card_id]
+      if(!card.hovered){
+        card.hovered = true
+        t.app.state.hovered = [card_id]
+        t.server.send({
+          type: 'HIGHLIGHT',
+          card_id: card_id,
+        })
+      }
     }
   }
+  //else{
+    // console.log('not hovering any cards in zonegroup');
+  //}
 }
+function throttle(callback,limit){
+  var wait = false;                  // Initially, we're not waiting
+    return function () {               // We return a throttled function
+        if (!wait) {                   // If we're not waiting
+            callback.call();           // Execute users function
+            wait = true;               // Prevent future invocations
+            setTimeout(function () {   // After a period of time
+                wait = false;          // And allow future invocations
+            }, limit);
+        }
+    }
+}
+const updateServerCursor_throttled = throttle(updateServerCursor, 128);
+function updateServerCursor(){
+  const pointer = t.players?.[t.app.state.my_client_id]?.pointer?.mesh;
+  if(!pointer){
+    return;
+  }
+  t.server.send({
+    type: 'SET_PLAYER_CURSOR',
+    cursor: pointer.position,
+  })
+}
+function updateClientCursor(){
+  // hit test to position pointer
+  // mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  // Toggle rotation bool for meshes that we clicked
+  const pointer = t.players?.[t.app.state.my_client_id]?.pointer?.mesh;
+  if(pointer){
+    var intersects = raycaster.intersectObjects( [...t.zonegroup.children, t.tableMesh] );
+    // console.log('intersects',intersects);
+    if ( intersects.length > 0 ) {
+
+      pointer.position.copy(intersects[ 0 ].point);
+      pointer.position.y = pointer.position.y + .5;
+
+      // send a throttled update to the server
+      updateServerCursor_throttled();
+    }
+  }else{
+    console.warn('player pointer not found')
+  }
+
+  // t.players[client_id].pointer.mesh.position.set()
+}
+
 
 function onMouseDown (evt){
   mouseDownCoord = {
@@ -1002,38 +1376,53 @@ function onMouseClick( evt ){
   //   mouseClickCoord,
   //   drag_distance
   // })
-  console.log('is it my turn?',{
-    my_id:t.app.state.my_Fclient_id,
-    player_turn:t.app.state.player_turn
-  })
+  // console.log('is it my turn?',{
+  //   my_id:t.app.state.my_client_id,
+  //   player_turn:t.app.state.player_turn
+  // })
   if(t.app.state.my_client_id !== t.app.state.player_turn){
     console.error('its not your turn');
+    // TODO: visual feedback (pulse cursor red or something)
     return;
   }
   // ignore clicks if you dragged the mouse
   if(drag_distance > 10){
     return;
   }
-  let keep_testing = true;
-  for(let i = 0; i<t.cards.length; i++){
-    if(!keep_testing){
-        continue;
-    }
-    let __card = t.cards[i];
-    let _card = __card.mesh;
+  // let keep_testing = true;
+  // for(let i = 0; i<t.cards.length; i++){
+  //   if(!keep_testing){
+  //       continue;
+  //   }
+  //   let __card = t.cards[i];
+  //   let _card = __card.mesh;
 
     // TODO: we need to only react to the card that is closest to the camera
     // need to account for occluders too :/
-    if( _card && raycast( _card ) == true && !__card.animating){
-      keep_testing = false;
+    const intersects = intersectsGroup(t.zonegroup.children)
+    let card_id = intersects?.[0]?.object?.userData?.card_id;
+    // card is on the play field
+    // TODO: certain games will allow you to click on cards that do not have a zone?
+    // zone ~~ on playfield (! in deck, ! in hand)
+    let __card = t.cards?.[card_id]
+    if(!__card){
+      console.warn('card not found',card_id);
+    }
+    else if(
+      !__card.tweening
+      && __card.zone
+    ){
+      // keep_testing = false;
       if(
         // ignore if we already flipped this card over
-        t.game.flipped.indexOf(i)>-1
+        t.app.state.flipped.indexOf(i)>-1
         // or if it's in the player hand
         || t.game.current_player.cards.indexOf(i)>-1
        ){
+         console.log('ignoring click',card_id);
         return;
       }
+      console.log('second turn?',_card.faceUp)
       if( _card.faceUp ){ // card faceup
         //getFlipTween(_card,'facedown').start();
         t.game.flipCard(i,false);
@@ -1048,7 +1437,7 @@ function onMouseClick( evt ){
         // so turn it faceup
         t.game.flipCard(i,true)
 
-        t.game.flipped.push(i);
+        t.app.state.flipped.push(i);
         t.server.send({
             type: 'FLIP',
             direction: 'faceup',
@@ -1056,8 +1445,8 @@ function onMouseClick( evt ){
         })
       }
     }
-  }
-  if(t.game.flipped.length > 1){
+  // }
+  if(t.app.state.flipped.length > 1){
     t.game.checkForMatches();
   }
 
@@ -1081,7 +1470,7 @@ function lerp(v0,v1,t){
 //   const cardB = t.cards[t.game.flipped[1]];
 //   t.game.layout.zones[cardA.zone].card = null;
 //   t.game.layout.zones[cardB.zone].card = null;
-//   addMatchToHand(t.game.flipped[0],t.game.flipped[1])
+//   updateCardsInHand(t.game.flipped[0],t.game.flipped[1])
 //   t.game.flipped = [];
 //   console.warn('moving flipped cards to players hand',
 //   t.game.current_player.matches,
@@ -1105,7 +1494,7 @@ function resetCards(){
     },reset_delay);
 }
 
-function raycast( object ){
+function setupRaycast(){
   // calculate mouse position in normalized device coordinates
 	// (-1 to +1) for both components
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -1113,14 +1502,29 @@ function raycast( object ){
 
   // update the picking ray with the camera and mouse position
 	raycaster.setFromCamera( mouse, camera );
+}
+
+function raycastObject( object ){
+  setupRaycast();
 
 	// calculate objects intersecting the picking ray
 	var intersects = raycaster.intersectObject( object );
   if( intersects.length > 0 ){
     return true;
-  } else {
-    return false;
   }
+  return false;
+}
+
+function intersectsGroup( group ){
+  setupRaycast();
+
+  // calculate objects intersecting the picking ray
+  var intersects = raycaster.intersectObjects( group );
+  // if( intersects.length > 0 ){
+  //   return true;
+  // }
+  // return false;
+  return intersects;
 }
 
 function pointsHelper( pointsArray ){
