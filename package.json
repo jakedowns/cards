@@ -9,6 +9,7 @@
     "axios": "^0.26.1",
     "dotenv": "^16.0.0",
     "laravel-mix": "^6.0.43",
+    "sass-loader": "^12.6.0",
     "vue": "^3.2.31",
     "webpack": "^5.72.0",
     "ws": "^8.5.0"
@@ -18,6 +19,7 @@
     "babel": "^6.23.0",
     "babel-cli": "^6.26.0",
     "ngrok": "^4.3.1",
+    "sass": "^1.51.0",
     "vue-loader": "^17.0.0",
     "vue-template-compiler": "^2.6.14"
   },
