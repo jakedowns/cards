@@ -149,16 +149,24 @@ class ServerGame{
 
     onClientMessage(client_id,message){
         message = ''+message;
-        console.log('client says',client_id,message)
+
+        // console.log('client says',client_id,message)
         let decoded = null;
         try{
             decoded = JSON.parse(message);
         }catch(e){
             console.error(e)
         }
+        if(!decoded){
+            console.error('error decoding client message',message);
+            return;
+        }
         if(decoded.client_id !== client_id){
             console.error('client message client_id mismatch',decoded.client_id,client_id)
             return false;
+        }
+        if(['HIGHLIGHT','SET_PLAYER_CURSOR'].indexOf(decoded.type) === -1){
+            console.log('client says',decoded);
         }
         switch(decoded.type){
             // case 'NEW_ROOM':

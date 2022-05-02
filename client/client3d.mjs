@@ -163,7 +163,12 @@ class SocketConnection{
     }
     send(data){
       data.client_id = t.app.state.my_client_id;
-      console.log('sending',data,this.client_id,t.app.state.my_client_id);
+      if(
+        data.type !== 'SET_PLAYER_CURSOR'
+        && data.type !== 'HIGHLIGHT'
+      ){
+        console.log('sending',data,this.client_id,t.app.state.my_client_id);
+      }
       this.ws.send(JSON.stringify(data));
     }
 }
@@ -264,6 +269,7 @@ class Tabletop{
       for(let b in t.players){
         if(t.app?.state?.client_ids?.indexOf(b) === -1){
           t.players[b].destroy();
+          delete t.players[b];
         }
       }
       for(let i in t.app.state.player_cursors){
@@ -356,7 +362,7 @@ class PlayerPointer{
       this.mesh.rotation.y -= .01;
       // todo: call this only on host change
       this.mesh.material.color.setHex(
-        this.player_id === t.app.state?.game_host ? 0x0000ff : 0xff0000
+        this.player_id === t.app.state?.player_turn ? 0x0000ff : 0xff0000
       )
     },16)
   }
@@ -368,29 +374,41 @@ class PlayerPointer{
     }else{
       // console.log('tweening cursor...');
     }
+
+    let _mesh = this.mesh;
+    if(!_mesh){
+      // console.error('mesh not found',this);
+      return;
+    }
+
     this.tweening = true;
 
     // TODO: add ability to include/exclude properties from tween to save overhead
 
-    let _mesh = this.mesh;
+
     // let tweenMid = null;
     // if(options && options.arcTo){
     //     // optional midpoint
     //     tweenMid = getMeshTween(_mesh,options.arcTo,300/2);
     // }
 
+    // magintude
+    let magnitude = this?.mesh?.position?.distanceTo(
+      new THREE.Vector3(
+        destination?.pos_x ?? this?.mesh?.position?.x,
+        destination?.pos_y ?? this?.mesh?.position?.y,
+        destination?.pos_z ?? this?.mesh?.position?.z
+      )
+    );
     if(duration === 'distance'){
-      // magintude
-      let magnitude = this.mesh.position.distanceTo(
-        new THREE.Vector3(
-          destination.pos_x,
-          destination.pos_y,
-          destination.pos_z
-        )
-      );
-      console.log('magnitude',magnitude);
-      duration = lerp(100,500,(magnitude/10));
-      console.log('duration',duration)
+      // console.log('magnitude',magnitude);
+      duration = lerp(50,1000,(magnitude/6));
+      // console.log('duration',duration)
+    }
+
+    if(magnitude<0.1){
+      this.tweening = false;
+      return;
     }
 
     let tweenEnd = getMeshTween(_mesh,destination,{
@@ -709,7 +727,6 @@ class Round{
     constructor(){
         this.moves = [];
         //this.players = [];
-        this.current_player_id = 0;
         // for(let i=0; i<t.players.length; i++){
         //     // initialize player for round
         //     this.players.push({
@@ -771,7 +788,7 @@ class Round{
         this.on_round_end_callback = cb;
     }
     get current_player(){
-        return this.players[this.current_player_id];
+        return t.players[t.app.state.player_turn]
     }
 }
 class Layout{
@@ -1070,6 +1087,10 @@ function getMeshTween(mesh,updateTo,options){
   //   y: mesh.scale.y,
   //   z: mesh.scale.z,
   // }
+  if(!mesh || !mesh.position){
+    console.warn('huh?',mesh);
+    return;
+  }
 
   let tweenProps = {
     pos_x: mesh.position.x,
@@ -1216,15 +1237,18 @@ function initTableMesh(){
 // mouse over hover effect
 // TODO: use SHADER to blend
 // TODO: animate color transition
-function onMouseMove( evt ){
-  updateClientCursor();
+async function onMouseMove( evt ){
+  await updateClientCursor();
   // TODO: allow user to hover over matches in their hand,
   // but NOT the playfield cards, if it's not currently their turn
   // todo: move up to app-level
   // console.log('is it my turn?',t?.app?.$refs?.app?.its_my_turn)
-  if(!t?.app?.$refs?.app?.its_my_turn){
-    return;
-  }
+
+  // for some reason returning early here makes it so !player_turn (opponent) can't move cursor
+
+  // if(!t?.app?.$refs?.app?.its_my_turn){
+  //   return;
+  // }
   // let cards = t.cards;
   // let keep_testing = true;
   // for(let i = 0; i<cards.length; i++){
@@ -1385,7 +1409,7 @@ function onMouseClick( evt ){
     // TODO: visual feedback (pulse cursor red or something)
     return;
   }
-  // ignore clicks if you dragged the mouse
+  // ignore clicks if you dragged the mouse (moved camera)
   if(drag_distance > 10){
     return;
   }
@@ -1401,47 +1425,50 @@ function onMouseClick( evt ){
     // need to account for occluders too :/
     const intersects = intersectsGroup(t.zonegroup.children)
     let card_id = intersects?.[0]?.object?.userData?.card_id;
+    // console.log('click intersects',{intersects,card_id});
     // card is on the play field
     // TODO: certain games will allow you to click on cards that do not have a zone?
     // zone ~~ on playfield (! in deck, ! in hand)
     let __card = t.cards?.[card_id]
+    console.log('clicked card',{card_id,__card})
     if(!__card){
       console.warn('card not found',card_id);
     }
     else if(
       !__card.tweening
-      && __card.zone
+      //&& __card.zone // todo: revisit
     ){
       // keep_testing = false;
       if(
         // ignore if we already flipped this card over
-        t.app.state.flipped.indexOf(i)>-1
+        t.app.state.flipped.indexOf(card_id)>-1
         // or if it's in the player hand
-        || t.game.current_player.cards.indexOf(i)>-1
+        || t.game.current_player.cards.indexOf(card_id)>-1
        ){
          console.log('ignoring click',card_id);
         return;
       }
+      let _card = __card?.mesh;
       console.log('second turn?',_card.faceUp)
       if( _card.faceUp ){ // card faceup
         //getFlipTween(_card,'facedown').start();
-        t.game.flipCard(i,false);
+        t.game.flipCard(card_id,false);
 
         t.server.send({
             type: 'FLIP',
             direction: 'facedown',
-            card_id: i
+            card_id
         })
 
       } else if( !_card.faceUp ) { // card facedown
         // so turn it faceup
-        t.game.flipCard(i,true)
+        t.game.flipCard(card_id,true)
 
-        t.app.state.flipped.push(i);
+        t.app.state.flipped.push(card_id);
         t.server.send({
             type: 'FLIP',
             direction: 'faceup',
-            card_id: i
+            card_id
         })
       }
     }

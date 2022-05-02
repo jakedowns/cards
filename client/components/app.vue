@@ -1,5 +1,5 @@
 <template>
-    <div id="debug">
+    <div id="debug" v-show="show">
         <ul class="details">
             <li class="my_client_id">My Client ID:
                 <span class="value">{{state?.my_client_id}}</span></li>
@@ -92,12 +92,19 @@ export default {
 
     setup(){
         return {
+            show: false,
             messages: []
         }
     },
 
     mounted(){
-        console.log('debugger mounted');
+        // console.log('vue app mounted');
+        document.addEventListener('keyup', e => {
+            // Keys.d (lowercase "d")
+            if (e.keyCode === 68) {
+                this.show = !this.show;
+            }
+        });
     },
 
     watch: {
