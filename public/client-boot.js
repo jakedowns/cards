@@ -4,7 +4,7 @@ axios.get('./public/hot').then(res => {
     console.log(res);
     let contents = '';
     // loadscript = res.data.trim().split('\\n').join('')+loadscript;
-    loadscript = 'http://'+location.hostname+':3092'+loadscript;
+    loadscript = 'https://'+location.hostname+':3092'+loadscript;
 }).catch(err => {
     console.error(err);
     loadscript = './public/'+loadscript; // relative, port 80

@@ -58,14 +58,14 @@ class SocketConnection{
       this.client_id = null;
       window.t.app.state.my_client_id = null;
       try{
-          this.ws = new WebSocket(`ws://${WSHOSTNAME}:${PORT}`);
+          this.ws = new WebSocket(`wss://${WSHOSTNAME}:${WEB_PORT}`);
 
           this.ws.addEventListener("open", () =>{
               console.log("We are connected");
               //this.ws.send("How are you?");
           });
           this.ws.addEventListener('error', event => {
-              console.log('error',event);
+              console.error('error',event);
           })
           this.ws.addEventListener('close', event => {
             console.log('ws connection closed. server restarted?')
