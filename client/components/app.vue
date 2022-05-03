@@ -1,8 +1,12 @@
 <template>
     <div id="debug" >
-        <div
+        <div v-if="!calling"
             @click.prevent="start_video_chat">
-            <button class="video-chat-call">Start Video Chat</button>
+            <button class="video-chat-call-start">Start Video Chat</button>
+        </div>
+        <div v-if="!show_end_call_button"
+            @click.prevent="end_video_chat">
+            <button class="video-chat-call-end">End Video Chat</button>
         </div>
         <br/>
         <button @click="show=!show">{{show?'Hide':'Show Debug Info'}}</button>
@@ -103,6 +107,8 @@ export default {
     setup(){
         return {
             show: false,
+            calling: false,
+            show_end_call_button: false,
             messages: []
         }
     },
@@ -180,6 +186,7 @@ export default {
 
     methods:{
         start_video_chat(){
+            this.calling = true;
             window.t.call()
         },
         new_room() {

@@ -25,8 +25,11 @@
                 height: 90px;
                 left: 0;
                 bottom: 0;
-                opacity: 0.5;
+                opacity: 1.0;
                 border: 1px solid blue;
+            }
+            video.muted {
+                opacity: 0.5;
             }
             #opponent_video {
                 left: auto;
@@ -42,6 +45,7 @@
                 } else {
                     video.muted = true;
                 }
+                video.classList.toggle('muted',video.muted)
             }
         </script>
     </head>

@@ -30,7 +30,7 @@ const ROOT = __dirname + '/..';
 const server_options = {
     key: readFileSync(SSL_KEY_PATH),
     cert: readFileSync(SSL_CERT_PATH),
-    requestCert: true,
+    requestCert: false,
     rejectUnauthorized: false,
     ca: readFileSync(SSL_CA_CERT_PATH),
     // intermediate: readFileSync(SSL_INTERMEDIATE_PATH),
