@@ -1,9 +1,9 @@
 <template>
     <div id="debug" >
-        <div v-if="!calling"
+        <!-- <div v-if="!calling"
             @click.prevent="start_video_chat">
             <button class="video-chat-call-start">Start Video Chat</button>
-        </div>
+        </div> -->
         <div v-if="!show_end_call_button"
             @click.prevent="end_video_chat">
             <button class="video-chat-call-end">End Video Chat</button>
@@ -128,8 +128,14 @@ export default {
             // todo: should i detect deck<->zone<->hand movement implicitly / reactively?
             // or do i need to say ON_MATCH_PASS, ON_MATCH_FAIL to trigger next steps?
             handler(new_state,old_state){
+                this.show_end_call_button = t?.peer?.connectionState === 'connected';
                 if(new_state?.game?.started && !old_state?.game?.started){
                     t.startGame();
+                }
+
+                if(new_state?.client_ids?.length === 2 && old_state?.client_ids?.length === 1){
+                    // we just went from 1 peer to 2, start a call
+                    t.call();
                 }
 
                 //console.log('flipped?',new_state.flipped,new_state.cards);
@@ -188,6 +194,9 @@ export default {
         start_video_chat(){
             this.calling = true;
             window.t.call()
+        },
+        end_video_chat(){
+            window.t?.peer?.close();
         },
         new_room() {
             // request new room
