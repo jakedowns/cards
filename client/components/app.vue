@@ -137,11 +137,11 @@ export default {
                     t.startGame();
                 }
 
-                // if(new_state?.client_ids?.length === 2 && old_state?.client_ids?.length === 1){
-                //     // we just went from 1 peer to 2, start a call
-                //     this.calling = true; // hide start call button
-                //     t.call();
-                // }
+                if(new_state?.client_ids?.length === 2 && old_state?.client_ids?.length === 1){
+                    // we just went from 1 peer to 2, start a call
+                    // this.calling = true; // hide start call button
+                    // t.call();
+                }
 
                 //console.log('flipped?',new_state.flipped,new_state.cards);
 
@@ -202,6 +202,10 @@ export default {
         },
         end_video_chat(){
             window.t?.peer?.close();
+            if(window.t.peer){
+                window.t.peer = null;
+            }
+            window.t.setupOpponentPeer();
             this.show_end_call_button = false;
             this.calling = false;
         },

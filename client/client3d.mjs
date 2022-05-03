@@ -413,7 +413,13 @@ class Tabletop{
           await t.peer.setRemoteDescription(new RTCSessionDescription(decoded.offer));
           const peerAnswer = await t.peer.createAnswer();
           await t.peer.setLocalDescription(new RTCSessionDescription(peerAnswer));
-
+          t.opponent_video_stream_settings = decoded.stream_settings; // save call initiators stream settings
+          if(t.opponent_video_stream_settings){
+            let aspect_ratio = t.opponent_video_stream_settings.aspectRatio;
+            console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+            t?.players?.[getOpponentID()]?.head.mesh.scale.set(aspect_ratio,1,1);
+            console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+          }
           t.server.send({
             type:'mediaAnswer',
             answer: peerAnswer,
@@ -429,7 +435,19 @@ class Tabletop{
     async onMediaAnswer(decoded){
       console.log('onMediaAnswer',decoded)
       await t.peer.setRemoteDescription(new RTCSessionDescription(decoded.answer));
-      t.opponent_video_stream_settings = decoded.stream_settings;
+      t.opponent_video_stream_settings = decoded.stream_settings; // save call recipients stream settings
+
+      // update opponent's "head" shape to match their video aspect ratio
+      console.log('opponent stream ar',
+      //stream.getVideoTracks()[0].getSettings()
+      t.opponent_video_stream_settings);
+
+      if(t.opponent_video_stream_settings){
+        let aspect_ratio = t.opponent_video_stream_settings.aspectRatio;
+        console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+        t?.players?.[getOpponentID()]?.head.mesh.scale.set(aspect_ratio,1,1);
+        console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+      }
     }
 
     onIceCandidateEvent(event) {
@@ -1279,17 +1297,6 @@ function setupOpponentPeer(){
     const [stream] = event.streams;
     t.opponent_stream = stream;
     t.opponent_video.srcObject = stream;
-
-    // update opponent's "head" shape to match their video aspect ratio
-    console.log('opponent stream ar',stream.getVideoTracks()[0].getSettings());
-
-    if(t.opponent_video_stream_settings){
-      let aspect_ratio = t.opponent_video_stream_settings.aspectRatio;
-      console.log('head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
-      t?.players?.[getOpponentID()]?.head?.mesh?.scale?.set(1,aspect_ratio,1);
-
-    }
-    // console.log('head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
   };
 
   t.peer.addEventListener('track', gotRemoteStream);
@@ -1297,6 +1304,7 @@ function setupOpponentPeer(){
 
 // current player's video stream
 function setupVideoStream(){
+  t.setupOpponentPeer = setupOpponentPeer
   setupOpponentPeer();
 
   if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
@@ -1335,7 +1343,10 @@ function setupVideoStream(){
   }
 
   t.call = async()=>{
-    setupOpponentPeer();
+    if(!window.t.peer){
+      window.t.setupOpponentPeer();
+    }
+    //setupOpponentPeer();
     const localPeerOffer = await t.peer.createOffer();
     await t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
     const opponent_id = getOpponentID()
