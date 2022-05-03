@@ -4,12 +4,11 @@
 source code for [https://cards.jakedowns.com](https://cards.jakedowns.com)
 
 
-
 https://user-images.githubusercontent.com/1683122/166343608-b03ef7fe-cea6-4a36-bd32-fe7eea6d59f2.mp4
 
 
+### basics:
 
-basics:
 1. use nvm or some other means to make sure you have at least node v12 (v14 recommended)
 2. npm install to get the basic node dependencies
 3. add a `.env` file with the following properties
@@ -36,3 +35,19 @@ basics:
 
 5. in a separate terminal run `nodemon server/server.mjs` (if nodemon is not found, `npm i -g nodemon`) // can also use `forever`
 6. visit `https://cards.site:3090` (or whatever hostname/port config you gave it)
+
+
+### Overview
+
+- an engine for designing and playing card games collaboratively
+- powered by THREE.js
+
+- server is node
+- 3d client is Vue + THREE.js
+- 2d client is Vue + css animations (potentially could use canvas, but native dom is a fun challenge)
+
+- future goals:
+  - testing porting to Flutter
+  - testing porting to React Native
+  - (maybe) test port to Unity / Unreal
+

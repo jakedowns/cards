@@ -1262,6 +1262,7 @@ function init(){
   window.addEventListener( 'mousedown', onMouseDown, false);
   window.addEventListener( 'touchstart', onTouchStart, false);
   window.addEventListener( 'touchend', onTouchEnd, false)
+  window.addEventListener( 'touchmove', onTouchMove, false);
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
   txtLoader = new THREE.TextureLoader();
@@ -1683,6 +1684,10 @@ function initTableMesh(){
 
 //   return flipUpsideClip;
 // }
+
+function onTouchMove (evt){
+  onMouseMove();
+}
 
 // mouse over hover effect
 // TODO: use SHADER to blend

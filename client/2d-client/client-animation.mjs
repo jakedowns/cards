@@ -1,5 +1,5 @@
 import * as Config from './client-config.mjs'
-import * as Helpers from '../shared/helpers.mjs';
+import * as Helpers from '../../shared/helpers.mjs';
 
 const anim_speed_factor = 1.0; // TOOD: use css variables to affect css animation timing too
 

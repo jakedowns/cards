@@ -1,11 +1,11 @@
 import ClientAPI from './client-api.mjs';
 import * as Config from './client-config.mjs'
-import * as Helpers from '../shared/helpers.mjs';
+import * as Helpers from '../../shared/helpers.mjs';
 import * as Animation from './client-animation.mjs';
 import DynamicRenderer from './components/DynamicRenderer.mjs';
 import Card from './objects/Card.mjs';
 // todo move this to shared
-import {STARTER_DECK_OPTIONS} from '../server/decks/welcome.deck.mjs'
+import {STARTER_DECK_OPTIONS} from '../../server/decks/welcome.deck.mjs'
 class Client {
     constructor(){
         this.api = new ClientAPI(this);

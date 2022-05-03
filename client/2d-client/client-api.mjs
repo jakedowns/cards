@@ -1,5 +1,5 @@
 import Card from './objects/Card.mjs'
-import * as Helpers from '../shared/helpers.mjs'
+import * as Helpers from '../../shared/helpers.mjs'
 class ClientAPI {
     constructor(client){
         this.client = client;
