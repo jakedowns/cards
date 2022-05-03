@@ -341,7 +341,7 @@ class ServerGame{
     }
 
     notifyClient(client_id,message){
-        if(message.message !== 'PING'){
+        if(message.type !== 'PING'){
             console.log('sending client message',client_id,message)
         }
         // todo: error if no client matches id
