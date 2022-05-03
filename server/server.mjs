@@ -1,4 +1,5 @@
 import https from 'https';
+import http from 'http';
 import {promises as fs} from 'fs';
 import {readFileSync} from 'fs';
 import { dirname } from 'path';
@@ -12,6 +13,7 @@ const HOSTNAME = process.env?.HOSTNAME ?? '0.0.0.0';
 const SSL_CERT_PATH = process.env?.SSL_CERT_PATH ?? '../ssl/server.crt';
 const SSL_KEY_PATH = process.env?.SSL_KEY_PATH ?? '../ssl/server.key';
 const SSL_CA_CERT_PATH = process.env?.SSL_CA_CERT_PATH ?? '../ssl/ca.crt';
+const LOCAL = process.env?.LOCAL ?? false;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -56,6 +58,17 @@ const loadFile = function(path,res){
             res.statusCode = 404;
             res.end(JSON.stringify(err));
         });
+}
+
+if(!LOCAL){
+    try{
+        const http_server = http.createServer((req,res)=>{
+            return res.redirect(301, `https://${req.headers.host}${req.url}`);
+        });
+        http_server.listen(80);
+    }catch(e){
+        console.warn('failed to start http->https redirect server');
+    }
 }
 
 const server = https.createServer(server_options,(req, res) => {

@@ -172,7 +172,7 @@ class ServerGame{
             console.error('client message client_id mismatch',decoded.client_id,client_id)
             return false;
         }
-        if(['HIGHLIGHT','SET_PLAYER_CURSOR'].indexOf(decoded.type) === -1){
+        if(['HIGHLIGHT','SET_PLAYER_CURSOR','SET_PLAYER_HEAD'].indexOf(decoded.type) === -1){
             console.log('client says',decoded);
         }
         switch(decoded.type){
@@ -341,7 +341,7 @@ class ServerGame{
     }
 
     notifyClient(client_id,message){
-        if(message.type !== 'PING'){
+        if(['PING'].indexOf(message.type)===-1){
             console.log('sending client message',client_id,message)
         }
         // todo: error if no client matches id

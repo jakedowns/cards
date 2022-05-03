@@ -34,11 +34,21 @@
                 border: 1px solid red;
             }
         </style>
+        <script>
+            function toggle_opponent_mute(){
+                var video = document.getElementById('opponent_video');
+                if (video.muted) {
+                    video.muted = false;
+                } else {
+                    video.muted = true;
+                }
+            }
+        </script>
     </head>
     <body>
         <!-- webcam feed -->
         <video id="video" autoplay playsinline muted></video>
-        <video id="opponent_video" autoplay playsinline></video>
+        <video id="opponent_video" autoplay playsinline onclick="toggle_opponent_mute()"></video>
         <div id="vue-layer"></div>
         <script src="./public/client-boot.js"></script>
     </body>

@@ -669,7 +669,7 @@ class PlayerPointer{
   }
   setupMesh(){
     this.mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(.5,8,8),
+      new THREE.SphereGeometry(.5,4,4),
       new THREE.MeshBasicMaterial({
         color: this.player_id === t.app.state?.game_host ? 0x0000ff : 0xff0000,
         wireframe: true,
