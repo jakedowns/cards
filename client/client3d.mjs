@@ -182,6 +182,10 @@ class SocketConnection{
       ){
         console.log('sending',data,this.client_id,t.app.state.my_client_id);
       }
+      if(!this.ws.readyState === 1){
+        console.warn('ws not ready');
+        return;
+      }
       this.ws.send(JSON.stringify(data));
     }
 }
@@ -268,8 +272,8 @@ class Tabletop{
           // TODO: prevent tweens from piling up
           if(!card.tweenedToHand){
             card.tweenedToHand = true;
+            card.current_tween = card.tweenTo(updateTo,{duration:300})
           }
-          card.current_tween = card.tweenTo(updateTo,{duration:300})
         }
       }
 
@@ -797,8 +801,8 @@ class Card {
         // this generates a tween between the current position and the destination
         this.destination = destination;
         if(this.tweening){
-          console.log('already tweening. should we cancel or finish or block?');
-            return false;
+          console.log('already tweening. should we cancel or finish, block, or queue?');
+            //return false;
         }
         this.tweening = true;
 
@@ -853,128 +857,176 @@ class Deck{
             this.available_cards.push(i);
         }
     }
+    // NOTE: server drives shuffling now...
     // todo allow shuffling indefinitely until player clicks to stop
-    async shuffle(iterations=3){
-        if(this.shuffling){
-            return;
+    // async shuffle(iterations=3){
+    //     if(this.shuffling){
+    //         return;
+    //     }
+    //     this.shuffling = true;
+    //     for(var i=0; i<iterations; i++){
+    //         let final_available_cards = await this.shuffleOnce(this.available_cards);
+    //         this.available_cards = final_available_cards;
+    //     }
+    //     this.shuffling = false;
+    // }
+    // server drives shuffle now
+    // async shuffleOnce(array){
+    //     var m = array.length, t, i;
+
+    //     // While there remain elements to shuffle…
+    //     while (m) {
+
+    //         // snapshot the array
+    //         this.available_cards_history.push(array.slice());
+
+    //         // Pick a remaining element…
+    //         i = Math.floor(Math.random() * m--);
+
+    //         // And swap it with the current element.
+    //         t = array[m];
+    //         array[m] = array[i];
+    //         array[i] = t;
+
+    //         this.cards[array[m]].deck_order_index = m;
+    //         this.cards[array[i]].deck_order_index = i;
+
+    //         // animate the shuffled cards coming off the top
+    //         // and sliding back into the deck
+    //         this.animateOrderChangeAsShuffle(
+    //             array[i],
+    //             array[m],
+    //             i,
+    //             m
+    //         );
+    //         // artificially delay the shuffling
+    //         await delay(3);
+    //     }
+
+
+    //     return array;
+    // }
+    // animateOrderChangeAsShuffle(iCardA,iCardB,indexA,indexB){
+    //     //console.log('animating swap of A and B',iCardA,iCardB,indexA,indexB);
+
+    //     const cardA = this.cards[iCardA];
+    //     cardA.tweenTo({
+    //         pos_x:0,//cardA.mesh.position.x,
+    //         pos_y:indexB * 0.025, // offset by card thickness + minor gap
+    //     },{
+    //         duration: 150,
+    //         arcTo:{
+    //             pos_x:'-2.6', // camera left, screen right
+    //             // y:'+1',
+    //         }
+    //     });
+    //     const cardB = this.cards[iCardB];
+    //     cardB.tweenTo({
+    //         pos_x:0,//cardB.mesh.position.x,
+    //         pos_y:indexA * 0.025, // offset by card thickness + minor gap
+    //     },{
+    //         duration: 150,
+    //         arcTo:{
+    //             pos_x:'+2.6', // camera right, screen left
+    //             // y:'+1',
+    //         }
+    //     });
+
+    //     // by default card order updates do nothing to their position
+    //     // if this was reactive, every modification to this.available_cards (aka the card order of the remaining cards in the deck) would trigger a property update
+    //     // then we would watch those properties and either update z-depth instantly
+    //     // or with a transition tween
+    //     // in this case, we'd want a SPECIAL tween, not just a linear tween of cards phasing thru each other
+    //     // to give it more physicality we want to animate the cards moving off the top of the deck and then back in
+    // }
+    // async dealToLayout(layout){
+    //     // for each zone in passed layout
+    //     // if there is no card in the zone
+    //     // pick the top card from the deck
+    //     // and place it in the zone
+
+    //     // TODO: support multiple cards per zone (think klondike solitaire)
+    //     console.log('dealToLayout',this);
+    //     // for(let izone in layout.zones){
+    //     //     let zone = layout.zones[izone];
+    //     //     if(!zone.card){
+    //     //         let card_index = this.available_cards.pop();
+    //     //         zone.card = card_index;
+    //     //         this.cards[card_index].zone = izone;
+    //     //         // ...
+    //     //     }
+    //     // }
+    //     // todo: if game is already in progress, skip DEAL animation...
+    //     for(let iA in t.app.state.available_cards){
+    //       let iCard = t.app.state.available_cards[iA];
+    //       let card = t.app.state.cards[iA];
+    //       if(card.zone){
+    //         let zone = layout.zones[card.zone];
+    //         zone.card = iCard;
+    //         // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
+    //         t.zonegroup.attach(t.cards[iCard].mesh);
+    //         t.cards[iCard].tweenTo(
+    //             {
+    //                 pos_x: zone.origin.x,
+    //                 // todo offset by num cards already in the zone
+    //                 pos_y: zone.origin.y,
+    //                 pos_z: zone.origin.z
+    //             },
+    //             {
+    //                 duration: 1000,
+    //             }
+    //         );
+    //         //console.warn('todo, settle ypos of cards in deck as cards are removed')
+    //         //console.warn('todo deal from other end of array?')
+    //         await delay(150); // slight delay in dealing
+    //       }
+    //     }
+    // }
+    async tweenCardsToDeck(){
+      for(let i in t.cards){
+        let card = t.cards[i];
+        if(card.mesh){
+          t.deckgroup.attach(card.mesh);
+          card?.tweenTo({
+            pos_x: t.deckgroup.position.x,
+            pos_y: t.deckgroup.position.y + (i*0.025),
+            pos_z: t.deckgroup.position.z
+          },{
+            duration: 1000,
+          });
+        }else{
+          console.error('failed to tween card to deck',i)
         }
-        this.shuffling = true;
-        for(var i=0; i<iterations; i++){
-            let final_available_cards = await this.shuffleOnce(this.available_cards);
-            this.available_cards = final_available_cards;
-        }
-        this.shuffling = false;
+      }
     }
-    async shuffleOnce(array){
-        var m = array.length, t, i;
-
-        // While there remain elements to shuffle…
-        while (m) {
-
-            // snapshot the array
-            this.available_cards_history.push(array.slice());
-
-            // Pick a remaining element…
-            i = Math.floor(Math.random() * m--);
-
-            // And swap it with the current element.
-            t = array[m];
-            array[m] = array[i];
-            array[i] = t;
-
-            this.cards[array[m]].deck_order_index = m;
-            this.cards[array[i]].deck_order_index = i;
-
-            // animate the shuffled cards coming off the top
-            // and sliding back into the deck
-            this.animateOrderChangeAsShuffle(
-                array[i],
-                array[m],
-                i,
-                m
-            );
-            // artificially delay the shuffling
-            await delay(3);
-        }
-
-
-        return array;
-    }
-    animateOrderChangeAsShuffle(iCardA,iCardB,indexA,indexB){
-        //console.log('animating swap of A and B',iCardA,iCardB,indexA,indexB);
-
-        const cardA = this.cards[iCardA];
-        cardA.tweenTo({
-            pos_x:0,//cardA.mesh.position.x,
-            pos_y:indexB * 0.025, // offset by card thickness + minor gap
-        },{
-            duration: 150,
-            arcTo:{
-                pos_x:'-2.6', // camera left, screen right
-                // y:'+1',
-            }
-        });
-        const cardB = this.cards[iCardB];
-        cardB.tweenTo({
-            pos_x:0,//cardB.mesh.position.x,
-            pos_y:indexA * 0.025, // offset by card thickness + minor gap
-        },{
-            duration: 150,
-            arcTo:{
-                pos_x:'+2.6', // camera right, screen left
-                // y:'+1',
-            }
-        });
-
-        // by default card order updates do nothing to their position
-        // if this was reactive, every modification to this.available_cards (aka the card order of the remaining cards in the deck) would trigger a property update
-        // then we would watch those properties and either update z-depth instantly
-        // or with a transition tween
-        // in this case, we'd want a SPECIAL tween, not just a linear tween of cards phasing thru each other
-        // to give it more physicality we want to animate the cards moving off the top of the deck and then back in
-    }
-    async dealToLayout(layout){
-        // for each zone in passed layout
-        // if there is no card in the zone
-        // pick the top card from the deck
-        // and place it in the zone
-
-        // TODO: support multiple cards per zone (think klondike solitaire)
-        console.log('dealToLayout',this);
-        // for(let izone in layout.zones){
-        //     let zone = layout.zones[izone];
-        //     if(!zone.card){
-        //         let card_index = this.available_cards.pop();
-        //         zone.card = card_index;
-        //         this.cards[card_index].zone = izone;
-        //         // ...
-        //     }
-        // }
-        // todo: if game is already in progress, skip DEAL animation...
-        for(let iA in t.app.state.available_cards){
-          let iCard = t.app.state.available_cards[iA];
-          let card = t.app.state.cards[iA];
-          if(card.zone){
-            let zone = layout.zones[card.zone];
-            zone.card = iCard;
-            // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
-            t.zonegroup.attach(t.cards[iCard].mesh);
-            t.cards[iCard].tweenTo(
-                {
-                    pos_x: zone.origin.x,
-                    // todo offset by num cards already in the zone
-                    pos_y: zone.origin.y,
-                    pos_z: zone.origin.z
-                },
-                {
-                    duration: 1000,
-                }
-            );
-            //console.warn('todo, settle ypos of cards in deck as cards are removed')
-            //console.warn('todo deal from other end of array?')
-            await delay(150); // slight delay in dealing
+    async tweenCardsToZones(){
+      for(let i in t.game.layout.zones){
+        let zone = t.game.layout.zones[i];
+        let card = null;
+        //cardforzone
+        for(let j in t.app.state.cards){
+          let c = t.app.state.cards[j];
+          if(c.zone == i){
+            card = t.cards[j];
+            break;
           }
         }
+        // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
+        if(!card.mesh){
+          console.error('failed to tween card to zone',i,j)
+        }else{
+          t.zonegroup.attach(card.mesh);
+        }
+        // console.log('tween card to zone',card);
+        card?.tweenTo({
+          pos_x: zone.origin.x,
+          pos_y: zone.origin.y,
+          pos_z: zone.origin.z
+        },{
+          duration: 1000,
+        });
+        await delay(150);
+      }
     }
 }
 class Move{
@@ -1035,7 +1087,6 @@ class Round{
         // TODO: we still need to do a dummy animation
         //await window.t.deck.shuffle();
 
-
         //await delay(1000);
 
         // move the deck out of the way
@@ -1048,11 +1099,14 @@ class Round{
 
         await delay(1000);
 
+        // NOTE: server drives dealing of cards now
+        // just by setting card.zone
+        // then the client watches for zone changes and tweens
         // deal the cards
         // for symmetry could allow calling t.game.layout.dealFromDeck(deck)
-        await window.t.deck.dealToLayout(
-            window.t.game.layout
-        )
+        // await window.t.deck.dealToLayout(
+        //     window.t.game.layout
+        // )
     }
     recordMove(move){
         this.moves.push(move);
@@ -1316,6 +1370,8 @@ function setupVideoStream(){
     const constraints = {
       audio: true,
       video: {
+        exposureMode: {ideal:'continuous'},
+        exposureCompensation: {ideal:0},
         width: {ideal:1280},
         height: {ideal:720},
         facingMode: 'user'
@@ -1634,6 +1690,11 @@ function initTableMesh(){
 async function onMouseMove( evt ){
   updateClientCursor();
   updatePlayerHead();
+  // t.players[getOpponentID()].head.mesh.lookAt(t.camera)
+  // prevent looking under the table
+  if(camera.position.y <= 2){
+    camera.position.y = 2;
+  }
   // TODO: allow user to hover over matches in their hand,
   // but NOT the playfield cards, if it's not currently their turn
   // todo: move up to app-level

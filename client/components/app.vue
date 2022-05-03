@@ -1,6 +1,9 @@
 <template>
     <div id="debug" >
         <div>Online: {{state?.client_ids?.length}}</div>
+        <div>Round {{state?.round_number}}</div>
+        <div v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: {{state?.player_scores?.[id]?.[0] ?? 0}}</div>
+
         <div v-if="!calling"
             @click.prevent="start_video_chat">
             <button class="video-chat-call-start">Start Video Chat</button>
@@ -135,6 +138,13 @@ export default {
 
                 if(new_state?.game?.started && !old_state?.game?.started){
                     t.startGame();
+                }
+                // console.log('last dealt?',new_state?.last_dealt,old_state?.last_dealt);
+                if(new_state?.shuffling && !old_state?.shuffling){
+                    t.deck.tweenCardsToDeck();
+                }
+                if(new_state?.last_dealt !== old_state?.last_dealt){
+                    t.deck.tweenCardsToZones();
                 }
 
                 if(new_state?.client_ids?.length === 2 && old_state?.client_ids?.length === 1){

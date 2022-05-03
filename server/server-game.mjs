@@ -16,11 +16,14 @@ class ServerGame{
         };
         this.game_host = null;
         this.rounds = {};
+        this.round_number = 1;
+        this.last_dealt = null; // trigger "dealing" tween
 
         // TODO: nest these under games[]
         this.cards = [];
         this.zones = [];
         this.available_cards = [];
+        this.shuffling = false;
         this.flipped = [];
         this.hovered = [];
         this.player_turn = null;
@@ -29,6 +32,8 @@ class ServerGame{
         this.ignore_clicks = false;
         this.player_hands = {};
         this.player_heads = {};
+        this.player_scores = {};
+        this.player_names = {};
 
         // heartbeat
         this.ping_interval = setInterval(this.ping.bind(this),256);
@@ -96,6 +101,8 @@ class ServerGame{
         this.player_cursors[client_id] = {x:0,y:0,z:0};
         this.player_hands[client_id] = [];
         this.player_heads[client_id] = [];
+        this.player_scores[client_id] = [0,0]; // matches, rounds won
+        this.player_names[client_id] = 'player '+room.players.length; // matches, rounds won
         const player_or_spectator = room.players.length <= 2 ? 'player' : 'spectator';
         console.log('players?',room.players.length)
         if(room.players.indexOf(room.player_turn) === -1){
@@ -118,6 +125,8 @@ class ServerGame{
         delete this.clients?.[client_id];
         delete this.player_hands?.[client_id];
         delete this.player_heads?.[client_id];
+        delete this.player_scores?.[client_id];
+        delete this.player_names?.[client_id];
 
         // todo: get room(s) for player and loop
         const room = this.rooms[this.room_id];
@@ -271,8 +280,10 @@ class ServerGame{
         console.log('check for match',this.flipped.length);
         if(this.flipped.length > 1){
             this.ignore_clicks = true;
-            let cardA = this.cards[this.flipped[0]];
-            let cardB = this.cards[this.flipped[1]];
+            const cardA_ID = this.flipped[0]
+            const cardB_ID = this.flipped[1]
+            let cardA = this.cards[cardA_ID];
+            let cardB = this.cards[cardB_ID];
             console.log('match?',cardA.pair_id,cardB.pair_id);
             if(cardA.pair_id === cardB.pair_id){
                 console.log('match found');
@@ -282,6 +293,8 @@ class ServerGame{
                     pass: true,
                     pair_id:cardA.pair_id
                 })
+
+                this.player_scores[this.player_turn][0]++;
 
                 await delay(1000); // wait a beat
 
@@ -293,7 +306,12 @@ class ServerGame{
                     ...this.flipped
                 ];
 
+                // remove from "available" array
+                this.available_cards.splice(this.available_cards.indexOf(cardA_ID),1);
+                this.available_cards.splice(this.available_cards.indexOf(cardB_ID),1);
+
                 console.log('player hands?',this.player_hands);
+                console.log('available cards remaining?', this.available_cards.length);
 
                 // un-flag
                 this.flipped = [];
@@ -306,9 +324,23 @@ class ServerGame{
                 cardB.zone = null;
                 cardB.player_id = this.player_turn;
 
+                if(!this.available_cards.length){
+                    // round over, start next round
+                    this.newRound();
+                    // let new_round_id = "round_"+performance.now();
+                    // this.rounds[new_round_id] = {
+                    //     started: true
+                    // }
+                    // this.round_id = new_round_id;
+                    this.round_number = Object.keys(this.rounds).length;
+                }else{
+                    // if there's still cards in the 'deck' zone,
+                    // deal 2 cards to the zones we just emptied (flipped)
+                }
 
             }else{
                 console.log('not a match');
+                this.player_scores[this.player_turn][0]--;
                 // todo delay
                 await delay(1000);
                 this.flipped = []; // unflip on client
@@ -367,15 +399,20 @@ class ServerGame{
             type:'PING',
             time: performance.now(),
             state: {
+                shuffling: this?.shuffling,
+                last_dealt: this?.last_dealt,
                 room_id: this.room_id,
                 client_ids: Object.keys(this.clients),
                 player_hands: this?.player_hands,
                 player_heads: this?.player_heads,
+                player_scores: this?.player_scores,
+                player_names: this?.player_names,
                 game_host: this?.game_host,
                 game_id: this?.game_id,
                 game: this.games?.[this?.game_id],
                 round_id: this?.round_id,
                 round: this.rounds?.[this?.round_id],
+                round_number: this.round_number,
                 cards: this.cards,
                 available_cards: this.available_cards,
                 //flipped: this.games?.[this?.game_id]?.flipped,
@@ -398,9 +435,7 @@ class ServerGame{
         let new_game_id = "game_"+performance.now();
         this.game_id = new_game_id;
 
-        let new_round_id = "round_"+performance.now();
-        this.round_id = new_round_id;
-
+        // do we reference room.players? or just state.players?
         this.rooms[new_room_id] = {
             players: [], //Object.keys(this.clients),
         }
@@ -413,27 +448,7 @@ class ServerGame{
             //flipped: [],
         }
 
-        this.rounds[new_round_id] = {
-            started: true,
-        }
-
-        for(var i=0; i<(4*4); i++){
-            this.cards.push({
-                index: i,
-                deck_order_index: i,
-                face_up: false,
-                pair_id: i % 2 === 0 ? i : i-1,
-            });
-            this.available_cards.push(i);
-        }
-
-        this.available_cards = this.shuffleOnce(this.available_cards);
-
-        for(let i in this.cards){
-            let card = this.cards[i];
-            card.deck_order_index = this.available_cards.indexOf(i);
-            card.zone = i;
-        }
+        this.newRound();
 
         // ping will broadcast
         // this.notifyClient(client_id,{
@@ -442,6 +457,53 @@ class ServerGame{
         //     game_id:new_game_id,
         //     round_id:new_round_id
         // })
+    }
+
+    async newRound(){
+        let new_round_id = "round_"+performance.now();
+        this.round_id = new_round_id;
+
+        this.rounds[new_round_id] = {
+            started: true,
+        }
+
+        // clear players hands
+        for(let i in this.player_hands){
+            this.player_hands[i] = [];
+        }
+
+        // regenerate available cards array
+        this.available_cards = [];
+        this.cards = [];
+        for(var i=0; i<(4*4); i++){
+            this.cards.push({
+                index: i,
+                deck_order_index: i,
+                face_up: false,
+                pair_id: i % 2 === 0 ? i : i-1,
+                zone: 'deck'
+            });
+            this.available_cards.push(i);
+        }
+
+        this.shuffling = true; //start client shuffle animation
+        await delay(2000);
+        this.available_cards = this.shuffleOnce(this.available_cards);
+        this.shuffling = false; // end client shuffle animation
+
+        // deal the cards by assigning them to zones
+        for(let i in this.available_cards){
+            let card_id = this.available_cards[i];
+            let card = this.cards[card_id];
+            //card.deck_order_index = i; //this.available_cards.indexOf(card_id);
+            // max zones
+            if(i<16){
+                card.zone = i;
+            }
+        }
+        // TODO: support "backfilling" when the deck has more cards than there are zones to deal to (after each match)
+        this.last_dealt = Date.now();
+        // console.log('last_dealt',this.last_dealt)
     }
 
     shuffleDeck(){
