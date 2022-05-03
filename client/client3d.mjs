@@ -415,10 +415,11 @@ class Tabletop{
           await t.peer.setLocalDescription(new RTCSessionDescription(peerAnswer));
           t.opponent_video_stream_settings = decoded.stream_settings; // save call initiators stream settings
           if(t.opponent_video_stream_settings){
-            let aspect_ratio = t.opponent_video_stream_settings.aspectRatio;
-            console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+            let ovss = t.opponent_video_stream_settings;
+            let aspect_ratio = ovss.width / ovss.height;
+            // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
             t?.players?.[getOpponentID()]?.head.mesh.scale.set(aspect_ratio,1,1);
-            console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+            // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
           }
           t.server.send({
             type:'mediaAnswer',
@@ -443,10 +444,11 @@ class Tabletop{
       t.opponent_video_stream_settings);
 
       if(t.opponent_video_stream_settings){
-        let aspect_ratio = t.opponent_video_stream_settings.aspectRatio;
-        console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+        let ovss = t.opponent_video_stream_settings;
+        let aspect_ratio = ovss.width / ovss.height; // mobiel safari did not send .aspectRatio so calculate it
+        // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
         t?.players?.[getOpponentID()]?.head.mesh.scale.set(aspect_ratio,1,1);
-        console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+        // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
       }
     }
 
