@@ -1,6 +1,11 @@
 <template>
     <div id="debug" >
-        <button @click="show=!show">{{show?'Hide':'Show'}}</button>
+        <div
+            @click.prevent="start_video_chat">
+            <button class="video-chat-call">Start Video Chat</button>
+        </div>
+        <br/>
+        <button @click="show=!show">{{show?'Hide':'Show Debug Info'}}</button>
         <div class="inner" v-show="show">
             <ul class="details">
                 <li class="my_client_id">My Client ID:
@@ -67,10 +72,7 @@
                     <button class="new-game">Restart Game</button>
                 </li>
 
-                <li
-                    @click.prevent="start_game">
-                    <button class="new-game">Start Game</button>
-                </li>
+
 
                 <!-- <li v-if="state?.room_id && state?.game_id && !state?.game?.started"
                     @click.prevent="start_game">
@@ -177,6 +179,9 @@ export default {
     },
 
     methods:{
+        start_video_chat(){
+            window.t.call()
+        },
         new_room() {
             // request new room
             window.t.server.send({
