@@ -404,6 +404,10 @@ class Tabletop{
     }
 
     async onMediaOffer(decoded){
+      // if(!t.peer){
+      //   setupOpponentPeer();
+      // }
+      console.log('todo: if we already have a peer, do we keep or destroy that connection to respond to the new offer?')
       console.log('onMediaOffer',decoded);
         try {
           await t.peer.setRemoteDescription(new RTCSessionDescription(decoded.offer));
@@ -414,7 +418,8 @@ class Tabletop{
             type:'mediaAnswer',
             answer: peerAnswer,
             from: t.app.state.my_client_id,
-            to: decoded.from
+            to: decoded.from,
+            stream_settings: t.stream.getVideoTracks()[0].getSettings()
           });
         } catch (error) {
           console.error('onMediaOffer',error);
@@ -424,6 +429,7 @@ class Tabletop{
     async onMediaAnswer(decoded){
       console.log('onMediaAnswer',decoded)
       await t.peer.setRemoteDescription(new RTCSessionDescription(decoded.answer));
+      t.opponent_video_stream_settings = decoded.stream_settings;
     }
 
     onIceCandidateEvent(event) {
@@ -560,7 +566,7 @@ class PlayerHead extends TweenableMesh {
   setupMesh(){
     this.mesh = new THREE.Mesh(
       // new THREE.SphereGeometry(4.0,8,8),
-      new THREE.PlaneGeometry( 16, 9 ),
+      new THREE.PlaneGeometry( 16, 16 ),
       new THREE.MeshBasicMaterial({
         // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
         // wireframe: true,
@@ -1236,7 +1242,26 @@ function init(){
   render();
 }
 
-function setupVideoStream(){
+// TODO: host ability to invite a spectator to become a player
+// TODO: host ability to kick a player into spectator status
+
+// todo: filter thru clients, return other player(s) who aren't you
+// skip spectators
+function getOpponentID(){
+  const ids = t.app.state.client_ids.slice();
+  if(ids.length<2){
+    console.error('no one to call');
+  }else if(ids.length > 2){
+    console.error('need to figure out multipeer connections');
+  }else{
+    let my_index = ids.indexOf(t.app.state.my_client_id);
+    ids.splice(my_index,1);
+    console.warn('attempting media offer to peer:',ids[0],ids);
+  }
+  return ids[0];
+}
+
+function setupOpponentPeer(){
   // oponent stream
   const createPeerConnection = () => {
     return new RTCPeerConnection({
@@ -1252,18 +1277,37 @@ function setupVideoStream(){
   t.peer.onicecandidate = t.onIceCandidateEvent;
   const gotRemoteStream = event => {
     const [stream] = event.streams;
+    t.opponent_stream = stream;
     t.opponent_video.srcObject = stream;
+
+    // update opponent's "head" shape to match their video aspect ratio
+    console.log('opponent stream ar',stream.getVideoTracks()[0].getSettings());
+
+    if(t.opponent_video_stream_settings){
+      let aspect_ratio = t.opponent_video_stream_settings.aspectRatio;
+      console.log('head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+      t?.players?.[getOpponentID()]?.head?.mesh?.scale?.set(1,aspect_ratio,1);
+
+    }
+    // console.log('head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
   };
 
   t.peer.addEventListener('track', gotRemoteStream);
+}
+
+// current player's video stream
+function setupVideoStream(){
+  setupOpponentPeer();
 
   if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
-
+    // todo add camera flip (self)
+    // add video mute (self/other)
+    // add audio mute (self/other)
     const constraints = {
       audio: true,
       video: {
-        width: 1280,
-        height: 720,
+        width: {ideal:1280},
+        height: {ideal:720},
         facingMode: 'user'
       }
     };
@@ -1271,6 +1315,7 @@ function setupVideoStream(){
     navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
 
       // apply the stream to the video element used in the texture
+      t.stream = stream;
 
       stream.getTracks().forEach(track => t.peer.addTrack(track, stream));
 
@@ -1290,23 +1335,16 @@ function setupVideoStream(){
   }
 
   t.call = async()=>{
+    setupOpponentPeer();
     const localPeerOffer = await t.peer.createOffer();
     await t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
-    const ids = t.app.state.client_ids.slice();
-    if(ids.length<2){
-      console.error('no one to call');
-    }else if(ids.length > 2){
-      console.error('need to figure out multipeer connections');
-    }else{
-      let my_index = ids.indexOf(t.app.state.my_client_id);
-      ids.splice(my_index,1);
-      console.warn('attempting media offer to peer:',ids);
-    }
+    const opponent_id = getOpponentID()
     t.server.send({
       type:'mediaOffer',
       offer: localPeerOffer,
+      stream_settings: t.stream.getVideoTracks()[0].getSettings(),
       from: t.app.state.my_client_id,
-      to: ids[0]
+      to: opponent_id
     })
   }
 
