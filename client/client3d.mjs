@@ -1499,7 +1499,7 @@ function render(){
             // instead of calling card.tweento here,
             // we should just update destination values on the object
             // and on every tick, it should tween to the new values
-            card.setDestination({
+            card.tweenTo({
               pos_y: 1,
             })
           }
@@ -1508,7 +1508,7 @@ function render(){
           card.mesh.material[2].color.set( colorDark );
           card.mesh.material[3].color.set( colorDark );
           // console.log('setting material to color dark')
-          card.setDestination({
+          card.tweenTo({
             pos_y: 0,
           })
         }
