@@ -147,7 +147,7 @@ class SocketConnection{
               // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
 
               // request video stream
-              setupVideoStream();
+              //setupVideoStream();
               break;
 
           case 'GAME_STATE_UPDATE':
@@ -213,12 +213,14 @@ class SoundsManager{
       'flip': './public/sounds/flip.mp3',
     }
 
-    this.element = document.getElementById('sound_effects')
   }
-  play(sound_name){
-    if(!this.muted && this.sound_map?.sound_name){
-      this.element.src = this.sound_map[sound_name];
-      this.element.play();
+  async play(sound_name){
+    this.element = document.getElementById('sound_effects')
+    console.trace('play sound',this.muted,sound_name,this.sound_map)
+    if(!this.muted && this.sound_map?.[sound_name]){
+      // this.element.setAttribute('src',this.sound_map[sound_name]);
+      this.element.currentTime = 0; // seek to beginning
+      await this.element.play();
     }
   }
 }
@@ -229,7 +231,9 @@ class Tabletop{
         // table tops have uuids which can be shared / spectated / joined
         this.id = "id"+performance.now();
 
+        // t.server =
         this.server = new SocketConnection();
+        // t.sounds =
         this.sounds = new SoundsManager();
 
         this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
@@ -854,7 +858,7 @@ class Card {
               this.tween = tweenEnd;
               this.tweening = true;
               this.tween.onComplete(()=>{
-                console.log(this.tween);
+                // console.log(this.tween);
                 this.tweening = false;
               })
               this.tween.start();
@@ -876,7 +880,7 @@ class Card {
         this.tween = tweenMid ? tweenMid.chain(tweenEnd) : tweenEnd;
         this.tweening = true;
         this.tween.onComplete(()=>{
-          console.log(this.tween);
+          // console.log(this.tween);
           this.tweening = false;
         })
         this.tween.start();
@@ -1520,18 +1524,18 @@ function render(){
             // instead of calling card.tweento here,
             // we should just update destination values on the object
             // and on every tick, it should tween to the new values
-            card.tweenTo({
-              pos_y: 1,
-            })
+            // card.tweenTo({
+            //   pos_y: 1,
+            // })
           }
         }else{
           card.hovered = false;
           card.mesh.material[2].color.set( colorDark );
           card.mesh.material[3].color.set( colorDark );
           // console.log('setting material to color dark')
-          card.tweenTo({
-            pos_y: 0,
-          })
+          // card.tweenTo({
+          //   pos_y: 0,
+          // })
         }
       }
     }

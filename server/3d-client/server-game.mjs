@@ -325,6 +325,7 @@ class ServerGame{
                 cardB.player_id = this.player_turn;
 
                 if(!this.available_cards.length){
+                    await delay(1000); // wait a beat
                     // round over, start next round
                     this.newRound();
                     // let new_round_id = "round_"+performance.now();
