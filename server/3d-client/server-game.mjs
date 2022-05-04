@@ -101,7 +101,7 @@ class ServerGame{
         this.player_cursors[client_id] = {x:0,y:0,z:0};
         this.player_hands[client_id] = [];
         this.player_heads[client_id] = [];
-        this.player_scores[client_id] = [0,0]; // matches, rounds won
+        this.player_scores[client_id] = [0,0]; // matches, misses
         this.player_names[client_id] = 'player '+room.players.length; // matches, rounds won
         const player_or_spectator = room.players.length <= 2 ? 'player' : 'spectator';
         console.log('players?',room.players.length)
@@ -340,7 +340,7 @@ class ServerGame{
 
             }else{
                 console.log('not a match');
-                this.player_scores[this.player_turn][0]--;
+                this.player_scores[this.player_turn][1]++;
                 // todo delay
                 await delay(1000);
                 this.flipped = []; // unflip on client
@@ -388,41 +388,84 @@ class ServerGame{
         //     player_hands[a] = client.hand;
         // }
         const room = this.rooms[this.room_id];
+
+        // TODO: make this time delayed, or require user input
+        // "looks like other player has left.
+        // [Wait] [Invite Another Player] [Continue Alone] [New Game] [End Game/Leave Room]"
         if(room?.players?.indexOf(this.player_turn) === -1){
             this.player_turn = room.players[0];
         }
+        // same note as above, let the user know they're the only player
         if(room?.players?.indexOf(this?.game_host) === -1){
             this.game_host = room.players[0];
         }
         // TODO: if player's ws connection is closed, prune them from the room
+        // TODO: do this on a delay based on client.last_seen, client.max_timeout_before_dropped
+        // that way if someone loses their connection, they can rejoin within a specified time period
+
+
+        // TODO: investigate sending deltas on a per-client basis (let client send last known good hashes)
+        // we compare last known hashes to the current hashes, and send deltas (or full state if corrupt / fresh);
         this.notifyAllClients({
             type:'PING',
             time: performance.now(),
             state: {
+                // is the deck currently being shuffled? tells client to animate the deck in a shuffle loop
                 shuffling: this?.shuffling,
+                // todo: do away with this in favor of automatic zone-switch tweens
+                // this basically tells the client the last time the server dealt cards, and if the client hasn't played a "deal" animation since it last saw the server deal cards, it should animate the cards
                 last_dealt: this?.last_dealt,
+                // the current room id that the client is currently playing in
+                // todo: server support multiple clients in different rooms
                 room_id: this.room_id,
+                // the list of client ids of other clients in the room
+                // todo: scope to room
                 client_ids: Object.keys(this.clients),
+                // pvp-matching: player<->matched_cards mapping
                 player_hands: this?.player_hands,
+                // broadcasts the position of each client's camera
                 player_heads: this?.player_heads,
+                // keep track of current player scores (total, and per-round)
                 player_scores: this?.player_scores,
+                // names of current players // todo: user accounts
                 player_names: this?.player_names,
+                // player_id of the current player hosting the room (extra options available if host)
                 game_host: this?.game_host,
+                // only necessary once we allow clients to play multiple games simultaneously (mult-tab,multi-device)
                 game_id: this?.game_id,
-                game: this.games?.[this?.game_id],
-                round_id: this?.round_id,
-                round: this.rounds?.[this?.round_id],
+                // i like having a flat store instead of state.game.prop, state.game_prop
+                // this only holds {started:boolean}
+                // todo: drop this
+                // game: this.games?.[this?.game_id],
+
+                // the current round id
+                // i don't think the client needs this...
+                // round_id: this?.round_id,
+
+                // round.started (only prop):
+                // round: this.rounds?.[this?.round_id],
+
+                // allow client to display current round number and detect round transitions
                 round_number: this.round_number,
+
+                // cards[i].face_up is not used (we ref state.flipped[] instead)
+                // this object holds card shuffled order info & card-zone assignment
+                // (and pairing but the client doest really need to know that since server validates matches)
+                // will be needed once you can edit decks client-side #FUTURE
                 cards: this.cards,
+                // the remaining cards in the deck, in their SHUFFLED order
                 available_cards: this.available_cards,
-                //flipped: this.games?.[this?.game_id]?.flipped,
+                // the ids of the max2 cards flipped over by current player+round+turn
                 flipped: this.flipped,
+                // PlayerID: who's turn is it
                 player_turn: this.player_turn,
+                // the ids of the cards being hovered over by the current player (i think i blocked hovering when it's not your turn)
                 hovered: this.hovered,
-                // just let server dictate when a card is in a players hand
-                // if the client detects a change in length in the hand, it should re-parent the card from zonegroup to handd
-                // match_checks: this.match_checks, // todo: subset
+
+                // the current position of players mouse cursor / pointer / "hands"
                 player_cursors: this.player_cursors,
+
+                // whether or not the server is currently ignoring clicks (to prevent actions while animating / processing)
                 ignore_clicks: this.ignore_clicks
             }
         })
@@ -443,10 +486,12 @@ class ServerGame{
         this.game_host = client_id;
         this.player_turn = client_id;
 
-        this.games[new_game_id] = {
-            started: true,
-            //flipped: [],
-        }
+        // this.games[new_game_id] = {
+        //     started: true,
+        //     //flipped: [],
+        // }
+
+        this.rounds = [];
 
         this.newRound();
 
@@ -470,6 +515,10 @@ class ServerGame{
         // clear players hands
         for(let i in this.player_hands){
             this.player_hands[i] = [];
+        }
+        // clear player scores
+        for(let i in this.player_scores){
+            this.player_scores[i] = [];
         }
 
         // regenerate available cards array

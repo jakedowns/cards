@@ -725,6 +725,7 @@ class Card {
         this.deck_order_index = index; // what order is this card in the deck's available cards array? (saves repeat indexOf calls)
         this.setupTexturesAndMaterials();
         this.setupMesh();
+        this.destination = {};
 
         // Animation
         this.face_up = false;
@@ -800,32 +801,75 @@ class Card {
         // console.log('card move to point',destination,options);
         // this generates a tween between the current position and the destination
         this.destination = destination;
+        let priority = options?.priority ?? 3; // 1-4 default: 3
         if(this.tweening){
-          console.log('already tweening. should we cancel or finish, block, or queue?');
-            //return false;
+          // console.log('already tweening. should we cancel or finish, block, or queue?',priority);
+          if(priority === 4){
+            // tween is low priority, we can ignore it
+            return;
+          }
         }
-        this.tweening = true;
-
-        // TODO: add ability to include/exclude properties from tween to save overhead
-
+        this.current_tween_priority = priority;
         let _mesh = this.mesh;
         let tweenMid = null;
-        if(options && options.arcTo){
-            // optional midpoint
-            tweenMid = getMeshTween(_mesh,options.arcTo,300/2);
-        }
-        let tweenEnd = getMeshTween(_mesh,destination,{
-            duration: tweenMid ? 300/2 : 300,
+        let duration = options?.arcTo ? 300/2 : 300;
+        // TODO: bring back curve-based / mixer based animation
+        // if(options && options.arcTo){
+        //     // optional midpoint
+        //     tweenMid = getMeshTween(_mesh,options.arcTo,300/2);
+        // }
+        // TODO: add ability to include/exclude properties from tween to save overhead
+        let tweenEnd = getMeshTween(
+          _mesh,
+          destination,
+          {
+            duration,
             // todo accept easing option
-        });
+          });
+        if(priority === 3){
+          // priority_level_3 === chain onto the current tween
+          if(this.tweening && this.tween && !this.tween.stopped){
+            // can we chain on a running track?
+            // if not, push into a queue we call when original tween ends...
+            this.tween.onComplete(()=>{
+              this.tween = tweenEnd;
+              this.tweening = true;
+              this.tween.onComplete(()=>{
+                console.log(this.tween);
+                this.tweening = false;
+              })
+              this.tween.start();
+            });
+            // await delay(duration);
+            // TODO: put this in a callback
+            // this.tweening = false;
+            return;
+          }
+        }
 
-        tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
+        if(priority === 2){
+          // jump the tween to the last frame, then do the next tween
+        }
 
-        await delay(150);
+        // ELSE assume priority 1
+        // interupt the current tween
+        this?.tween?.stop();
+        this.tween = tweenMid ? tweenMid.chain(tweenEnd) : tweenEnd;
+        this.tweening = true;
+        this.tween.onComplete(()=>{
+          console.log(this.tween);
+          this.tweening = false;
+        })
+        this.tween.start();
 
+        // await delay(duration);
 
         // run the tween
-        this.tweening = false;
+        // this.tweening = false;
+    }
+
+    setDestination(destination){
+      this.destination = destination;
     }
 }
 class Deck{
@@ -1437,6 +1481,8 @@ function render(){
   // update "hovered" status of cards
   // todo only run this loop if t.app.state.hovered has changed since last tick
   if(t?.app?.state?.hovered){
+    // TODO: this check is probably wasteful, find a better way
+    // like .last_hovered_at dirty flag
     if(JSON.stringify(t.app.state.hovered) !== JSON.stringify(t.app.state.hovered_prev)){
       // console.log('hovered array changed',t.app.state.hovered,t.app.state.hovered_prev);
       for(let cardi in t.app.state.cards){
@@ -1444,15 +1490,27 @@ function render(){
         let card = t.cards[cardi]
         // console.log(cardi,t.app.state.hovered.indexOf(cardi),card.hovered)
         if(t.app.state.hovered.indexOf(cardi) > -1){
-          // console.log('setting material to color light')
-          card.hovered = true;
-          card.mesh.material[2].color.set( colorLight );
-          card.mesh.material[3].color.set( colorLight );
+          if(!card.hovered){
+            // console.log('setting material to color light')
+            card.hovered = true;
+            card.mesh.material[2].color.set( colorLight );
+            card.mesh.material[3].color.set( colorLight );
+
+            // instead of calling card.tweento here,
+            // we should just update destination values on the object
+            // and on every tick, it should tween to the new values
+            card.setDestination({
+              pos_y: 1,
+            })
+          }
         }else{
           card.hovered = false;
           card.mesh.material[2].color.set( colorDark );
           card.mesh.material[3].color.set( colorDark );
           // console.log('setting material to color dark')
+          card.setDestination({
+            pos_y: 0,
+          })
         }
       }
     }
@@ -1743,7 +1801,13 @@ async function onMouseMove( evt ){
     if(card_id !== null){
       let card = t.cards[card_id]
       if(!card.hovered){
+        card.mouseOver = true;
         card.hovered = true
+        if(t.app.state.hovered && t.app.state.hovered?.[0]){
+          let i = t.app.state.hovered?.[0];
+          t.cards[i].mouseOver = false;
+          t.cards[i].hovered = false;
+        }
         t.app.state.hovered = [card_id]
         t.server.send({
           type: 'HIGHLIGHT',
@@ -1751,6 +1815,17 @@ async function onMouseMove( evt ){
         })
       }
     }
+  }else{
+    if(t.app.state.hovered && t.app.state.hovered?.[0]){
+      let i = t.app.state.hovered?.[0];
+      t.cards[i].mouseOver = false;
+      t.cards[i].hovered = false;
+    }
+    t.server.send({
+      type: 'HIGHLIGHT',
+      card_id: null,
+    })
+    t.app.state.hovered = [];
   }
   //else{
     // console.log('not hovering any cards in zonegroup');

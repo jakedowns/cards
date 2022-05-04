@@ -1,7 +1,7 @@
 // storage api for CardBox
 
-import DEFAULT_STATE from './default.state.mjs';
-import PlayerState from './player-states/4_26_2022_10_11_am_pst.mjs';
+import DEFAULT_STATE from '../2d-client/default.state.mjs';
+import PlayerState from '../2d-client/player-states/4_26_2022_10_11_am_pst.mjs';
 
 class ServerAPI {
 

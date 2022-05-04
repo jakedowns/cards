@@ -19,7 +19,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 console.log('__dirname',__dirname);
 
-import ServerAPI from './server-api.mjs';
+import ServerAPI from './shared/server-api.mjs';
 const SERVER_API = new ServerAPI();
 
 const hostname = HOSTNAME;
@@ -76,8 +76,7 @@ const server = https.createServer(server_options,(req, res) => {
     // basic routing
     console.log('loading',req.url);
     if(req.url.startsWith('/api/')){
-        SERVER_API.request(req, res);
-        return
+        return SERVER_API.request(req, res);
     }
     switch(req.url){
         case '/':
@@ -94,20 +93,13 @@ const server = https.createServer(server_options,(req, res) => {
 });
 
 server.listen(port, hostname, () => {
+    // confirm startup
   console.log(`Server running at https://${hostname}:${port}/`);
 });
 
 // todo: split websocket into separate file
 // Importing the required modules
 import {WebSocketServer} from 'ws';
-
-// let https_ws_server = https.createServer(options, (req, res) => {
-// res.writeHead(200);
-// res.end(index);
-// });
-// server.addListener('upgrade', (req, res, head) => console.log('UPGRADE:', req.url));
-// server.on('error', (err) => console.error(err));
-// server.listen(8000, () => console.log('Https running on port 8000'));
 
 let wss = null;
 server.on('upgrade', function upgrade(request, socket, head) {
@@ -121,7 +113,8 @@ server.on('upgrade', function upgrade(request, socket, head) {
 // Creating a new websocket server
 wss = new WebSocketServer({ noServer: true })
 
-import ServerGame from './server-game.mjs';
+// maybe rename this to ServerRoomManager
+import ServerGame from './3d-client/server-game.mjs';
 const game = new ServerGame();
 
 import {
@@ -133,18 +126,25 @@ wss.on("connection", ws => {
     let client_id = `client_${performance.now()}`;
     // TODO: prevent client id collisions
 
+    // register client
     game.onClientJoin(client_id,ws);
-    // sending message
+
+
+    // listen to client messages
     ws.on("message", data => {
         //console.log(`Client has sent us: ${data}`)
         game.onClientMessage(client_id,data);
         //ws.send('server says thanks!');
     });
-    // handling what to do when clients disconnects from server
+
+
+    // handle disconnects
     ws.on("close", () => {
         //console.log("the client has disconnected");
         game.onClientLeave(client_id);
     });
+
+
     // handling client connection error
     ws.onerror = function (err) {
         //console.log("Some Error occurred")

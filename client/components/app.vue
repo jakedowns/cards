@@ -2,7 +2,7 @@
     <div id="debug" >
         <div>Online: {{state?.client_ids?.length}}</div>
         <div>Round {{state?.round_number}}</div>
-        <div v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: {{state?.player_scores?.[id]?.[0] ?? 0}}</div>
+        <div class="scores" v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: <span class="hit">{{state?.player_scores?.[id]?.[0] ?? 0}}</span> / <span class="miss">{{state?.player_scores?.[id]?.[1] ?? 0}}</span> </div>
 
         <div v-if="!calling"
             @click.prevent="start_video_chat">
@@ -97,7 +97,18 @@
             </ul>
             <div class="bg-blur"></div>
         </div>
-
+        <div class="hud">
+            <div class="av-control">
+                <button @click="toggle_mic_mute">{{mic_muted?'Un':''}}Mute Mic</button>
+                <!-- TODO: pick audio input -->
+                <!-- TODO: pick audio input settings -->
+                <button @click="toggle_vid_mute">{{video_muted?'Un':''}}Mute Video</button>
+                <!-- TODO: pick video input -->
+                <!-- TODO: video input settings -->
+            </div>
+            <div v-if="its_my_turn">Your Turn</div>
+            <div v-else>Opponent's Turn</div>
+        </div>
     </div>
 </template>
 
@@ -113,7 +124,9 @@ export default {
             show: false,
             calling: false,
             show_end_call_button: false,
-            messages: []
+            messages: [],
+            mic_muted: false,
+            video_muted: false,
         }
     },
 
@@ -206,6 +219,12 @@ export default {
     },
 
     methods:{
+        toggle_mic_mute(){
+            this.mic_muted = !this.mic_muted;
+        },
+        toggle_vid_mute(){
+            this.video_muted = !this.video_muted;
+        },
         start_video_chat(){
             this.calling = true;
             window.t.call()
@@ -286,7 +305,7 @@ export default {
     .details {
         z-index: 2;
         position: relative;
-        font-family: cursive;
+
         font-size: 11px;
     }
     .bg-blur {
@@ -299,6 +318,13 @@ export default {
         background: rgba(0,0,0,0.5);
         filter: blur(10px);
         pointer-events: none;
+    }
+
+    .scores .hit {
+        color: green;
+    }
+    .scores .miss {
+        color: red;
     }
 }
 </style>
