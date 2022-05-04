@@ -63,9 +63,16 @@ const loadFile = function(path,res){
 if(!LOCAL){
     try{
         const http_server = http.createServer((req,res)=>{
-            return res.redirect(301, `https://${req.headers.host}${req.url}`);
+            console.log('redirect http->https',`https://${req.headers.host}${req.url}`);
+            res.writeHead(302, {
+            'Location': `https://${req.headers.host}${req.url}`,
+            //add other headers here...
+            });
+            res.end();
         });
-        http_server.listen(80);
+        http_server.listen(80,hostname,()=>{
+            console.log('http fallback started',hostname);
+        });
     }catch(e){
         console.warn('failed to start http->https redirect server');
     }

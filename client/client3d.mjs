@@ -205,6 +205,24 @@ class Player {
     }
 }
 
+class SoundsManager{
+  constructor(){
+    this.muted = false;
+
+    this.sound_map = {
+      'flip': './public/sounds/flip.mp3',
+    }
+
+    this.element = document.getElementById('sound_effects')
+  }
+  play(sound_name){
+    if(!this.muted && this.sound_map?.sound_name){
+      this.element.src = this.sound_map[sound_name];
+      this.element.play();
+    }
+  }
+}
+
 // Playfield?
 class Tabletop{
     constructor(){
@@ -212,6 +230,7 @@ class Tabletop{
         this.id = "id"+performance.now();
 
         this.server = new SocketConnection();
+        this.sounds = new SoundsManager();
 
         this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
@@ -1239,6 +1258,7 @@ class Game_PVPMemory{
         // todo if already tweening cancel it
         __card.current_tween = getFlipTween(_card,'faceup');
         __card.current_tween.start();
+        t.sounds.play('flip'); // todo: put this in the tween
       }else if(!face_up && !__card.tweenedToFaceDown && __card.face_up){
         __card.face_up = false;
         __card.tweenedToFaceUp = false;
@@ -1247,6 +1267,7 @@ class Game_PVPMemory{
         // todo if already tweening cancel it
         __card.current_tween = getFlipTween(_card,'facedown')
         __card.current_tween.start();
+        t.sounds.play('flip'); // todo: put this in the tween
       }
     }
     get current_round(){
@@ -2081,6 +2102,8 @@ function resetCards(){
          let fc = t.cards[fci].mesh;
          // fc.actions.flipUpside.stop();
          getFlipTween(fc,'facedown').start();
+         // todo: put the soundeffect in the getTween method
+         t.sounds.play('flip');
         //  fc.actions.flipDownside.start();
          fc.faceUp = false;
        }
