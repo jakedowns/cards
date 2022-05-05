@@ -147,15 +147,15 @@ class SocketConnection{
               // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
 
               // request video stream
-              //setupVideoStream();
+              setupVideoStream();
               break;
 
-          case 'GAME_STATE_UPDATE':
-              window.t.app.state = {
-                  ...window.t.app.state,
-                  ...decoded?.state
-              }
-              break;
+          // case 'GAME_STATE_UPDATE':
+          //     window.t.app.state = {
+          //         ...window.t.app.state,
+          //         ...decoded?.state
+          //     }
+          //     break;
 
           // case 'ROOM_CREATE_SUCCESS':
           //     console.log('room created',decoded);
@@ -1260,18 +1260,18 @@ class Game_PVPMemory{
         __card.tweenedToFaceDown = false;
         __card.tweening = true;
         // todo if already tweening cancel it
+        t.sounds.play('flip'); // todo: put this in the tween
         __card.current_tween = getFlipTween(_card,'faceup');
         __card.current_tween.start();
-        t.sounds.play('flip'); // todo: put this in the tween
       }else if(!face_up && !__card.tweenedToFaceDown && __card.face_up){
         __card.face_up = false;
         __card.tweenedToFaceUp = false;
         __card.tweenedToFaceDown = true;
         __card.tweening = true;
         // todo if already tweening cancel it
+        t.sounds.play('flip'); // todo: put this in the tween
         __card.current_tween = getFlipTween(_card,'facedown')
         __card.current_tween.start();
-        t.sounds.play('flip'); // todo: put this in the tween
       }
     }
     get current_round(){
@@ -2105,9 +2105,9 @@ function resetCards(){
          let fci = t.game.flipped[a];
          let fc = t.cards[fci].mesh;
          // fc.actions.flipUpside.stop();
+         t.sounds.play('flip');
          getFlipTween(fc,'facedown').start();
          // todo: put the soundeffect in the getTween method
-         t.sounds.play('flip');
         //  fc.actions.flipDownside.start();
          fc.faceUp = false;
        }

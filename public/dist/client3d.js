@@ -13708,7 +13708,11 @@ __webpack_require__.r(__webpack_exports__);
   setup: function setup() {
     return {
       show: false,
-      messages: []
+      calling: false,
+      show_end_call_button: false,
+      messages: [],
+      mic_muted: false,
+      video_muted: false
     };
   },
   mounted: function mounted() {
@@ -13727,10 +13731,27 @@ __webpack_require__.r(__webpack_exports__);
       // todo: should i detect deck<->zone<->hand movement implicitly / reactively?
       // or do i need to say ON_MATCH_PASS, ON_MATCH_FAIL to trigger next steps?
       handler: function handler(new_state, old_state) {
-        var _new_state$game, _old_state$game;
+        var _t, _t$peer, _new_state$game, _old_state$game, _new_state$client_ids, _old_state$client_ids;
+
+        // if we have an active webrtc connection, give user option to end it
+        this.show_end_call_button = ((_t = t) === null || _t === void 0 ? void 0 : (_t$peer = _t.peer) === null || _t$peer === void 0 ? void 0 : _t$peer.connectionState) === 'connected';
 
         if (new_state !== null && new_state !== void 0 && (_new_state$game = new_state.game) !== null && _new_state$game !== void 0 && _new_state$game.started && !(old_state !== null && old_state !== void 0 && (_old_state$game = old_state.game) !== null && _old_state$game !== void 0 && _old_state$game.started)) {
           t.startGame();
+        } // console.log('last dealt?',new_state?.last_dealt,old_state?.last_dealt);
+
+
+        if (new_state !== null && new_state !== void 0 && new_state.shuffling && !(old_state !== null && old_state !== void 0 && old_state.shuffling)) {
+          t.deck.tweenCardsToDeck();
+        }
+
+        if ((new_state === null || new_state === void 0 ? void 0 : new_state.last_dealt) !== (old_state === null || old_state === void 0 ? void 0 : old_state.last_dealt)) {
+          t.deck.tweenCardsToZones();
+        }
+
+        if ((new_state === null || new_state === void 0 ? void 0 : (_new_state$client_ids = new_state.client_ids) === null || _new_state$client_ids === void 0 ? void 0 : _new_state$client_ids.length) === 2 && (old_state === null || old_state === void 0 ? void 0 : (_old_state$client_ids = old_state.client_ids) === null || _old_state$client_ids === void 0 ? void 0 : _old_state$client_ids.length) === 1) {// we just went from 1 peer to 2, start a call
+          // this.calling = true; // hide start call button
+          // t.call();
         } //console.log('flipped?',new_state.flipped,new_state.cards);
         // todo: loop over all cards
         // then animate flip based on flipped.indexOf(card.id) > -1
@@ -13783,8 +13804,28 @@ __webpack_require__.r(__webpack_exports__);
 
   },
   methods: {
+    toggle_mic_mute: function toggle_mic_mute() {
+      this.mic_muted = !this.mic_muted;
+    },
+    toggle_vid_mute: function toggle_vid_mute() {
+      this.video_muted = !this.video_muted;
+    },
     start_video_chat: function start_video_chat() {
+      this.calling = true;
       window.t.call();
+    },
+    end_video_chat: function end_video_chat() {
+      var _window$t, _window$t$peer;
+
+      (_window$t = window.t) === null || _window$t === void 0 ? void 0 : (_window$t$peer = _window$t.peer) === null || _window$t$peer === void 0 ? void 0 : _window$t$peer.close();
+
+      if (window.t.peer) {
+        window.t.peer = null;
+      }
+
+      window.t.setupOpponentPeer();
+      this.show_end_call_button = false;
+      this.calling = false;
     },
     new_room: function new_room() {
       // request new room
@@ -13859,63 +13900,65 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   id: "debug"
 };
+var _hoisted_2 = {
+  "class": "hit"
+};
 
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-  "class": "video-chat-call"
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" / ");
+
+var _hoisted_4 = {
+  "class": "miss"
+};
+
+var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "video-chat-call-start"
 }, "Start Video Chat", -1
 /* HOISTED */
 );
 
-var _hoisted_3 = [_hoisted_2];
+var _hoisted_6 = [_hoisted_5];
 
-var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "video-chat-call-end"
+}, "End Video Chat", -1
 /* HOISTED */
 );
 
-var _hoisted_5 = {
+var _hoisted_8 = [_hoisted_7];
+
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_10 = {
   "class": "inner"
 };
-var _hoisted_6 = {
+var _hoisted_11 = {
   "class": "details"
 };
-var _hoisted_7 = {
+var _hoisted_12 = {
   "class": "my_client_id"
 };
 
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
 
-var _hoisted_9 = {
+var _hoisted_14 = {
   "class": "value"
 };
-var _hoisted_10 = {
+var _hoisted_15 = {
   "class": "room_id"
 };
 
-var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
-
-var _hoisted_12 = {
-  "class": "value"
-};
-var _hoisted_13 = {
-  "class": "game_id"
-};
-
-var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
-
-var _hoisted_15 = {
-  "class": "value"
-};
-
-var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
 
 var _hoisted_17 = {
   "class": "value"
 };
 var _hoisted_18 = {
-  "class": "host_id"
+  "class": "game_id"
 };
 
-var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
+var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
 
 var _hoisted_20 = {
   "class": "value"
@@ -13924,90 +13967,142 @@ var _hoisted_20 = {
 var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
 var _hoisted_22 = {
+  "class": "value"
+};
+var _hoisted_23 = {
+  "class": "host_id"
+};
+
+var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
+
+var _hoisted_25 = {
+  "class": "value"
+};
+
+var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+
+var _hoisted_27 = {
   "class": "round_id"
 };
 
-var _hoisted_23 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
-
-var _hoisted_24 = {
-  "class": "value"
-};
-
-var _hoisted_25 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
-
-var _hoisted_26 = {
-  "class": "value"
-};
-var _hoisted_27 = {
-  "class": "clients"
-};
-
-var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
+var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
 
 var _hoisted_29 = {
   "class": "value"
 };
 
-var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
+var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
 var _hoisted_31 = {
+  "class": "value"
+};
+var _hoisted_32 = {
+  "class": "clients"
+};
+
+var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
+
+var _hoisted_34 = {
+  "class": "value"
+};
+
+var _hoisted_35 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
+
+var _hoisted_36 = {
   key: 0
 };
 
-var _hoisted_32 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "new-game"
 }, "Restart Game", -1
 /* HOISTED */
 );
 
-var _hoisted_33 = [_hoisted_32];
-var _hoisted_34 = {
+var _hoisted_38 = [_hoisted_37];
+var _hoisted_39 = {
   "class": "messages"
 };
-var _hoisted_35 = {
+var _hoisted_40 = {
   "class": "message-text"
 };
 
-var _hoisted_36 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_41 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "bg-blur"
 }, null, -1
 /* HOISTED */
 );
 
+var _hoisted_42 = {
+  "class": "hud"
+};
+var _hoisted_43 = {
+  "class": "av-control"
+};
+var _hoisted_44 = {
+  key: 0
+};
+var _hoisted_45 = {
+  key: 1
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state, _$props$state$room_id, _$props$state2, _$props$state$game_id, _$props$state3, _$options$game, _$props$state$game_ho, _$props$state4, _$props$state$round_i, _$props$state5, _$options$round, _$props$state$player_;
+  var _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state7, _$props$state$room_id, _$props$state8, _$props$state$game_id, _$props$state9, _$options$game, _$props$state$game_ho, _$props$state10, _$props$state$round_i, _$props$state11, _$options$round, _$props$state$player_4;
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length), 1
+  /* TEXT */
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.round_number), 1
+  /* TEXT */
+  ), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)((_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.client_ids, function (id) {
+    var _$props$state$player_, _$props$state4, _$props$state4$player, _$props$state$player_2, _$props$state5, _$props$state5$player, _$props$state5$player2, _$props$state$player_3, _$props$state6, _$props$state6$player, _$props$state6$player2;
+
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+      "class": "scores",
+      key: id
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$player = _$props$state4.player_names) === null || _$props$state4$player === void 0 ? void 0 : _$props$state4$player[id]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'player') + ": ", 1
+    /* TEXT */
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
+    /* TEXT */
+    ), _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_3 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_3 !== void 0 ? _$props$state$player_3 : 0), 1
+    /* TEXT */
+    )]);
+  }), 128
+  /* KEYED_FRAGMENT */
+  )), !$setup.calling ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    key: 0,
     onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.start_video_chat && $options.start_video_chat.apply($options, arguments);
     }, ["prevent"]))
-  }, _hoisted_3), _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[1] || (_cache[1] = function ($event) {
+  }, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    key: 1,
+    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.end_video_chat && $options.end_video_chat.apply($options, arguments);
+    }, ["prevent"]))
+  }, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[2] || (_cache[2] = function ($event) {
       return $setup.show = !$setup.show;
     })
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.show ? 'Hide' : 'Show Debug Info'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_7, [_hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.my_client_id), 1
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_12, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.my_client_id), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_10, [_hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state8 = $props.state) === null || _$props$state8 === void 0 ? void 0 : _$props$state8.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_13, [_hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state9 = $props.state) === null || _$props$state9 === void 0 ? void 0 : _$props$state9.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
   /* TEXT */
-  ), _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$game = $options.game) !== null && _$options$game !== void 0 && _$options$game.started ? 'started' : 'not-started'), 1
+  ), _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$game = $options.game) !== null && _$options$game !== void 0 && _$options$game.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : _$props$state4.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_23, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state10 = $props.state) === null || _$props$state10 === void 0 ? void 0 : _$props$state10.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
   /* TEXT */
-  ), _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  ), _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
       color: $options.im_game_host ? 'green' : 'red'
     })
   }, "You're " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.im_game_host ? '' : 'NOT') + " the game host!", 5
   /* TEXT, STYLE */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_22, [_hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : _$props$state5.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_27, [_hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state11 = $props.state) === null || _$props$state11 === void 0 ? void 0 : _$props$state11.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
   /* TEXT */
-  ), _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$round = $options.round) !== null && _$options$round !== void 0 && _$options$round.started ? 'started' : 'not-started'), 1
+  ), _hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$round = $options.round) !== null && _$options$round !== void 0 && _$options$round.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_27, [_hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_32, [_hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
   /* TEXT */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player turn id: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.state.player_turn) + " ", 1
   /* TEXT */
@@ -14017,37 +14112,49 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, "It's " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.its_my_turn ? '' : 'NOT') + " Your Turn!", 5
   /* TEXT, STYLE */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = $props.state.player_type) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'connecting'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_4 = $props.state.player_type) !== null && _$props$state$player_4 !== void 0 ? _$props$state$player_4 : 'connecting'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
-    var _$props$state$player_2, _$props$state$player_3, _$props$state6, _$props$state6$player;
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
+    var _$props$state$player_5, _$props$state$player_6, _$props$state12, _$props$state12$playe;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
       key: player_id
-    }, [!((_$props$state$player_2 = $props.state.player_hands) !== null && _$props$state$player_2 !== void 0 && (_$props$state$player_3 = _$props$state$player_2[player_id]) !== null && _$props$state$player_3 !== void 0 && _$props$state$player_3.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_31, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_hands) === null || _$props$state6$player === void 0 ? void 0 : _$props$state6$player[player_id])), 1
+    }, [!((_$props$state$player_5 = $props.state.player_hands) !== null && _$props$state$player_5 !== void 0 && (_$props$state$player_6 = _$props$state$player_5[player_id]) !== null && _$props$state$player_6 !== void 0 && _$props$state$player_6.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_36, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state12 = $props.state) === null || _$props$state12 === void 0 ? void 0 : (_$props$state12$playe = _$props$state12.player_hands) === null || _$props$state12$playe === void 0 ? void 0 : _$props$state12$playe[player_id])), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
   ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "Flipped: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.flipped)), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                <li v-if=\"!state?.room_id\">\n                    <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                </li>\n\n                <li v-if=\"state?.room_id && !state?.game_id\"\n                    @click.prevent=\"new_game\">\n                    <button class=\"new-game\">New Game</button>\n                </li> "), $options.im_game_host && $options.game_started ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                <li v-if=\"!state?.room_id\">\n                    <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                </li>\n\n                <li v-if=\"state?.room_id && !state?.game_id\"\n                    @click.prevent=\"new_game\">\n                    <button class=\"new-game\">New Game</button>\n                </li> "), $options.im_game_host ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
     key: 0,
-    onClick: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.restart_game && $options.restart_game.apply($options, arguments);
     }, ["prevent"]))
-  }, _hoisted_33)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                    @click.prevent=\"start_game\">\n                    <button class=\"start-game\">Start Game</button>\n                </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_34, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.messages, function (message, i) {
+  }, _hoisted_38)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                    @click.prevent=\"start_game\">\n                    <button class=\"start-game\">Start Game</button>\n                </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_39, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.messages, function (message, i) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "message",
       key: i
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])])]), _hoisted_36], 512
+  ))])])]), _hoisted_41], 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.show]])]);
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.show]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[4] || (_cache[4] = function () {
+      return $options.toggle_mic_mute && $options.toggle_mic_mute.apply($options, arguments);
+    })
+  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.mic_muted ? 'Un' : '') + "Mute Mic", 1
+  /* TEXT */
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[5] || (_cache[5] = function () {
+      return $options.toggle_vid_mute && $options.toggle_vid_mute.apply($options, arguments);
+    })
+  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.video_muted ? 'Un' : '') + "Mute Video", 1
+  /* TEXT */
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $options.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_44, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_45, "Opponent's Turn"))])]);
 }
 
 /***/ }),
@@ -14069,7 +14176,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: auto;\n  width: 30vw;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-family: cursive;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: auto;\n  width: 30vw;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -21321,7 +21428,7 @@ var SocketConnection = /*#__PURE__*/function () {
   }, {
     key: "onServerMessage",
     value: function onServerMessage(event) {
-      var _decoded, _decoded2, _window$t$app$state$h, _window, _window$t, _window$t$app, _window$t$app$state, _decoded3, _t$players, _decoded4;
+      var _decoded, _decoded2, _window$t$app$state$h, _window, _window$t, _window$t$app, _window$t$app$state, _decoded3, _t$players;
 
       //console.log(event);
       var decoded = null;
@@ -21391,10 +21498,12 @@ var SocketConnection = /*#__PURE__*/function () {
 
           setupVideoStream();
           break;
-
-        case 'GAME_STATE_UPDATE':
-          window.t.app.state = _objectSpread(_objectSpread({}, window.t.app.state), (_decoded4 = decoded) === null || _decoded4 === void 0 ? void 0 : _decoded4.state);
-          break;
+        // case 'GAME_STATE_UPDATE':
+        //     window.t.app.state = {
+        //         ...window.t.app.state,
+        //         ...decoded?.state
+        //     }
+        //     break;
         // case 'ROOM_CREATE_SUCCESS':
         //     console.log('room created',decoded);
         //     window.t.app.state.room_id = decoded.room_id;
@@ -21418,6 +21527,11 @@ var SocketConnection = /*#__PURE__*/function () {
 
       if (data.type !== 'SET_PLAYER_CURSOR' && data.type !== 'SET_PLAYER_HEAD' && data.type !== 'HIGHLIGHT') {
         console.log('sending', data, this.client_id, t.app.state.my_client_id);
+      }
+
+      if (!this.ws.readyState === 1) {
+        console.warn('ws not ready');
+        return;
       }
 
       this.ws.send(JSON.stringify(data));
@@ -21448,6 +21562,59 @@ var Player = /*#__PURE__*/function () {
   }]);
 
   return Player;
+}();
+
+var SoundsManager = /*#__PURE__*/function () {
+  function SoundsManager() {
+    _classCallCheck(this, SoundsManager);
+
+    this.muted = false;
+    this.sound_map = {
+      'flip': './public/sounds/flip.mp3'
+    };
+  }
+
+  _createClass(SoundsManager, [{
+    key: "play",
+    value: function () {
+      var _play = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee(sound_name) {
+        var _this$sound_map;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                this.element = document.getElementById('sound_effects');
+                console.trace('play sound', this.muted, sound_name, this.sound_map);
+
+                if (!(!this.muted && (_this$sound_map = this.sound_map) !== null && _this$sound_map !== void 0 && _this$sound_map[sound_name])) {
+                  _context.next = 6;
+                  break;
+                }
+
+                // this.element.setAttribute('src',this.sound_map[sound_name]);
+                this.element.currentTime = 0; // seek to beginning
+
+                _context.next = 6;
+                return this.element.play();
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function play(_x2) {
+        return _play.apply(this, arguments);
+      }
+
+      return play;
+    }()
+  }]);
+
+  return SoundsManager;
 }(); // Playfield?
 
 
@@ -21456,8 +21623,11 @@ var Tabletop = /*#__PURE__*/function () {
     _classCallCheck(this, Tabletop);
 
     // table tops have uuids which can be shared / spectated / joined
-    this.id = "id" + performance.now();
-    this.server = new SocketConnection();
+    this.id = "id" + performance.now(); // t.server =
+
+    this.server = new SocketConnection(); // t.sounds =
+
+    this.sounds = new SoundsManager();
     this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
     this.deckgroup = new THREE.Group();
@@ -21517,11 +21687,10 @@ var Tabletop = /*#__PURE__*/function () {
 
           if (!card.tweenedToHand) {
             card.tweenedToHand = true;
+            card.current_tween = card.tweenTo(updateTo, {
+              duration: 300
+            });
           }
-
-          card.current_tween = card.tweenTo(updateTo, {
-            duration: 300
-          });
         }
       } // TODO: animate cards that are in OTHER players hand...
 
@@ -21678,50 +21847,65 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "onMediaOffer",
     value: function () {
-      var _onMediaOffer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee(decoded) {
-        var peerAnswer;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee$(_context) {
+      var _onMediaOffer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee2(decoded) {
+        var peerAnswer, _t3, _t3$players, _t3$players$getOppone, ovss, aspect_ratio;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
+                // if(!t.peer){
+                //   setupOpponentPeer();
+                // }
+                console.log('todo: if we already have a peer, do we keep or destroy that connection to respond to the new offer?');
                 console.log('onMediaOffer', decoded);
-                _context.prev = 1;
-                _context.next = 4;
+                _context2.prev = 2;
+                _context2.next = 5;
                 return t.peer.setRemoteDescription(new RTCSessionDescription(decoded.offer));
 
-              case 4:
-                _context.next = 6;
+              case 5:
+                _context2.next = 7;
                 return t.peer.createAnswer();
 
-              case 6:
-                peerAnswer = _context.sent;
-                _context.next = 9;
+              case 7:
+                peerAnswer = _context2.sent;
+                _context2.next = 10;
                 return t.peer.setLocalDescription(new RTCSessionDescription(peerAnswer));
 
-              case 9:
+              case 10:
+                t.opponent_video_stream_settings = decoded.stream_settings; // save call initiators stream settings
+
+                if (t.opponent_video_stream_settings) {
+                  ovss = t.opponent_video_stream_settings;
+                  aspect_ratio = ovss.width / ovss.height; // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+
+                  (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$players = _t3.players) === null || _t3$players === void 0 ? void 0 : (_t3$players$getOppone = _t3$players[getOpponentID()]) === null || _t3$players$getOppone === void 0 ? void 0 : _t3$players$getOppone.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+                }
+
                 t.server.send({
                   type: 'mediaAnswer',
                   answer: peerAnswer,
                   from: t.app.state.my_client_id,
-                  to: decoded.from
+                  to: decoded.from,
+                  stream_settings: t.stream.getVideoTracks()[0].getSettings()
                 });
-                _context.next = 15;
+                _context2.next = 18;
                 break;
 
-              case 12:
-                _context.prev = 12;
-                _context.t0 = _context["catch"](1);
-                console.error('onMediaOffer', _context.t0);
-
               case 15:
+                _context2.prev = 15;
+                _context2.t0 = _context2["catch"](2);
+                console.error('onMediaOffer', _context2.t0);
+
+              case 18:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, null, [[1, 12]]);
+        }, _callee2, null, [[2, 15]]);
       }));
 
-      function onMediaOffer(_x2) {
+      function onMediaOffer(_x3) {
         return _onMediaOffer.apply(this, arguments);
       }
 
@@ -21730,24 +21914,41 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "onMediaAnswer",
     value: function () {
-      var _onMediaAnswer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee2(decoded) {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee2$(_context2) {
+      var _onMediaAnswer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(decoded) {
+        var _t4, _t4$players, _t4$players$getOppone, ovss, aspect_ratio;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 console.log('onMediaAnswer', decoded);
-                _context2.next = 3;
+                _context3.next = 3;
                 return t.peer.setRemoteDescription(new RTCSessionDescription(decoded.answer));
 
               case 3:
+                t.opponent_video_stream_settings = decoded.stream_settings; // save call recipients stream settings
+                // update opponent's "head" shape to match their video aspect ratio
+
+                console.log('opponent stream ar', //stream.getVideoTracks()[0].getSettings()
+                t.opponent_video_stream_settings);
+
+                if (t.opponent_video_stream_settings) {
+                  ovss = t.opponent_video_stream_settings;
+                  aspect_ratio = ovss.width / ovss.height; // mobiel safari did not send .aspectRatio so calculate it
+                  // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+
+                  (_t4 = t) === null || _t4 === void 0 ? void 0 : (_t4$players = _t4.players) === null || _t4$players === void 0 ? void 0 : (_t4$players$getOppone = _t4$players[getOpponentID()]) === null || _t4$players$getOppone === void 0 ? void 0 : _t4$players$getOppone.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+                }
+
+              case 6:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2);
+        }, _callee3);
       }));
 
-      function onMediaAnswer(_x3) {
+      function onMediaAnswer(_x4) {
         return _onMediaAnswer.apply(this, arguments);
       }
 
@@ -21775,34 +21976,34 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "onRemotePeerIceCandidate",
     value: function () {
-      var _onRemotePeerIceCandidate = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(data) {
+      var _onRemotePeerIceCandidate = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(data) {
         var candidate;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
-                _context3.prev = 0;
+                _context4.prev = 0;
                 candidate = new RTCIceCandidate(data.candidate);
-                _context3.next = 4;
+                _context4.next = 4;
                 return t.peer.addIceCandidate(candidate);
 
               case 4:
-                _context3.next = 8;
+                _context4.next = 8;
                 break;
 
               case 6:
-                _context3.prev = 6;
-                _context3.t0 = _context3["catch"](0);
+                _context4.prev = 6;
+                _context4.t0 = _context4["catch"](0);
 
               case 8:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, null, [[0, 6]]);
+        }, _callee4, null, [[0, 6]]);
       }));
 
-      function onRemotePeerIceCandidate(_x4) {
+      function onRemotePeerIceCandidate(_x5) {
         return _onRemotePeerIceCandidate.apply(this, arguments);
       }
 
@@ -21827,36 +22028,36 @@ var TweenableMesh = /*#__PURE__*/function () {
   _createClass(TweenableMesh, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(destination, _ref2) {
+      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee5(destination, _ref2) {
         var _this$mesh, _this$mesh$position, _destination$pos_x, _this$mesh2, _this$mesh2$position, _destination$pos_y, _this$mesh3, _this$mesh3$position, _destination$pos_z, _this$mesh4, _this$mesh4$position;
 
         var _ref2$duration, duration, _mesh, magnitude, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
                 _ref2$duration = _ref2.duration, duration = _ref2$duration === void 0 ? 1000 : _ref2$duration;
                 // console.log('tweenTo',destination);
                 this.destination = destination; // todo: accept option to stop,finish,queue tweens
 
                 if (!this.tweening) {
-                  _context4.next = 6;
+                  _context5.next = 6;
                   break;
                 }
 
-                return _context4.abrupt("return", false);
+                return _context5.abrupt("return", false);
 
               case 6:
                 _mesh = this.mesh;
 
                 if (_mesh) {
-                  _context4.next = 10;
+                  _context5.next = 10;
                   break;
                 }
 
                 console.error('mesh not found', this);
-                return _context4.abrupt("return");
+                return _context5.abrupt("return");
 
               case 10:
                 this.tweening = true; // TODO: add ability to include/exclude properties from tween to save overhead
@@ -21875,12 +22076,12 @@ var TweenableMesh = /*#__PURE__*/function () {
                 }
 
                 if (!(magnitude < 0.1)) {
-                  _context4.next = 16;
+                  _context5.next = 16;
                   break;
                 }
 
                 this.tweening = false;
-                return _context4.abrupt("return");
+                return _context5.abrupt("return");
 
               case 16:
                 tweenEnd = getMeshTween(_mesh, destination, {
@@ -21892,7 +22093,7 @@ var TweenableMesh = /*#__PURE__*/function () {
                 }); // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
 
                 this.tween = tweenEnd.start();
-                _context4.next = 20;
+                _context5.next = 20;
                 return delay(duration);
 
               case 20:
@@ -21901,13 +22102,13 @@ var TweenableMesh = /*#__PURE__*/function () {
 
               case 21:
               case "end":
-                return _context4.stop();
+                return _context5.stop();
             }
           }
-        }, _callee4, this);
+        }, _callee5, this);
       }));
 
-      function tweenTo(_x5, _x6) {
+      function tweenTo(_x6, _x7) {
         return _tweenTo.apply(this, arguments);
       }
 
@@ -21963,7 +22164,7 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
     key: "setupMesh",
     value: function setupMesh() {
       this.mesh = new THREE.Mesh( // new THREE.SphereGeometry(4.0,8,8),
-      new THREE.PlaneGeometry(16, 9), new THREE.MeshBasicMaterial({
+      new THREE.PlaneGeometry(16, 16), new THREE.MeshBasicMaterial({
         // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
         // wireframe: true,
         transparent: this.player_is_me ? true : false,
@@ -22015,34 +22216,34 @@ var PlayerPointer = /*#__PURE__*/function () {
   _createClass(PlayerPointer, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee5(destination, _ref3) {
+      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6(destination, _ref3) {
         var _this$mesh5, _this$mesh5$position, _destination$pos_x2, _this$mesh6, _this$mesh6$position, _destination$pos_y2, _this$mesh7, _this$mesh7$position, _destination$pos_z2, _this$mesh8, _this$mesh8$position;
 
         var _ref3$duration, duration, _mesh, magnitude, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee5$(_context5) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
                 _ref3$duration = _ref3.duration, duration = _ref3$duration === void 0 ? 1000 : _ref3$duration;
                 this.destination = destination;
 
                 if (!this.tweening) {
-                  _context5.next = 6;
+                  _context6.next = 6;
                   break;
                 }
 
-                return _context5.abrupt("return", false);
+                return _context6.abrupt("return", false);
 
               case 6:
                 _mesh = this.mesh;
 
                 if (_mesh) {
-                  _context5.next = 9;
+                  _context6.next = 9;
                   break;
                 }
 
-                return _context5.abrupt("return");
+                return _context6.abrupt("return");
 
               case 9:
                 this.tweening = true; // TODO: add ability to include/exclude properties from tween to save overhead
@@ -22061,12 +22262,12 @@ var PlayerPointer = /*#__PURE__*/function () {
                 }
 
                 if (!(magnitude < 0.1)) {
-                  _context5.next = 15;
+                  _context6.next = 15;
                   break;
                 }
 
                 this.tweening = false;
-                return _context5.abrupt("return");
+                return _context6.abrupt("return");
 
               case 15:
                 tweenEnd = getMeshTween(_mesh, destination, {
@@ -22078,7 +22279,7 @@ var PlayerPointer = /*#__PURE__*/function () {
                 }); // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
 
                 this.tween = tweenEnd.start();
-                _context5.next = 19;
+                _context6.next = 19;
                 return delay(duration);
 
               case 19:
@@ -22087,13 +22288,13 @@ var PlayerPointer = /*#__PURE__*/function () {
 
               case 20:
               case "end":
-                return _context5.stop();
+                return _context6.stop();
             }
           }
-        }, _callee5, this);
+        }, _callee6, this);
       }));
 
-      function tweenTo(_x7, _x8) {
+      function tweenTo(_x8, _x9) {
         return _tweenTo2.apply(this, arguments);
       }
 
@@ -22107,7 +22308,7 @@ var PlayerPointer = /*#__PURE__*/function () {
     value: function setupMesh() {
       var _t$app$state7;
 
-      this.mesh = new THREE.Mesh(new THREE.SphereGeometry(.5, 8, 8), new THREE.MeshBasicMaterial({
+      this.mesh = new THREE.Mesh(new THREE.SphereGeometry(.5, 4, 4), new THREE.MeshBasicMaterial({
         color: this.player_id === ((_t$app$state7 = t.app.state) === null || _t$app$state7 === void 0 ? void 0 : _t$app$state7.game_host) ? 0x0000ff : 0xff0000,
         wireframe: true,
         transparent: true,
@@ -22136,7 +22337,8 @@ var Card = /*#__PURE__*/function () {
     this.deck_order_index = index; // what order is this card in the deck's available cards array? (saves repeat indexOf calls)
 
     this.setupTexturesAndMaterials();
-    this.setupMesh(); // Animation
+    this.setupMesh();
+    this.destination = {}; // Animation
 
     this.face_up = false;
     this.mesh.faceUp = false;
@@ -22206,62 +22408,114 @@ var Card = /*#__PURE__*/function () {
   }, {
     key: "tweenTo",
     value: function () {
-      var _tweenTo3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6(destination, options) {
-        var _mesh, tweenMid, tweenEnd;
+      var _tweenTo3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7(destination, options) {
+        var _options$priority,
+            _this3 = this,
+            _this$tween;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee6$(_context6) {
+        var priority, _mesh, tweenMid, duration, tweenEnd;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
                 // console.log('card move to point',destination,options);
                 // this generates a tween between the current position and the destination
                 this.destination = destination;
+                priority = (_options$priority = options === null || options === void 0 ? void 0 : options.priority) !== null && _options$priority !== void 0 ? _options$priority : 3; // 1-4 default: 3
 
                 if (!this.tweening) {
-                  _context6.next = 4;
+                  _context7.next = 5;
                   break;
                 }
 
-                console.log('already tweening. should we cancel or finish or block?');
-                return _context6.abrupt("return", false);
-
-              case 4:
-                this.tweening = true; // TODO: add ability to include/exclude properties from tween to save overhead
-
-                _mesh = this.mesh;
-                tweenMid = null;
-
-                if (options && options.arcTo) {
-                  // optional midpoint
-                  tweenMid = getMeshTween(_mesh, options.arcTo, 300 / 2);
+                if (!(priority === 4)) {
+                  _context7.next = 5;
+                  break;
                 }
 
+                return _context7.abrupt("return");
+
+              case 5:
+                this.current_tween_priority = priority;
+                _mesh = this.mesh;
+                tweenMid = null;
+                duration = options !== null && options !== void 0 && options.arcTo ? 300 / 2 : 300; // TODO: bring back curve-based / mixer based animation
+                // if(options && options.arcTo){
+                //     // optional midpoint
+                //     tweenMid = getMeshTween(_mesh,options.arcTo,300/2);
+                // }
+                // TODO: add ability to include/exclude properties from tween to save overhead
+
                 tweenEnd = getMeshTween(_mesh, destination, {
-                  duration: tweenMid ? 300 / 2 : 300 // todo accept easing option
+                  duration: duration // todo accept easing option
 
                 });
-                tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
-                _context6.next = 12;
-                return delay(150);
 
-              case 12:
+                if (!(priority === 3)) {
+                  _context7.next = 14;
+                  break;
+                }
+
+                if (!(this.tweening && this.tween && !this.tween.stopped)) {
+                  _context7.next = 14;
+                  break;
+                }
+
+                // can we chain on a running track?
+                // if not, push into a queue we call when original tween ends...
+                this.tween.onComplete(function () {
+                  _this3.tween = tweenEnd;
+                  _this3.tweening = true;
+
+                  _this3.tween.onComplete(function () {
+                    // console.log(this.tween);
+                    _this3.tweening = false;
+                  });
+
+                  _this3.tween.start();
+                }); // await delay(duration);
+                // TODO: put this in a callback
+                // this.tweening = false;
+
+                return _context7.abrupt("return");
+
+              case 14:
+                if (priority === 2) {// jump the tween to the last frame, then do the next tween
+                } // ELSE assume priority 1
+                // interupt the current tween
+
+
+                this === null || this === void 0 ? void 0 : (_this$tween = this.tween) === null || _this$tween === void 0 ? void 0 : _this$tween.stop();
+                this.tween = tweenMid ? tweenMid.chain(tweenEnd) : tweenEnd;
+                this.tweening = true;
+                this.tween.onComplete(function () {
+                  // console.log(this.tween);
+                  _this3.tweening = false;
+                });
+                this.tween.start(); // await delay(duration);
                 // run the tween
-                this.tweening = false;
+                // this.tweening = false;
 
-              case 13:
+              case 20:
               case "end":
-                return _context6.stop();
+                return _context7.stop();
             }
           }
-        }, _callee6, this);
+        }, _callee7, this);
       }));
 
-      function tweenTo(_x9, _x10) {
+      function tweenTo(_x10, _x11) {
         return _tweenTo3.apply(this, arguments);
       }
 
       return tweenTo;
     }()
+  }, {
+    key: "setDestination",
+    value: function setDestination(destination) {
+      this.destination = destination;
+    }
   }]);
 
   return Card;
@@ -22288,238 +22542,243 @@ var Deck = /*#__PURE__*/function () {
       this.cards.push(new Card(i, this.card_types[i % 2 === 0 ? i / 2 : (i - 1) / 2]));
       this.available_cards.push(i);
     }
-  } // todo allow shuffling indefinitely until player clicks to stop
+  } // NOTE: server drives shuffling now...
+  // todo allow shuffling indefinitely until player clicks to stop
+  // async shuffle(iterations=3){
+  //     if(this.shuffling){
+  //         return;
+  //     }
+  //     this.shuffling = true;
+  //     for(var i=0; i<iterations; i++){
+  //         let final_available_cards = await this.shuffleOnce(this.available_cards);
+  //         this.available_cards = final_available_cards;
+  //     }
+  //     this.shuffling = false;
+  // }
+  // server drives shuffle now
+  // async shuffleOnce(array){
+  //     var m = array.length, t, i;
+  //     // While there remain elements to shuffle…
+  //     while (m) {
+  //         // snapshot the array
+  //         this.available_cards_history.push(array.slice());
+  //         // Pick a remaining element…
+  //         i = Math.floor(Math.random() * m--);
+  //         // And swap it with the current element.
+  //         t = array[m];
+  //         array[m] = array[i];
+  //         array[i] = t;
+  //         this.cards[array[m]].deck_order_index = m;
+  //         this.cards[array[i]].deck_order_index = i;
+  //         // animate the shuffled cards coming off the top
+  //         // and sliding back into the deck
+  //         this.animateOrderChangeAsShuffle(
+  //             array[i],
+  //             array[m],
+  //             i,
+  //             m
+  //         );
+  //         // artificially delay the shuffling
+  //         await delay(3);
+  //     }
+  //     return array;
+  // }
+  // animateOrderChangeAsShuffle(iCardA,iCardB,indexA,indexB){
+  //     //console.log('animating swap of A and B',iCardA,iCardB,indexA,indexB);
+  //     const cardA = this.cards[iCardA];
+  //     cardA.tweenTo({
+  //         pos_x:0,//cardA.mesh.position.x,
+  //         pos_y:indexB * 0.025, // offset by card thickness + minor gap
+  //     },{
+  //         duration: 150,
+  //         arcTo:{
+  //             pos_x:'-2.6', // camera left, screen right
+  //             // y:'+1',
+  //         }
+  //     });
+  //     const cardB = this.cards[iCardB];
+  //     cardB.tweenTo({
+  //         pos_x:0,//cardB.mesh.position.x,
+  //         pos_y:indexA * 0.025, // offset by card thickness + minor gap
+  //     },{
+  //         duration: 150,
+  //         arcTo:{
+  //             pos_x:'+2.6', // camera right, screen left
+  //             // y:'+1',
+  //         }
+  //     });
+  //     // by default card order updates do nothing to their position
+  //     // if this was reactive, every modification to this.available_cards (aka the card order of the remaining cards in the deck) would trigger a property update
+  //     // then we would watch those properties and either update z-depth instantly
+  //     // or with a transition tween
+  //     // in this case, we'd want a SPECIAL tween, not just a linear tween of cards phasing thru each other
+  //     // to give it more physicality we want to animate the cards moving off the top of the deck and then back in
+  // }
+  // async dealToLayout(layout){
+  //     // for each zone in passed layout
+  //     // if there is no card in the zone
+  //     // pick the top card from the deck
+  //     // and place it in the zone
+  //     // TODO: support multiple cards per zone (think klondike solitaire)
+  //     console.log('dealToLayout',this);
+  //     // for(let izone in layout.zones){
+  //     //     let zone = layout.zones[izone];
+  //     //     if(!zone.card){
+  //     //         let card_index = this.available_cards.pop();
+  //     //         zone.card = card_index;
+  //     //         this.cards[card_index].zone = izone;
+  //     //         // ...
+  //     //     }
+  //     // }
+  //     // todo: if game is already in progress, skip DEAL animation...
+  //     for(let iA in t.app.state.available_cards){
+  //       let iCard = t.app.state.available_cards[iA];
+  //       let card = t.app.state.cards[iA];
+  //       if(card.zone){
+  //         let zone = layout.zones[card.zone];
+  //         zone.card = iCard;
+  //         // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
+  //         t.zonegroup.attach(t.cards[iCard].mesh);
+  //         t.cards[iCard].tweenTo(
+  //             {
+  //                 pos_x: zone.origin.x,
+  //                 // todo offset by num cards already in the zone
+  //                 pos_y: zone.origin.y,
+  //                 pos_z: zone.origin.z
+  //             },
+  //             {
+  //                 duration: 1000,
+  //             }
+  //         );
+  //         //console.warn('todo, settle ypos of cards in deck as cards are removed')
+  //         //console.warn('todo deal from other end of array?')
+  //         await delay(150); // slight delay in dealing
+  //       }
+  //     }
+  // }
 
 
   _createClass(Deck, [{
-    key: "shuffle",
+    key: "tweenCardsToDeck",
     value: function () {
-      var _shuffle = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7() {
-        var iterations,
-            i,
-            final_available_cards,
-            _args7 = arguments;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
-          while (1) {
-            switch (_context7.prev = _context7.next) {
-              case 0:
-                iterations = _args7.length > 0 && _args7[0] !== undefined ? _args7[0] : 3;
-
-                if (!this.shuffling) {
-                  _context7.next = 3;
-                  break;
-                }
-
-                return _context7.abrupt("return");
-
-              case 3:
-                this.shuffling = true;
-                i = 0;
-
-              case 5:
-                if (!(i < iterations)) {
-                  _context7.next = 13;
-                  break;
-                }
-
-                _context7.next = 8;
-                return this.shuffleOnce(this.available_cards);
-
-              case 8:
-                final_available_cards = _context7.sent;
-                this.available_cards = final_available_cards;
-
-              case 10:
-                i++;
-                _context7.next = 5;
-                break;
-
-              case 13:
-                this.shuffling = false;
-
-              case 14:
-              case "end":
-                return _context7.stop();
-            }
-          }
-        }, _callee7, this);
-      }));
-
-      function shuffle() {
-        return _shuffle.apply(this, arguments);
-      }
-
-      return shuffle;
-    }()
-  }, {
-    key: "shuffleOnce",
-    value: function () {
-      var _shuffleOnce = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8(array) {
-        var m, t, i;
+      var _tweenCardsToDeck = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8() {
+        var i, card;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                m = array.length; // While there remain elements to shuffle…
+                for (i in t.cards) {
+                  card = t.cards[i];
 
-              case 1:
-                if (!m) {
-                  _context8.next = 14;
-                  break;
+                  if (card.mesh) {
+                    t.deckgroup.attach(card.mesh);
+                    card === null || card === void 0 ? void 0 : card.tweenTo({
+                      pos_x: t.deckgroup.position.x,
+                      pos_y: t.deckgroup.position.y + i * 0.025,
+                      pos_z: t.deckgroup.position.z
+                    }, {
+                      duration: 1000
+                    });
+                  } else {
+                    console.error('failed to tween card to deck', i);
+                  }
                 }
 
-                // snapshot the array
-                this.available_cards_history.push(array.slice()); // Pick a remaining element…
-
-                i = Math.floor(Math.random() * m--); // And swap it with the current element.
-
-                t = array[m];
-                array[m] = array[i];
-                array[i] = t;
-                this.cards[array[m]].deck_order_index = m;
-                this.cards[array[i]].deck_order_index = i; // animate the shuffled cards coming off the top
-                // and sliding back into the deck
-
-                this.animateOrderChangeAsShuffle(array[i], array[m], i, m); // artificially delay the shuffling
-
-                _context8.next = 12;
-                return delay(3);
-
-              case 12:
-                _context8.next = 1;
-                break;
-
-              case 14:
-                return _context8.abrupt("return", array);
-
-              case 15:
+              case 1:
               case "end":
                 return _context8.stop();
             }
           }
-        }, _callee8, this);
+        }, _callee8);
       }));
 
-      function shuffleOnce(_x11) {
-        return _shuffleOnce.apply(this, arguments);
+      function tweenCardsToDeck() {
+        return _tweenCardsToDeck.apply(this, arguments);
       }
 
-      return shuffleOnce;
+      return tweenCardsToDeck;
     }()
   }, {
-    key: "animateOrderChangeAsShuffle",
-    value: function animateOrderChangeAsShuffle(iCardA, iCardB, indexA, indexB) {
-      //console.log('animating swap of A and B',iCardA,iCardB,indexA,indexB);
-      var cardA = this.cards[iCardA];
-      cardA.tweenTo({
-        pos_x: 0,
-        //cardA.mesh.position.x,
-        pos_y: indexB * 0.025 // offset by card thickness + minor gap
-
-      }, {
-        duration: 150,
-        arcTo: {
-          pos_x: '-2.6' // camera left, screen right
-          // y:'+1',
-
-        }
-      });
-      var cardB = this.cards[iCardB];
-      cardB.tweenTo({
-        pos_x: 0,
-        //cardB.mesh.position.x,
-        pos_y: indexA * 0.025 // offset by card thickness + minor gap
-
-      }, {
-        duration: 150,
-        arcTo: {
-          pos_x: '+2.6' // camera right, screen left
-          // y:'+1',
-
-        }
-      }); // by default card order updates do nothing to their position
-      // if this was reactive, every modification to this.available_cards (aka the card order of the remaining cards in the deck) would trigger a property update
-      // then we would watch those properties and either update z-depth instantly
-      // or with a transition tween
-      // in this case, we'd want a SPECIAL tween, not just a linear tween of cards phasing thru each other
-      // to give it more physicality we want to animate the cards moving off the top of the deck and then back in
-    }
-  }, {
-    key: "dealToLayout",
+    key: "tweenCardsToZones",
     value: function () {
-      var _dealToLayout = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9(layout) {
-        var iA, iCard, card, zone;
+      var _tweenCardsToZones = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9() {
+        var i, _card2, zone, card, _j, c;
+
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
               case 0:
-                // for each zone in passed layout
-                // if there is no card in the zone
-                // pick the top card from the deck
-                // and place it in the zone
-                // TODO: support multiple cards per zone (think klondike solitaire)
-                console.log('dealToLayout', this); // for(let izone in layout.zones){
-                //     let zone = layout.zones[izone];
-                //     if(!zone.card){
-                //         let card_index = this.available_cards.pop();
-                //         zone.card = card_index;
-                //         this.cards[card_index].zone = izone;
-                //         // ...
-                //     }
-                // }
-                // todo: if game is already in progress, skip DEAL animation...
+                _context9.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.game.layout.zones);
 
-                _context9.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.app.state.available_cards);
-
-              case 2:
+              case 1:
                 if ((_context9.t1 = _context9.t0()).done) {
-                  _context9.next = 15;
+                  _context9.next = 20;
                   break;
                 }
 
-                iA = _context9.t1.value;
-                iCard = t.app.state.available_cards[iA];
-                card = t.app.state.cards[iA];
+                i = _context9.t1.value;
+                zone = t.game.layout.zones[i];
+                card = null; //cardforzone
 
-                if (!card.zone) {
-                  _context9.next = 13;
+                _context9.t2 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.app.state.cards);
+
+              case 6:
+                if ((_context9.t3 = _context9.t2()).done) {
+                  _context9.next = 14;
                   break;
                 }
 
-                zone = layout.zones[card.zone];
-                zone.card = iCard; // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
+                _j = _context9.t3.value;
+                c = t.app.state.cards[_j];
 
-                t.zonegroup.attach(t.cards[iCard].mesh);
-                t.cards[iCard].tweenTo({
+                if (!(c.zone == i)) {
+                  _context9.next = 12;
+                  break;
+                }
+
+                card = t.cards[_j];
+                return _context9.abrupt("break", 14);
+
+              case 12:
+                _context9.next = 6;
+                break;
+
+              case 14:
+                // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
+                if (!card.mesh) {
+                  console.error('failed to tween card to zone', i, j);
+                } else {
+                  t.zonegroup.attach(card.mesh);
+                } // console.log('tween card to zone',card);
+
+
+                (_card2 = card) === null || _card2 === void 0 ? void 0 : _card2.tweenTo({
                   pos_x: zone.origin.x,
-                  // todo offset by num cards already in the zone
                   pos_y: zone.origin.y,
                   pos_z: zone.origin.z
                 }, {
                   duration: 1000
-                }); //console.warn('todo, settle ypos of cards in deck as cards are removed')
-                //console.warn('todo deal from other end of array?')
-
-                _context9.next = 13;
+                });
+                _context9.next = 18;
                 return delay(150);
 
-              case 13:
-                _context9.next = 2;
+              case 18:
+                _context9.next = 1;
                 break;
 
-              case 15:
+              case 20:
               case "end":
                 return _context9.stop();
             }
           }
-        }, _callee9, this);
+        }, _callee9);
       }));
 
-      function dealToLayout(_x12) {
-        return _dealToLayout.apply(this, arguments);
+      function tweenCardsToZones() {
+        return _tweenCardsToZones.apply(this, arguments);
       }
 
-      return dealToLayout;
+      return tweenCardsToZones;
     }()
   }]);
 
@@ -22602,10 +22861,6 @@ var Round = /*#__PURE__*/function () {
                 return delay(1000);
 
               case 7:
-                _context10.next = 9;
-                return window.t.deck.dealToLayout(window.t.game.layout);
-
-              case 9:
               case "end":
                 return _context10.stop();
             }
@@ -22632,9 +22887,9 @@ var Round = /*#__PURE__*/function () {
   }, {
     key: "current_player",
     get: function get() {
-      var _t3, _t3$players, _t$app$state8;
+      var _t5, _t5$players, _t$app$state8;
 
-      return (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$players = _t3.players) === null || _t3$players === void 0 ? void 0 : _t3$players[(_t$app$state8 = t.app.state) === null || _t$app$state8 === void 0 ? void 0 : _t$app$state8.player_turn];
+      return (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : _t5$players[(_t$app$state8 = t.app.state) === null || _t$app$state8 === void 0 ? void 0 : _t$app$state8.player_turn];
     }
   }]);
 
@@ -22722,6 +22977,8 @@ var Game_PVPMemory = /*#__PURE__*/function () {
         __card.tweenedToFaceDown = false;
         __card.tweening = true; // todo if already tweening cancel it
 
+        t.sounds.play('flip'); // todo: put this in the tween
+
         __card.current_tween = getFlipTween(_card, 'faceup');
 
         __card.current_tween.start();
@@ -22730,6 +22987,8 @@ var Game_PVPMemory = /*#__PURE__*/function () {
         __card.tweenedToFaceUp = false;
         __card.tweenedToFaceDown = true;
         __card.tweening = true; // todo if already tweening cancel it
+
+        t.sounds.play('flip'); // todo: put this in the tween
 
         __card.current_tween = getFlipTween(_card, 'facedown');
 
@@ -22820,6 +23079,7 @@ function init() {
   window.addEventListener('mousedown', onMouseDown, false);
   window.addEventListener('touchstart', onTouchStart, false);
   window.addEventListener('touchend', onTouchEnd, false);
+  window.addEventListener('touchmove', onTouchMove, false);
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
   txtLoader = new THREE.TextureLoader();
@@ -22873,9 +23133,29 @@ function init() {
   }); // kick off render loop
 
   render();
+} // TODO: host ability to invite a spectator to become a player
+// TODO: host ability to kick a player into spectator status
+// todo: filter thru clients, return other player(s) who aren't you
+// skip spectators
+
+
+function getOpponentID() {
+  var ids = t.app.state.client_ids.slice();
+
+  if (ids.length < 2) {
+    console.error('no one to call');
+  } else if (ids.length > 2) {
+    console.error('need to figure out multipeer connections');
+  } else {
+    var my_index = ids.indexOf(t.app.state.my_client_id);
+    ids.splice(my_index, 1);
+    console.warn('attempting media offer to peer:', ids[0], ids);
+  }
+
+  return ids[0];
 }
 
-function setupVideoStream() {
+function setupOpponentPeer() {
   // oponent stream
   var createPeerConnection = function createPeerConnection() {
     return new RTCPeerConnection({
@@ -22892,22 +23172,43 @@ function setupVideoStream() {
     var _event$streams = _slicedToArray(event.streams, 1),
         stream = _event$streams[0];
 
+    t.opponent_stream = stream;
     t.opponent_video.srcObject = stream;
   };
 
   t.peer.addEventListener('track', gotRemoteStream);
+} // current player's video stream
+
+
+function setupVideoStream() {
+  t.setupOpponentPeer = setupOpponentPeer;
+  setupOpponentPeer();
 
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    // todo add camera flip (self)
+    // add video mute (self/other)
+    // add audio mute (self/other)
     var constraints = {
       audio: true,
       video: {
-        width: 1280,
-        height: 720,
+        exposureMode: {
+          ideal: 'continuous'
+        },
+        exposureCompensation: {
+          ideal: 0
+        },
+        width: {
+          ideal: 1280
+        },
+        height: {
+          ideal: 720
+        },
         facingMode: 'user'
       }
     };
     navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
       // apply the stream to the video element used in the texture
+      t.stream = stream;
       stream.getTracks().forEach(function (track) {
         return t.peer.addTrack(track, stream);
       });
@@ -22921,37 +23222,32 @@ function setupVideoStream() {
   }
 
   t.call = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee12() {
-    var localPeerOffer, ids, my_index;
+    var localPeerOffer, opponent_id;
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee12$(_context12) {
       while (1) {
         switch (_context12.prev = _context12.next) {
           case 0:
-            _context12.next = 2;
+            if (!window.t.peer) {
+              window.t.setupOpponentPeer();
+            } //setupOpponentPeer();
+
+
+            _context12.next = 3;
             return t.peer.createOffer();
 
-          case 2:
+          case 3:
             localPeerOffer = _context12.sent;
-            _context12.next = 5;
+            _context12.next = 6;
             return t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
 
-          case 5:
-            ids = t.app.state.client_ids.slice();
-
-            if (ids.length < 2) {
-              console.error('no one to call');
-            } else if (ids.length > 2) {
-              console.error('need to figure out multipeer connections');
-            } else {
-              my_index = ids.indexOf(t.app.state.my_client_id);
-              ids.splice(my_index, 1);
-              console.warn('attempting media offer to peer:', ids);
-            }
-
+          case 6:
+            opponent_id = getOpponentID();
             t.server.send({
               type: 'mediaOffer',
               offer: localPeerOffer,
+              stream_settings: t.stream.getVideoTracks()[0].getSettings(),
               from: t.app.state.my_client_id,
-              to: ids[0]
+              to: opponent_id
             });
 
           case 8:
@@ -22964,7 +23260,7 @@ function setupVideoStream() {
 }
 
 function render() {
-  var _t4, _t4$app, _t4$app$state;
+  var _t6, _t6$app, _t6$app$state;
 
   if (resize(renderer)) {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -22979,7 +23275,9 @@ function render() {
   // update "hovered" status of cards
   // todo only run this loop if t.app.state.hovered has changed since last tick
 
-  if ((_t4 = t) !== null && _t4 !== void 0 && (_t4$app = _t4.app) !== null && _t4$app !== void 0 && (_t4$app$state = _t4$app.state) !== null && _t4$app$state !== void 0 && _t4$app$state.hovered) {
+  if ((_t6 = t) !== null && _t6 !== void 0 && (_t6$app = _t6.app) !== null && _t6$app !== void 0 && (_t6$app$state = _t6$app.state) !== null && _t6$app$state !== void 0 && _t6$app$state.hovered) {
+    // TODO: this check is probably wasteful, find a better way
+    // like .last_hovered_at dirty flag
     if (JSON.stringify(t.app.state.hovered) !== JSON.stringify(t.app.state.hovered_prev)) {
       // console.log('hovered array changed',t.app.state.hovered,t.app.state.hovered_prev);
       for (var cardi in t.app.state.cards) {
@@ -22987,14 +23285,24 @@ function render() {
         var card = t.cards[cardi]; // console.log(cardi,t.app.state.hovered.indexOf(cardi),card.hovered)
 
         if (t.app.state.hovered.indexOf(cardi) > -1) {
-          // console.log('setting material to color light')
-          card.hovered = true;
-          card.mesh.material[2].color.set(colorLight);
-          card.mesh.material[3].color.set(colorLight);
+          if (!card.hovered) {
+            // console.log('setting material to color light')
+            card.hovered = true;
+            card.mesh.material[2].color.set(colorLight);
+            card.mesh.material[3].color.set(colorLight); // instead of calling card.tweento here,
+            // we should just update destination values on the object
+            // and on every tick, it should tween to the new values
+            // card.tweenTo({
+            //   pos_y: 1,
+            // })
+          }
         } else {
           card.hovered = false;
           card.mesh.material[2].color.set(colorDark);
           card.mesh.material[3].color.set(colorDark); // console.log('setting material to color dark')
+          // card.tweenTo({
+          //   pos_y: 0,
+          // })
         }
       }
     }
@@ -23190,25 +23498,34 @@ function initTableMesh() {
 //   );
 //   return flipUpsideClip;
 // }
-// mouse over hover effect
+
+
+function onTouchMove(evt) {
+  onMouseMove();
+} // mouse over hover effect
 // TODO: use SHADER to blend
 // TODO: animate color transition
 
 
-function onMouseMove(_x13) {
+function onMouseMove(_x12) {
   return _onMouseMove.apply(this, arguments);
 }
 
 function _onMouseMove() {
   _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee14(evt) {
-    var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card;
+    var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i2;
 
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee14$(_context14) {
       while (1) {
         switch (_context14.prev = _context14.next) {
           case 0:
             updateClientCursor();
-            updatePlayerHead(); // TODO: allow user to hover over matches in their hand,
+            updatePlayerHead(); // t.players[getOpponentID()].head.mesh.lookAt(t.camera)
+            // prevent looking under the table
+
+            if (camera.position.y <= 2) {
+              camera.position.y = 2;
+            } // TODO: allow user to hover over matches in their hand,
             // but NOT the playfield cards, if it's not currently their turn
             // todo: move up to app-level
             // console.log('is it my turn?',t?.app?.$refs?.app?.its_my_turn)
@@ -23239,6 +23556,7 @@ function _onMouseMove() {
             //   }
             // }
 
+
             intersects = intersectsGroup(t.zonegroup.children); // setupRaycast();
             // let intersects = raycaster.intersectObjects( t.zonegroup.children );
             // get the first card
@@ -23251,7 +23569,15 @@ function _onMouseMove() {
                 card = t.cards[card_id];
 
                 if (!card.hovered) {
+                  card.mouseOver = true;
                   card.hovered = true;
+
+                  if (t.app.state.hovered && (_t$app$state$hovered = t.app.state.hovered) !== null && _t$app$state$hovered !== void 0 && _t$app$state$hovered[0]) {
+                    i = (_t$app$state$hovered2 = t.app.state.hovered) === null || _t$app$state$hovered2 === void 0 ? void 0 : _t$app$state$hovered2[0];
+                    t.cards[i].mouseOver = false;
+                    t.cards[i].hovered = false;
+                  }
+
                   t.app.state.hovered = [card_id];
                   t.server.send({
                     type: 'HIGHLIGHT',
@@ -23259,12 +23585,24 @@ function _onMouseMove() {
                   });
                 }
               }
+            } else {
+              if (t.app.state.hovered && (_t$app$state$hovered3 = t.app.state.hovered) !== null && _t$app$state$hovered3 !== void 0 && _t$app$state$hovered3[0]) {
+                _i2 = (_t$app$state$hovered4 = t.app.state.hovered) === null || _t$app$state$hovered4 === void 0 ? void 0 : _t$app$state$hovered4[0];
+                t.cards[_i2].mouseOver = false;
+                t.cards[_i2].hovered = false;
+              }
+
+              t.server.send({
+                type: 'HIGHLIGHT',
+                card_id: null
+              });
+              t.app.state.hovered = [];
             } //else{
             // console.log('not hovering any cards in zonegroup');
             //}
 
 
-          case 4:
+          case 5:
           case "end":
             return _context14.stop();
         }
@@ -23522,7 +23860,9 @@ function resetCards() {
       var fci = t.game.flipped[a];
       var fc = t.cards[fci].mesh; // fc.actions.flipUpside.stop();
 
-      getFlipTween(fc, 'facedown').start(); //  fc.actions.flipDownside.start();
+      t.sounds.play('flip');
+      getFlipTween(fc, 'facedown').start(); // todo: put the soundeffect in the getTween method
+      //  fc.actions.flipDownside.start();
 
       fc.faceUp = false;
     }

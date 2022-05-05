@@ -75,7 +75,7 @@
                     <button class="new-game">New Game</button>
                 </li> -->
 
-                <li v-if="im_game_host && game_started"
+                <li v-if="im_game_host"
                     @click.prevent="restart_game">
                     <button class="new-game">Restart Game</button>
                 </li>

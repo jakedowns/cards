@@ -244,19 +244,19 @@ class ServerGame{
                 }
                 break;
 
-            case 'START_GAME':
-                this.notifyClient(client_id,{
-                    //type:'GAME_START_SUCCESS',
-                    type:'GAME_STATE_UPDATE',
-                    state: {
-                        //game_id: decoded.game_id,
-                        game: {started: true},
-                        round: {started: false},
-                        scores: {},
-                        flipped: []
-                    }
-                });
-                break;
+            // case 'START_GAME':
+            //     this.notifyClient(client_id,{
+            //         //type:'GAME_START_SUCCESS',
+            //         type:'GAME_STATE_UPDATE',
+            //         state: {
+            //             //game_id: decoded.game_id,
+            //             game: {started: true},
+            //             round: {started: false},
+            //             scores: {},
+            //             flipped: []
+            //         }
+            //     });
+            //     break;
 
             case 'FLIP':
                 //this.games[this.game_id].flipped.push(decoded.card_id);
