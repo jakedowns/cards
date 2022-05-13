@@ -5,12 +5,14 @@
         <div class="scores" v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: <span class="hit">{{state?.player_scores?.[id]?.[0] ?? 0}}</span> / <span class="miss">{{state?.player_scores?.[id]?.[1] ?? 0}}</span> </div>
 
         <div v-if="!calling"
-            @click.prevent="start_video_chat">
-            <button class="video-chat-call-start">Start Video Chat</button>
+            @click.prevent="start_video_chat"
+            style="pointer-events:all;">
+            <button class="video-chat-call-start">Join Chat</button>
         </div>
         <div v-if="!show_end_call_button"
-            @click.prevent="end_video_chat">
-            <button class="video-chat-call-end">End Video Chat</button>
+            @click.prevent="end_video_chat"
+            style="pointer-events:all;">
+            <button class="video-chat-call-end">Leave Chat</button>
         </div>
         <br/>
         <button @click="show=!show">{{show?'Hide':'Show Debug Info'}}</button>
@@ -98,16 +100,38 @@
             <div class="bg-blur"></div>
         </div>
         <div class="hud">
-            <div class="av-control">
-                <button @click="toggle_mic_mute">{{mic_muted?'Un':''}}Mute Mic</button>
+            <div class="av-controls">
+                 <!-- TOGGLE YOUR OWN VIDEO -->
+                <div style="pointer-events:all;" id="icon-video-enable" v-if="!video_enabled" @click.prevent="enableVideo()">
+                    <svg width="55" height="38" viewBox="0 0 55 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M43.3333 5.41667C43.3333 2.42938 40.904 0 37.9167 0H5.41667C2.42938 0 0 2.42938 0 5.41667V32.5C0 35.4873 2.42938 37.9167 5.41667 37.9167H37.9167C40.904 37.9167 43.3333 35.4873 43.3333 32.5V23.4731L54.1667 32.5V5.41667L43.3333 14.4435V5.41667Z" fill="white"/>
+                    </svg>
+                </div>
+                <div style="pointer-events:all;" id="icon-video-disable" v-if="video_enabled" @click.prevent="disableVideo()">
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 16 16"><rect x="0" y="0" width="16" height="16" fill="none" stroke="none" /><path fill="currentColor" fill-rule="evenodd" d="M10.961 12.365a1.99 1.99 0 0 0 .522-1.103l3.11 1.382A1 1 0 0 0 16 11.731V4.269a1 1 0 0 0-1.406-.913l-3.111 1.382A2 2 0 0 0 9.5 3H4.272l6.69 9.365zm-10.114-9A2.001 2.001 0 0 0 0 5v6a2 2 0 0 0 2 2h5.728L.847 3.366zm9.746 11.925l-10-14l.814-.58l10 14l-.814.58z"/></svg>
+                </div>
+                <!-- <button @click="toggle_mic_mute">{{mic_muted?'Un':''}}Mute Mic</button> -->
                 <!-- TODO: pick audio input -->
                 <!-- TODO: pick audio input settings -->
-                <button @click="toggle_vid_mute">{{video_muted?'Un':''}}Mute Video</button>
+                <!-- <button @click="toggle_vid_mute">{{video_muted?'Un':''}}Mute Video</button> -->
                 <!-- TODO: pick video input -->
                 <!-- TODO: video input settings -->
             </div>
             <div v-if="its_my_turn">Your Turn</div>
             <div v-else>Opponent's Turn</div>
+        </div>
+        <div class="debug-video">
+            <audio id="sound_effects" src="./public/sounds/flip.mp3" />
+            <!-- players webcam feed -->
+            <video id="video" autoplay playsinline muted v-show="video_enabled"/>
+            <!-- opponent video streams -->
+            <video class="opponent_video"
+                autoplay
+                playsinline
+                onclick="toggle_opponent_mute()"
+                v-for="client_id in (state?.client_ids ?? []).filter((id)=>{id!==state.my_client_id})"
+                :key="client_id"
+                :data-client-id="client_id" />
         </div>
     </div>
 </template>
@@ -126,7 +150,7 @@ export default {
             show_end_call_button: false,
             messages: [],
             mic_muted: false,
-            video_muted: false,
+            video_enabled: false,
         }
     },
 
@@ -138,6 +162,7 @@ export default {
                 this.show = !this.show;
             }
         });
+        t.video = document.getElementById('video');
     },
 
     watch: {
@@ -219,12 +244,22 @@ export default {
     },
 
     methods:{
+        enableVideo(){
+            this.video_enabled = true;
+            this.$nextTick(()=>{
+                window.t.setupVideoStream()
+            })
+        },
+        disableVideo(){
+            window.t.closeVideoStream();
+            this.video_enabled = false;
+        },
         toggle_mic_mute(){
             this.mic_muted = !this.mic_muted;
         },
-        toggle_vid_mute(){
-            this.video_muted = !this.video_muted;
-        },
+        // toggle_vid_mute(){
+        //     this.video_muted = !this.video_muted;
+        // },
         start_video_chat(){
             this.calling = true;
             window.t.call()
@@ -291,6 +326,18 @@ export default {
 }
 </script>
 <style lang="scss">
+#icon-video-enable, #icon-video-disable{
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+}
+#icon-video-enable svg {
+    width: 35px;
+}
+#icon-video-disable {
+    right: 21px;
+    bottom: 63px;
+}
 #debug {
     background: transparent;
     color: #fff;
@@ -299,8 +346,9 @@ export default {
     left: 0;
     right: 0;
     bottom: auto;
-    width: 30vw;
+    // width: 30vw;
     height: 100vh;
+    pointer-events: none;
 
     .details {
         z-index: 2;

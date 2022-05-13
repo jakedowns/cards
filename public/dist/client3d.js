@@ -13712,7 +13712,7 @@ __webpack_require__.r(__webpack_exports__);
       show_end_call_button: false,
       messages: [],
       mic_muted: false,
-      video_muted: false
+      video_enabled: false
     };
   },
   mounted: function mounted() {
@@ -13725,6 +13725,7 @@ __webpack_require__.r(__webpack_exports__);
         _this.show = !_this.show;
       }
     });
+    t.video = document.getElementById('video');
   },
   watch: {
     state: {
@@ -13804,12 +13805,22 @@ __webpack_require__.r(__webpack_exports__);
 
   },
   methods: {
+    enableVideo: function enableVideo() {
+      this.video_enabled = true;
+      this.$nextTick(function () {
+        window.t.setupVideoStream();
+      });
+    },
+    disableVideo: function disableVideo() {
+      window.t.closeVideoStream();
+      this.video_enabled = false;
+    },
     toggle_mic_mute: function toggle_mic_mute() {
       this.mic_muted = !this.mic_muted;
     },
-    toggle_vid_mute: function toggle_vid_mute() {
-      this.video_muted = !this.video_muted;
-    },
+    // toggle_vid_mute(){
+    //     this.video_muted = !this.video_muted;
+    // },
     start_video_chat: function start_video_chat() {
       this.calling = true;
       window.t.call();
@@ -13912,7 +13923,7 @@ var _hoisted_4 = {
 
 var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "video-chat-call-start"
-}, "Start Video Chat", -1
+}, "Join Chat", -1
 /* HOISTED */
 );
 
@@ -13920,7 +13931,7 @@ var _hoisted_6 = [_hoisted_5];
 
 var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "video-chat-call-end"
-}, "End Video Chat", -1
+}, "Leave Chat", -1
 /* HOISTED */
 );
 
@@ -14036,16 +14047,74 @@ var _hoisted_42 = {
   "class": "hud"
 };
 var _hoisted_43 = {
-  "class": "av-control"
+  "class": "av-controls"
 };
-var _hoisted_44 = {
+
+var _hoisted_44 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  width: "55",
+  height: "38",
+  viewBox: "0 0 55 38",
+  fill: "none",
+  xmlns: "http://www.w3.org/2000/svg"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  d: "M43.3333 5.41667C43.3333 2.42938 40.904 0 37.9167 0H5.41667C2.42938 0 0 2.42938 0 5.41667V32.5C0 35.4873 2.42938 37.9167 5.41667 37.9167H37.9167C40.904 37.9167 43.3333 35.4873 43.3333 32.5V23.4731L54.1667 32.5V5.41667L43.3333 14.4435V5.41667Z",
+  fill: "white"
+})], -1
+/* HOISTED */
+);
+
+var _hoisted_45 = [_hoisted_44];
+
+var _hoisted_46 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "2em",
+  height: "2em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 16 16"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "16",
+  height: "16",
+  fill: "none",
+  stroke: "none"
+}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  "fill-rule": "evenodd",
+  d: "M10.961 12.365a1.99 1.99 0 0 0 .522-1.103l3.11 1.382A1 1 0 0 0 16 11.731V4.269a1 1 0 0 0-1.406-.913l-3.111 1.382A2 2 0 0 0 9.5 3H4.272l6.69 9.365zm-10.114-9A2.001 2.001 0 0 0 0 5v6a2 2 0 0 0 2 2h5.728L.847 3.366zm9.746 11.925l-10-14l.814-.58l10 14l-.814.58z"
+})], -1
+/* HOISTED */
+);
+
+var _hoisted_47 = [_hoisted_46];
+var _hoisted_48 = {
   key: 0
 };
-var _hoisted_45 = {
+var _hoisted_49 = {
   key: 1
 };
+var _hoisted_50 = {
+  "class": "debug-video"
+};
+
+var _hoisted_51 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
+  id: "sound_effects",
+  src: "./public/sounds/flip.mp3"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_52 = {
+  id: "video",
+  autoplay: "",
+  playsinline: "",
+  muted: ""
+};
+var _hoisted_53 = ["data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state7, _$props$state$room_id, _$props$state8, _$props$state$game_id, _$props$state9, _$options$game, _$props$state$game_ho, _$props$state10, _$props$state$round_i, _$props$state11, _$options$round, _$props$state$player_4;
+  var _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state7, _$props$state$room_id, _$props$state8, _$props$state$game_id, _$props$state9, _$options$game, _$props$state$game_ho, _$props$state10, _$props$state$round_i, _$props$state11, _$options$round, _$props$state$player_4, _$props$state$client_2, _$props$state13;
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length), 1
   /* TEXT */
@@ -14070,12 +14139,18 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     key: 0,
     onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.start_video_chat && $options.start_video_chat.apply($options, arguments);
-    }, ["prevent"]))
+    }, ["prevent"])),
+    style: {
+      "pointer-events": "all"
+    }
   }, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
     onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.end_video_chat && $options.end_video_chat.apply($options, arguments);
-    }, ["prevent"]))
+    }, ["prevent"])),
+    style: {
+      "pointer-events": "all"
+    }
   }, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     onClick: _cache[2] || (_cache[2] = function ($event) {
       return $setup.show = !$setup.show;
@@ -14142,19 +14217,42 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* KEYED_FRAGMENT */
   ))])])]), _hoisted_41], 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.show]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[4] || (_cache[4] = function () {
-      return $options.toggle_mic_mute && $options.toggle_mic_mute.apply($options, arguments);
-    })
-  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.mic_muted ? 'Un' : '') + "Mute Mic", 1
-  /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[5] || (_cache[5] = function () {
-      return $options.toggle_vid_mute && $options.toggle_vid_mute.apply($options, arguments);
-    })
-  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.video_muted ? 'Un' : '') + "Mute Video", 1
-  /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $options.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_44, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_45, "Opponent's Turn"))])]);
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.show]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    key: 0,
+    style: {
+      "pointer-events": "all"
+    },
+    id: "icon-video-enable",
+    onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return $options.enableVideo();
+    }, ["prevent"]))
+  }, _hoisted_45)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    key: 1,
+    style: {
+      "pointer-events": "all"
+    },
+    id: "icon-video-disable",
+    onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return $options.disableVideo();
+    }, ["prevent"]))
+  }, _hoisted_47)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $options.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_48, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_49, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_50, [_hoisted_51, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_52, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_2 = (_$props$state13 = $props.state) === null || _$props$state13 === void 0 ? void 0 : _$props$state13.client_ids) !== null && _$props$state$client_2 !== void 0 ? _$props$state$client_2 : []).filter(function (id) {
+    id !== $props.state.my_client_id;
+  }), function (client_id) {
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("video", {
+      "class": "opponent_video",
+      autoplay: "",
+      playsinline: "",
+      onclick: "toggle_opponent_mute()",
+      key: client_id,
+      "data-client-id": client_id
+    }, null, 8
+    /* PROPS */
+    , _hoisted_53);
+  }), 128
+  /* KEYED_FRAGMENT */
+  ))])]);
 }
 
 /***/ }),
@@ -14176,7 +14274,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: auto;\n  width: 30vw;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 60px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 63px;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: auto;\n  height: 100vh;\n  pointer-events: none;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -21272,18 +21370,6 @@ function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symb
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
@@ -21297,6 +21383,18 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
@@ -21495,8 +21593,8 @@ var SocketConnection = /*#__PURE__*/function () {
           t.players[decoded.your_client_id] = new Player(decoded.your_client_id);
           console.log('t.players now', t.players); // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
           // request video stream
+          // setupVideoStream();
 
-          setupVideoStream();
           break;
         // case 'GAME_STATE_UPDATE':
         //     window.t.app.state = {
@@ -21628,6 +21726,8 @@ var Tabletop = /*#__PURE__*/function () {
     this.server = new SocketConnection(); // t.sounds =
 
     this.sounds = new SoundsManager();
+    this.webrtc_peer_connections = {};
+    this.webrtc_peer_streams = {};
     this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
     this.deckgroup = new THREE.Group();
@@ -21638,6 +21738,13 @@ var Tabletop = /*#__PURE__*/function () {
   }
 
   _createClass(Tabletop, [{
+    key: "opponentIDs",
+    get: function get() {
+      return t.app.state.client_ids.filter(function (id) {
+        return id !== t.app.state.my_client_id;
+      });
+    }
+  }, {
     key: "setupGame",
     value: function setupGame() {
       // Lights
@@ -21650,6 +21757,131 @@ var Tabletop = /*#__PURE__*/function () {
     key: "startGame",
     value: function startGame() {
       this.game.startRound();
+    }
+  }, {
+    key: "setupOpponentPeer",
+    value: function setupOpponentPeer(client_id) {
+      // oponent stream
+      var createPeerConnection = function createPeerConnection() {
+        return new RTCPeerConnection({
+          iceServers: [{
+            urls: "stun:stun.stunprotocol.org"
+          }]
+        });
+      };
+
+      t.webrtc_peer_connections[client_id] = createPeerConnection();
+      t.webrtc_peer_connections[client_id].onicecandidate = t.onIceCandidateEvent;
+
+      var gotRemoteStream = function gotRemoteStream(event) {
+        var _event$streams = _slicedToArray(event.streams, 1),
+            stream = _event$streams[0];
+
+        t.webrtc_peer_streams[client_id] = stream; // TODO: need multiple video elements
+
+        t.opponent_video.srcObject = stream;
+      };
+
+      t.peer.addEventListener('track', gotRemoteStream);
+    }
+  }, {
+    key: "closeVideoStream",
+    value: function closeVideoStream() {
+      var _t, _t$stream, _t$stream$getVideoTra;
+
+      // t?.stream?.getTracks()?.forEach(function(track){
+      //   track?.stop();
+      // })
+      (_t = t) === null || _t === void 0 ? void 0 : (_t$stream = _t.stream) === null || _t$stream === void 0 ? void 0 : (_t$stream$getVideoTra = _t$stream.getVideoTracks()) === null || _t$stream$getVideoTra === void 0 ? void 0 : _t$stream$getVideoTra.forEach(function (track) {
+        track.stop();
+      });
+    }
+  }, {
+    key: "closeAudioStream",
+    value: function closeAudioStream() {
+      var _t2, _t2$stream, _t2$stream$getAudioTr;
+
+      (_t2 = t) === null || _t2 === void 0 ? void 0 : (_t2$stream = _t2.stream) === null || _t2$stream === void 0 ? void 0 : (_t2$stream$getAudioTr = _t2$stream.getAudioTracks()) === null || _t2$stream$getAudioTr === void 0 ? void 0 : _t2$stream$getAudioTr.forEach(function (track) {
+        track.stop();
+      });
+    }
+  }, {
+    key: "setupVideoStream",
+    value: function setupVideoStream() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // todo add camera flip (self)
+        // add video mute (self/other)
+        // add audio mute (self/other)
+        var constraints = {
+          audio: true,
+          video: {
+            exposureMode: {
+              ideal: 'continuous'
+            },
+            exposureCompensation: {
+              ideal: 0
+            },
+            width: {
+              ideal: 1280
+            },
+            height: {
+              ideal: 720
+            },
+            facingMode: 'user'
+          }
+        };
+        navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+          // apply the stream to the video element used in the texture
+          t.stream = stream;
+          t.video.srcObject = stream;
+          t.video.play();
+        })["catch"](function (error) {
+          console.error('Unable to access the camera/webcam.', error);
+        });
+      } else {
+        console.error('MediaDevices interface not available.');
+      } // loop through ALL peers and send them the stream
+      // TODO: max peers
+
+
+      t.call = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee2() {
+        var localPeerOffer, opponent_id;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                t.opponentIDs.forEach(function (id) {
+                  t.setupOpponentPeer(id);
+                }); // add our audio/video track to the peer connection
+
+                t.stream.getTracks().forEach(function (track) {
+                  return t.peer.addTrack(track, stream);
+                });
+                _context2.next = 4;
+                return t.peer.createOffer();
+
+              case 4:
+                localPeerOffer = _context2.sent;
+                _context2.next = 7;
+                return t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
+
+              case 7:
+                opponent_id = getOpponentID();
+                t.server.send({
+                  type: 'mediaOffer',
+                  offer: localPeerOffer,
+                  stream_settings: t.stream.getVideoTracks()[0].getSettings(),
+                  from: t.app.state.my_client_id,
+                  to: opponent_id
+                });
+
+              case 9:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }));
     } // animate the cards within the hand to maintain spacing
     // also handles animating cards from playfield to hand after a match is validated by the server
 
@@ -21674,8 +21906,8 @@ var Tabletop = /*#__PURE__*/function () {
         var hand = (_t$app$state$player_h = (_t$app$state = t.app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$player_h2 = _t$app$state.player_hands) === null || _t$app$state$player_h2 === void 0 ? void 0 : _t$app$state$player_h2[player_id]) !== null && _t$app$state$player_h !== void 0 ? _t$app$state$player_h : [];
         var matches_count = hand.length / 2; // console.log('matches_count?',matches_count);
 
-        for (var a = 0; (_ref = a < (hand === null || hand === void 0 ? void 0 : hand.length)) !== null && _ref !== void 0 ? _ref : 0; a++) {
-          var _ref;
+        for (var a = 0; (_ref2 = a < (hand === null || hand === void 0 ? void 0 : hand.length)) !== null && _ref2 !== void 0 ? _ref2 : 0; a++) {
+          var _ref2;
 
           var i_card = hand[a];
           var card = t.cards[i_card];
@@ -21717,15 +21949,15 @@ var Tabletop = /*#__PURE__*/function () {
         }
       }
 
-      for (var _i in t.app.state.player_cursors) {
-        var player_cursor_position = t.app.state.player_cursors[_i]; // console.log(i===t.app.,player_cursor_position);
+      for (var _i2 in t.app.state.player_cursors) {
+        var player_cursor_position = t.app.state.player_cursors[_i2]; // console.log(i===t.app.,player_cursor_position);
 
-        if (_i !== t.app.state.my_client_id) {
-          var _t, _t$players3, _t$players3$_i, _t$players3$_i$pointe;
+        if (_i2 !== t.app.state.my_client_id) {
+          var _t3, _t3$players, _t3$players$_i, _t3$players$_i$pointe;
 
           // console.log('update opponent cursor');
           // only update other players, let mousemove drive local players cursor so it doesn't fight with server-streaming values
-          (_t = t) === null || _t === void 0 ? void 0 : (_t$players3 = _t.players) === null || _t$players3 === void 0 ? void 0 : (_t$players3$_i = _t$players3[_i]) === null || _t$players3$_i === void 0 ? void 0 : (_t$players3$_i$pointe = _t$players3$_i.pointer) === null || _t$players3$_i$pointe === void 0 ? void 0 : _t$players3$_i$pointe.tweenTo({
+          (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$players = _t3.players) === null || _t3$players === void 0 ? void 0 : (_t3$players$_i = _t3$players[_i2]) === null || _t3$players$_i === void 0 ? void 0 : (_t3$players$_i$pointe = _t3$players$_i.pointer) === null || _t3$players$_i$pointe === void 0 ? void 0 : _t3$players$_i$pointe.tweenTo({
             pos_x: player_cursor_position.x,
             pos_y: player_cursor_position.y,
             pos_z: player_cursor_position.z
@@ -21743,7 +21975,7 @@ var Tabletop = /*#__PURE__*/function () {
 
         // let player_id = t.app.state.client_ids[i];
         if (player_id !== t.app.state.my_client_id) {
-          var _t2, _t2$players, _t2$players$player_id;
+          var _t4, _t4$players, _t4$players$player_id;
 
           // only render opponent heads
           var player_head_position = t.app.state.player_heads[player_id];
@@ -21757,7 +21989,7 @@ var Tabletop = /*#__PURE__*/function () {
           // destination.rot_y = vector.y;
           // destination.rot_z = vector.z;
 
-          var head = (_t2 = t) === null || _t2 === void 0 ? void 0 : (_t2$players = _t2.players) === null || _t2$players === void 0 ? void 0 : (_t2$players$player_id = _t2$players[player_id]) === null || _t2$players$player_id === void 0 ? void 0 : _t2$players$player_id.head;
+          var head = (_t4 = t) === null || _t4 === void 0 ? void 0 : (_t4$players = _t4.players) === null || _t4$players === void 0 ? void 0 : (_t4$players$player_id = _t4$players[player_id]) === null || _t4$players$player_id === void 0 ? void 0 : _t4$players$player_id.head;
 
           if (!(head !== null && head !== void 0 && head.player_is_me)) {
             head === null || head === void 0 ? void 0 : head.mesh.lookAt(camera.position);
@@ -21847,29 +22079,26 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "onMediaOffer",
     value: function () {
-      var _onMediaOffer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee2(decoded) {
-        var peerAnswer, _t3, _t3$players, _t3$players$getOppone, ovss, aspect_ratio;
+      var _onMediaOffer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(decoded) {
+        var peerAnswer, _t5, _t5$players, _t5$players$getOppone, ovss, aspect_ratio;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee2$(_context2) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                // if(!t.peer){
-                //   setupOpponentPeer();
-                // }
                 console.log('todo: if we already have a peer, do we keep or destroy that connection to respond to the new offer?');
                 console.log('onMediaOffer', decoded);
-                _context2.prev = 2;
-                _context2.next = 5;
+                _context3.prev = 2;
+                _context3.next = 5;
                 return t.peer.setRemoteDescription(new RTCSessionDescription(decoded.offer));
 
               case 5:
-                _context2.next = 7;
+                _context3.next = 7;
                 return t.peer.createAnswer();
 
               case 7:
-                peerAnswer = _context2.sent;
-                _context2.next = 10;
+                peerAnswer = _context3.sent;
+                _context3.next = 10;
                 return t.peer.setLocalDescription(new RTCSessionDescription(peerAnswer));
 
               case 10:
@@ -21879,7 +22108,7 @@ var Tabletop = /*#__PURE__*/function () {
                   ovss = t.opponent_video_stream_settings;
                   aspect_ratio = ovss.width / ovss.height; // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
 
-                  (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$players = _t3.players) === null || _t3$players === void 0 ? void 0 : (_t3$players$getOppone = _t3$players[getOpponentID()]) === null || _t3$players$getOppone === void 0 ? void 0 : _t3$players$getOppone.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+                  (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : (_t5$players$getOppone = _t5$players[getOpponentID()]) === null || _t5$players$getOppone === void 0 ? void 0 : _t5$players$getOppone.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
                 }
 
                 t.server.send({
@@ -21889,20 +22118,20 @@ var Tabletop = /*#__PURE__*/function () {
                   to: decoded.from,
                   stream_settings: t.stream.getVideoTracks()[0].getSettings()
                 });
-                _context2.next = 18;
+                _context3.next = 18;
                 break;
 
               case 15:
-                _context2.prev = 15;
-                _context2.t0 = _context2["catch"](2);
-                console.error('onMediaOffer', _context2.t0);
+                _context3.prev = 15;
+                _context3.t0 = _context3["catch"](2);
+                console.error('onMediaOffer', _context3.t0);
 
               case 18:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2, null, [[2, 15]]);
+        }, _callee3, null, [[2, 15]]);
       }));
 
       function onMediaOffer(_x3) {
@@ -21914,15 +22143,15 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "onMediaAnswer",
     value: function () {
-      var _onMediaAnswer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(decoded) {
-        var _t4, _t4$players, _t4$players$getOppone, ovss, aspect_ratio;
+      var _onMediaAnswer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(decoded) {
+        var _t6, _t6$players, _t6$players$getOppone, ovss, aspect_ratio;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 console.log('onMediaAnswer', decoded);
-                _context3.next = 3;
+                _context4.next = 3;
                 return t.peer.setRemoteDescription(new RTCSessionDescription(decoded.answer));
 
               case 3:
@@ -21937,15 +22166,15 @@ var Tabletop = /*#__PURE__*/function () {
                   aspect_ratio = ovss.width / ovss.height; // mobiel safari did not send .aspectRatio so calculate it
                   // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
 
-                  (_t4 = t) === null || _t4 === void 0 ? void 0 : (_t4$players = _t4.players) === null || _t4$players === void 0 ? void 0 : (_t4$players$getOppone = _t4$players[getOpponentID()]) === null || _t4$players$getOppone === void 0 ? void 0 : _t4$players$getOppone.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+                  (_t6 = t) === null || _t6 === void 0 ? void 0 : (_t6$players = _t6.players) === null || _t6$players === void 0 ? void 0 : (_t6$players$getOppone = _t6$players[getOpponentID()]) === null || _t6$players$getOppone === void 0 ? void 0 : _t6$players$getOppone.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
                 }
 
               case 6:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3);
+        }, _callee4);
       }));
 
       function onMediaAnswer(_x4) {
@@ -21976,31 +22205,31 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "onRemotePeerIceCandidate",
     value: function () {
-      var _onRemotePeerIceCandidate = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(data) {
+      var _onRemotePeerIceCandidate = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee5(data) {
         var candidate;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
-                _context4.prev = 0;
+                _context5.prev = 0;
                 candidate = new RTCIceCandidate(data.candidate);
-                _context4.next = 4;
+                _context5.next = 4;
                 return t.peer.addIceCandidate(candidate);
 
               case 4:
-                _context4.next = 8;
+                _context5.next = 8;
                 break;
 
               case 6:
-                _context4.prev = 6;
-                _context4.t0 = _context4["catch"](0);
+                _context5.prev = 6;
+                _context5.t0 = _context5["catch"](0);
 
               case 8:
               case "end":
-                return _context4.stop();
+                return _context5.stop();
             }
           }
-        }, _callee4, null, [[0, 6]]);
+        }, _callee5, null, [[0, 6]]);
       }));
 
       function onRemotePeerIceCandidate(_x5) {
@@ -22028,36 +22257,36 @@ var TweenableMesh = /*#__PURE__*/function () {
   _createClass(TweenableMesh, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee5(destination, _ref2) {
+      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6(destination, _ref3) {
         var _this$mesh, _this$mesh$position, _destination$pos_x, _this$mesh2, _this$mesh2$position, _destination$pos_y, _this$mesh3, _this$mesh3$position, _destination$pos_z, _this$mesh4, _this$mesh4$position;
 
-        var _ref2$duration, duration, _mesh, magnitude, tweenEnd;
+        var _ref3$duration, duration, _mesh, magnitude, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee5$(_context5) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
-                _ref2$duration = _ref2.duration, duration = _ref2$duration === void 0 ? 1000 : _ref2$duration;
+                _ref3$duration = _ref3.duration, duration = _ref3$duration === void 0 ? 1000 : _ref3$duration;
                 // console.log('tweenTo',destination);
                 this.destination = destination; // todo: accept option to stop,finish,queue tweens
 
                 if (!this.tweening) {
-                  _context5.next = 6;
+                  _context6.next = 6;
                   break;
                 }
 
-                return _context5.abrupt("return", false);
+                return _context6.abrupt("return", false);
 
               case 6:
                 _mesh = this.mesh;
 
                 if (_mesh) {
-                  _context5.next = 10;
+                  _context6.next = 10;
                   break;
                 }
 
                 console.error('mesh not found', this);
-                return _context5.abrupt("return");
+                return _context6.abrupt("return");
 
               case 10:
                 this.tweening = true; // TODO: add ability to include/exclude properties from tween to save overhead
@@ -22076,12 +22305,12 @@ var TweenableMesh = /*#__PURE__*/function () {
                 }
 
                 if (!(magnitude < 0.1)) {
-                  _context5.next = 16;
+                  _context6.next = 16;
                   break;
                 }
 
                 this.tweening = false;
-                return _context5.abrupt("return");
+                return _context6.abrupt("return");
 
               case 16:
                 tweenEnd = getMeshTween(_mesh, destination, {
@@ -22093,7 +22322,7 @@ var TweenableMesh = /*#__PURE__*/function () {
                 }); // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
 
                 this.tween = tweenEnd.start();
-                _context5.next = 20;
+                _context6.next = 20;
                 return delay(duration);
 
               case 20:
@@ -22102,10 +22331,10 @@ var TweenableMesh = /*#__PURE__*/function () {
 
               case 21:
               case "end":
-                return _context5.stop();
+                return _context6.stop();
             }
           }
-        }, _callee5, this);
+        }, _callee6, this);
       }));
 
       function tweenTo(_x6, _x7) {
@@ -22156,20 +22385,21 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
     key: "setupTexturesAndMaterials",
     value: function setupTexturesAndMaterials() {
       // if(this.player_is_me){
-      this.video_texture = new THREE.VideoTexture(this.player_is_me ? t.video : t.opponent_video); // webcam stream
-
-      this.video_texture.format = THREE.RGBAFormat; // }
+      console.warn('todo: need to set up opponent webcam texture as well as spectator webpack textures'); // this.video_texture = new THREE.VideoTexture(t.video); // webcam stream
+      // this.video_texture.format = THREE.RGBAFormat;
+      // }
     }
   }, {
     key: "setupMesh",
     value: function setupMesh() {
       this.mesh = new THREE.Mesh( // new THREE.SphereGeometry(4.0,8,8),
       new THREE.PlaneGeometry(16, 16), new THREE.MeshBasicMaterial({
+        color: 0x800080,
         // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
         // wireframe: true,
         transparent: this.player_is_me ? true : false,
-        opacity: this.player_is_me ? 0.0 : 1.0,
-        map: this.video_texture
+        opacity: this.player_is_me ? 0.0 : 1.0 // map: this.video_texture,
+
       }));
       this.mesh.lookAt(camera.position); // this.mesh.scale.setScalar(.5)
 
@@ -22216,34 +22446,34 @@ var PlayerPointer = /*#__PURE__*/function () {
   _createClass(PlayerPointer, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6(destination, _ref3) {
+      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7(destination, _ref4) {
         var _this$mesh5, _this$mesh5$position, _destination$pos_x2, _this$mesh6, _this$mesh6$position, _destination$pos_y2, _this$mesh7, _this$mesh7$position, _destination$pos_z2, _this$mesh8, _this$mesh8$position;
 
-        var _ref3$duration, duration, _mesh, magnitude, tweenEnd;
+        var _ref4$duration, duration, _mesh, magnitude, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee6$(_context6) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
-                _ref3$duration = _ref3.duration, duration = _ref3$duration === void 0 ? 1000 : _ref3$duration;
+                _ref4$duration = _ref4.duration, duration = _ref4$duration === void 0 ? 1000 : _ref4$duration;
                 this.destination = destination;
 
                 if (!this.tweening) {
-                  _context6.next = 6;
+                  _context7.next = 6;
                   break;
                 }
 
-                return _context6.abrupt("return", false);
+                return _context7.abrupt("return", false);
 
               case 6:
                 _mesh = this.mesh;
 
                 if (_mesh) {
-                  _context6.next = 9;
+                  _context7.next = 9;
                   break;
                 }
 
-                return _context6.abrupt("return");
+                return _context7.abrupt("return");
 
               case 9:
                 this.tweening = true; // TODO: add ability to include/exclude properties from tween to save overhead
@@ -22262,12 +22492,12 @@ var PlayerPointer = /*#__PURE__*/function () {
                 }
 
                 if (!(magnitude < 0.1)) {
-                  _context6.next = 15;
+                  _context7.next = 15;
                   break;
                 }
 
                 this.tweening = false;
-                return _context6.abrupt("return");
+                return _context7.abrupt("return");
 
               case 15:
                 tweenEnd = getMeshTween(_mesh, destination, {
@@ -22279,7 +22509,7 @@ var PlayerPointer = /*#__PURE__*/function () {
                 }); // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
 
                 this.tween = tweenEnd.start();
-                _context6.next = 19;
+                _context7.next = 19;
                 return delay(duration);
 
               case 19:
@@ -22288,10 +22518,10 @@ var PlayerPointer = /*#__PURE__*/function () {
 
               case 20:
               case "end":
-                return _context6.stop();
+                return _context7.stop();
             }
           }
-        }, _callee6, this);
+        }, _callee7, this);
       }));
 
       function tweenTo(_x8, _x9) {
@@ -22408,16 +22638,16 @@ var Card = /*#__PURE__*/function () {
   }, {
     key: "tweenTo",
     value: function () {
-      var _tweenTo3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7(destination, options) {
+      var _tweenTo3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8(destination, options) {
         var _options$priority,
             _this3 = this,
             _this$tween;
 
         var priority, _mesh, tweenMid, duration, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
                 // console.log('card move to point',destination,options);
                 // this generates a tween between the current position and the destination
@@ -22425,16 +22655,16 @@ var Card = /*#__PURE__*/function () {
                 priority = (_options$priority = options === null || options === void 0 ? void 0 : options.priority) !== null && _options$priority !== void 0 ? _options$priority : 3; // 1-4 default: 3
 
                 if (!this.tweening) {
-                  _context7.next = 5;
+                  _context8.next = 5;
                   break;
                 }
 
                 if (!(priority === 4)) {
-                  _context7.next = 5;
+                  _context8.next = 5;
                   break;
                 }
 
-                return _context7.abrupt("return");
+                return _context8.abrupt("return");
 
               case 5:
                 this.current_tween_priority = priority;
@@ -22453,12 +22683,12 @@ var Card = /*#__PURE__*/function () {
                 });
 
                 if (!(priority === 3)) {
-                  _context7.next = 14;
+                  _context8.next = 14;
                   break;
                 }
 
                 if (!(this.tweening && this.tween && !this.tween.stopped)) {
-                  _context7.next = 14;
+                  _context8.next = 14;
                   break;
                 }
 
@@ -22478,7 +22708,7 @@ var Card = /*#__PURE__*/function () {
                 // TODO: put this in a callback
                 // this.tweening = false;
 
-                return _context7.abrupt("return");
+                return _context8.abrupt("return");
 
               case 14:
                 if (priority === 2) {// jump the tween to the last frame, then do the next tween
@@ -22499,10 +22729,10 @@ var Card = /*#__PURE__*/function () {
 
               case 20:
               case "end":
-                return _context7.stop();
+                return _context8.stop();
             }
           }
-        }, _callee7, this);
+        }, _callee8, this);
       }));
 
       function tweenTo(_x10, _x11) {
@@ -22536,8 +22766,8 @@ var Deck = /*#__PURE__*/function () {
     this.available_cards_history = [];
     this.card_types = ['APPLE', 'ORANGE', 'LEMON', 'PEAR', 'BLUEBERRY', 'GRAPES', 'RASPBERRY', 'STRAWBERRY'];
 
-    for (var i = 0; (_ref4 = i < (options === null || options === void 0 ? void 0 : options.card_count)) !== null && _ref4 !== void 0 ? _ref4 : 52; i++) {
-      var _ref4;
+    for (var i = 0; (_ref5 = i < (options === null || options === void 0 ? void 0 : options.card_count)) !== null && _ref5 !== void 0 ? _ref5 : 52; i++) {
+      var _ref5;
 
       this.cards.push(new Card(i, this.card_types[i % 2 === 0 ? i / 2 : (i - 1) / 2]));
       this.available_cards.push(i);
@@ -22661,11 +22891,11 @@ var Deck = /*#__PURE__*/function () {
   _createClass(Deck, [{
     key: "tweenCardsToDeck",
     value: function () {
-      var _tweenCardsToDeck = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8() {
+      var _tweenCardsToDeck = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9() {
         var i, card;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
                 for (i in t.cards) {
                   card = t.cards[i];
@@ -22686,10 +22916,10 @@ var Deck = /*#__PURE__*/function () {
 
               case 1:
               case "end":
-                return _context8.stop();
+                return _context9.stop();
             }
           }
-        }, _callee8);
+        }, _callee9);
       }));
 
       function tweenCardsToDeck() {
@@ -22701,46 +22931,46 @@ var Deck = /*#__PURE__*/function () {
   }, {
     key: "tweenCardsToZones",
     value: function () {
-      var _tweenCardsToZones = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9() {
+      var _tweenCardsToZones = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10() {
         var i, _card2, zone, card, _j, c;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
-                _context9.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.game.layout.zones);
+                _context10.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.game.layout.zones);
 
               case 1:
-                if ((_context9.t1 = _context9.t0()).done) {
-                  _context9.next = 20;
+                if ((_context10.t1 = _context10.t0()).done) {
+                  _context10.next = 20;
                   break;
                 }
 
-                i = _context9.t1.value;
+                i = _context10.t1.value;
                 zone = t.game.layout.zones[i];
                 card = null; //cardforzone
 
-                _context9.t2 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.app.state.cards);
+                _context10.t2 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.app.state.cards);
 
               case 6:
-                if ((_context9.t3 = _context9.t2()).done) {
-                  _context9.next = 14;
+                if ((_context10.t3 = _context10.t2()).done) {
+                  _context10.next = 14;
                   break;
                 }
 
-                _j = _context9.t3.value;
+                _j = _context10.t3.value;
                 c = t.app.state.cards[_j];
 
                 if (!(c.zone == i)) {
-                  _context9.next = 12;
+                  _context10.next = 12;
                   break;
                 }
 
                 card = t.cards[_j];
-                return _context9.abrupt("break", 14);
+                return _context10.abrupt("break", 14);
 
               case 12:
-                _context9.next = 6;
+                _context10.next = 6;
                 break;
 
               case 14:
@@ -22759,19 +22989,19 @@ var Deck = /*#__PURE__*/function () {
                 }, {
                   duration: 1000
                 });
-                _context9.next = 18;
+                _context10.next = 18;
                 return delay(150);
 
               case 18:
-                _context9.next = 1;
+                _context10.next = 1;
                 break;
 
               case 20:
               case "end":
-                return _context9.stop();
+                return _context10.stop();
             }
           }
-        }, _callee9);
+        }, _callee10);
       }));
 
       function tweenCardsToZones() {
@@ -22819,10 +23049,10 @@ var Round = /*#__PURE__*/function () {
   _createClass(Round, [{
     key: "start",
     value: function () {
-      var _start = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
+      var _start = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee11() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee11$(_context11) {
           while (1) {
-            switch (_context10.prev = _context10.next) {
+            switch (_context11.prev = _context11.next) {
               case 0:
                 console.log('round start', 'deck', window.t.deck); // center the deck
                 // animate the camera
@@ -22841,7 +23071,7 @@ var Round = /*#__PURE__*/function () {
                     updatePlayerHead();
                   }
                 }).start();
-                _context10.next = 4;
+                _context11.next = 4;
                 return delay(1000);
 
               case 4:
@@ -22857,15 +23087,15 @@ var Round = /*#__PURE__*/function () {
                   duration: 1000,
                   easing: TWEEN.Easing.Quadratic.Out
                 }).start();
-                _context10.next = 7;
+                _context11.next = 7;
                 return delay(1000);
 
               case 7:
               case "end":
-                return _context10.stop();
+                return _context11.stop();
             }
           }
-        }, _callee10);
+        }, _callee11);
       }));
 
       function start() {
@@ -22887,9 +23117,9 @@ var Round = /*#__PURE__*/function () {
   }, {
     key: "current_player",
     get: function get() {
-      var _t5, _t5$players, _t$app$state8;
+      var _t7, _t7$players, _t$app$state8;
 
-      return (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : _t5$players[(_t$app$state8 = t.app.state) === null || _t$app$state8 === void 0 ? void 0 : _t$app$state8.player_turn];
+      return (_t7 = t) === null || _t7 === void 0 ? void 0 : (_t7$players = _t7.players) === null || _t7$players === void 0 ? void 0 : _t7$players[(_t$app$state8 = t.app.state) === null || _t$app$state8 === void 0 ? void 0 : _t$app$state8.player_turn];
     }
   }]);
 
@@ -23015,10 +23245,10 @@ var Game_PVPMemory = /*#__PURE__*/function () {
   }, {
     key: "checkForMatches",
     value: function () {
-      var _checkForMatches = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee11() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee11$(_context11) {
+      var _checkForMatches = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee12() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee12$(_context12) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context12.prev = _context12.next) {
               case 0:
                 // we've flipped 2+ cards,
                 t.game.ignore_clicks = true; // server is checking for matches
@@ -23042,10 +23272,10 @@ var Game_PVPMemory = /*#__PURE__*/function () {
 
               case 1:
               case "end":
-                return _context11.stop();
+                return _context12.stop();
             }
           }
-        }, _callee11);
+        }, _callee12);
       }));
 
       function checkForMatches() {
@@ -23088,8 +23318,7 @@ function init() {
   window.t = new Tabletop();
   t.scene = scene;
   t.camera = camera;
-  t.video = document.getElementById('video');
-  t.opponent_video = document.getElementById('opponent_video');
+  t.opponent_video = document.querySelector('.opponent_video');
 
   function checkReady(callback) {
     console.log('check ready', document.readyState);
@@ -23155,112 +23384,8 @@ function getOpponentID() {
   return ids[0];
 }
 
-function setupOpponentPeer() {
-  // oponent stream
-  var createPeerConnection = function createPeerConnection() {
-    return new RTCPeerConnection({
-      iceServers: [{
-        urls: "stun:stun.stunprotocol.org"
-      }]
-    });
-  };
-
-  t.peer = createPeerConnection();
-  t.peer.onicecandidate = t.onIceCandidateEvent;
-
-  var gotRemoteStream = function gotRemoteStream(event) {
-    var _event$streams = _slicedToArray(event.streams, 1),
-        stream = _event$streams[0];
-
-    t.opponent_stream = stream;
-    t.opponent_video.srcObject = stream;
-  };
-
-  t.peer.addEventListener('track', gotRemoteStream);
-} // current player's video stream
-
-
-function setupVideoStream() {
-  t.setupOpponentPeer = setupOpponentPeer;
-  setupOpponentPeer();
-
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    // todo add camera flip (self)
-    // add video mute (self/other)
-    // add audio mute (self/other)
-    var constraints = {
-      audio: true,
-      video: {
-        exposureMode: {
-          ideal: 'continuous'
-        },
-        exposureCompensation: {
-          ideal: 0
-        },
-        width: {
-          ideal: 1280
-        },
-        height: {
-          ideal: 720
-        },
-        facingMode: 'user'
-      }
-    };
-    navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-      // apply the stream to the video element used in the texture
-      t.stream = stream;
-      stream.getTracks().forEach(function (track) {
-        return t.peer.addTrack(track, stream);
-      });
-      t.video.srcObject = stream;
-      t.video.play();
-    })["catch"](function (error) {
-      console.error('Unable to access the camera/webcam.', error);
-    });
-  } else {
-    console.error('MediaDevices interface not available.');
-  }
-
-  t.call = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee12() {
-    var localPeerOffer, opponent_id;
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee12$(_context12) {
-      while (1) {
-        switch (_context12.prev = _context12.next) {
-          case 0:
-            if (!window.t.peer) {
-              window.t.setupOpponentPeer();
-            } //setupOpponentPeer();
-
-
-            _context12.next = 3;
-            return t.peer.createOffer();
-
-          case 3:
-            localPeerOffer = _context12.sent;
-            _context12.next = 6;
-            return t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
-
-          case 6:
-            opponent_id = getOpponentID();
-            t.server.send({
-              type: 'mediaOffer',
-              offer: localPeerOffer,
-              stream_settings: t.stream.getVideoTracks()[0].getSettings(),
-              from: t.app.state.my_client_id,
-              to: opponent_id
-            });
-
-          case 8:
-          case "end":
-            return _context12.stop();
-        }
-      }
-    }, _callee12);
-  }));
-}
-
 function render() {
-  var _t6, _t6$app, _t6$app$state;
+  var _t8, _t8$app, _t8$app$state;
 
   if (resize(renderer)) {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -23275,7 +23400,7 @@ function render() {
   // update "hovered" status of cards
   // todo only run this loop if t.app.state.hovered has changed since last tick
 
-  if ((_t6 = t) !== null && _t6 !== void 0 && (_t6$app = _t6.app) !== null && _t6$app !== void 0 && (_t6$app$state = _t6$app.state) !== null && _t6$app$state !== void 0 && _t6$app$state.hovered) {
+  if ((_t8 = t) !== null && _t8 !== void 0 && (_t8$app = _t8.app) !== null && _t8$app !== void 0 && (_t8$app$state = _t8$app.state) !== null && _t8$app$state !== void 0 && _t8$app$state.hovered) {
     // TODO: this check is probably wasteful, find a better way
     // like .last_hovered_at dirty flag
     if (JSON.stringify(t.app.state.hovered) !== JSON.stringify(t.app.state.hovered_prev)) {
@@ -23513,7 +23638,7 @@ function onMouseMove(_x12) {
 
 function _onMouseMove() {
   _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee14(evt) {
-    var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i2;
+    var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i3;
 
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee14$(_context14) {
       while (1) {
@@ -23587,9 +23712,9 @@ function _onMouseMove() {
               }
             } else {
               if (t.app.state.hovered && (_t$app$state$hovered3 = t.app.state.hovered) !== null && _t$app$state$hovered3 !== void 0 && _t$app$state$hovered3[0]) {
-                _i2 = (_t$app$state$hovered4 = t.app.state.hovered) === null || _t$app$state$hovered4 === void 0 ? void 0 : _t$app$state$hovered4[0];
-                t.cards[_i2].mouseOver = false;
-                t.cards[_i2].hovered = false;
+                _i3 = (_t$app$state$hovered4 = t.app.state.hovered) === null || _t$app$state$hovered4 === void 0 ? void 0 : _t$app$state$hovered4[0];
+                t.cards[_i3].mouseOver = false;
+                t.cards[_i3].hovered = false;
               }
 
               t.server.send({
@@ -23654,13 +23779,13 @@ var cusorUpdateFN = getThrottledUpdateServer('SET_PLAYER_CURSOR', 128);
 var headUpdateFN = getThrottledUpdateServer('SET_PLAYER_HEAD', 128);
 
 function updateClientCursor() {
-  var _t$players4, _t$players4$t$app$sta, _t$players4$t$app$sta2;
+  var _t$players3, _t$players3$t$app$sta, _t$players3$t$app$sta2;
 
   // hit test to position pointer
   // mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
   // mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   // Toggle rotation bool for meshes that we clicked
-  var pointer = (_t$players4 = t.players) === null || _t$players4 === void 0 ? void 0 : (_t$players4$t$app$sta = _t$players4[t.app.state.my_client_id]) === null || _t$players4$t$app$sta === void 0 ? void 0 : (_t$players4$t$app$sta2 = _t$players4$t$app$sta.pointer) === null || _t$players4$t$app$sta2 === void 0 ? void 0 : _t$players4$t$app$sta2.mesh;
+  var pointer = (_t$players3 = t.players) === null || _t$players3 === void 0 ? void 0 : (_t$players3$t$app$sta = _t$players3[t.app.state.my_client_id]) === null || _t$players3$t$app$sta === void 0 ? void 0 : (_t$players3$t$app$sta2 = _t$players3$t$app$sta.pointer) === null || _t$players3$t$app$sta2 === void 0 ? void 0 : _t$players3$t$app$sta2.mesh;
 
   if (pointer) {
     var intersects = raycaster.intersectObjects([].concat(_toConsumableArray(t.zonegroup.children), [t.tableMesh])); // console.log('intersects',intersects);

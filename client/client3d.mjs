@@ -147,7 +147,7 @@ class SocketConnection{
               // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
 
               // request video stream
-              setupVideoStream();
+              // setupVideoStream();
               break;
 
           // case 'GAME_STATE_UPDATE':
@@ -236,6 +236,9 @@ class Tabletop{
         // t.sounds =
         this.sounds = new SoundsManager();
 
+        this.webrtc_peer_connections = {};
+        this.webrtc_peer_streams = {};
+
         this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
         this.deckgroup = new THREE.Group();
@@ -244,6 +247,10 @@ class Tabletop{
         // playfield cards (intersection group)
         this.zonegroup = new THREE.Group();
         scene.add(this.zonegroup);
+    }
+
+    get opponentIDs(){
+      return t.app.state.client_ids.filter(id => id !== t.app.state.my_client_id);
     }
 
     setupGame(){
@@ -260,6 +267,100 @@ class Tabletop{
         this.game.startRound();
     }
 
+    setupOpponentPeer(client_id){
+      // oponent stream
+      const createPeerConnection = () => {
+        return new RTCPeerConnection({
+          iceServers: [
+            {
+              urls: "stun:stun.stunprotocol.org"
+            }
+          ]
+        });
+      };
+
+      t.webrtc_peer_connections[client_id] = createPeerConnection();
+      t.webrtc_peer_connections[client_id].onicecandidate = t.onIceCandidateEvent;
+      const gotRemoteStream = event => {
+        const [stream] = event.streams;
+        t.webrtc_peer_streams[client_id] = stream;
+        // TODO: need multiple video elements
+        t.opponent_video.srcObject = stream;
+      };
+
+      t.peer.addEventListener('track', gotRemoteStream);
+    }
+
+    closeVideoStream(){
+      // t?.stream?.getTracks()?.forEach(function(track){
+      //   track?.stop();
+      // })
+      t?.stream?.getVideoTracks()?.forEach(function(track){
+        track.stop();
+      })
+    }
+    closeAudioStream(){
+      t?.stream?.getAudioTracks()?.forEach(function(track){
+        track.stop();
+      })
+    }
+
+    setupVideoStream(){
+      if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
+        // todo add camera flip (self)
+        // add video mute (self/other)
+        // add audio mute (self/other)
+        const constraints = {
+          audio: true,
+          video: {
+            exposureMode: {ideal:'continuous'},
+            exposureCompensation: {ideal:0},
+            width: {ideal:1280},
+            height: {ideal:720},
+            facingMode: 'user'
+          }
+        };
+
+        navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
+
+          // apply the stream to the video element used in the texture
+          t.stream = stream;
+
+          t.video.srcObject = stream;
+          t.video.play();
+
+        } ).catch( function ( error ) {
+
+          console.error( 'Unable to access the camera/webcam.', error );
+
+        } );
+
+      } else {
+
+        console.error( 'MediaDevices interface not available.' );
+
+      }
+
+      // loop through ALL peers and send them the stream
+      // TODO: max peers
+      t.call = async()=>{
+        t.opponentIDs.forEach((id)=>{
+          t.setupOpponentPeer(id);
+        })
+        // add our audio/video track to the peer connection
+        t.stream.getTracks().forEach(track => t.peer.addTrack(track, stream));
+        const localPeerOffer = await t.peer.createOffer();
+        await t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
+        const opponent_id = getOpponentID()
+        t.server.send({
+          type:'mediaOffer',
+          offer: localPeerOffer,
+          stream_settings: t.stream.getVideoTracks()[0].getSettings(),
+          from: t.app.state.my_client_id,
+          to: opponent_id
+        })
+      }
+    }
     // animate the cards within the hand to maintain spacing
     // also handles animating cards from playfield to hand after a match is validated by the server
     updateCardsInHand(){
@@ -431,9 +532,6 @@ class Tabletop{
     }
 
     async onMediaOffer(decoded){
-      // if(!t.peer){
-      //   setupOpponentPeer();
-      // }
       console.log('todo: if we already have a peer, do we keep or destroy that connection to respond to the new offer?')
       console.log('onMediaOffer',decoded);
         try {
@@ -604,10 +702,9 @@ class PlayerHead extends TweenableMesh {
   }
   setupTexturesAndMaterials(){
     // if(this.player_is_me){
-      this.video_texture = new THREE.VideoTexture(
-        this.player_is_me ? t.video : t.opponent_video
-      ); // webcam stream
-      this.video_texture.format = THREE.RGBAFormat;
+      console.warn('todo: need to set up opponent webcam texture as well as spectator webpack textures')
+      // this.video_texture = new THREE.VideoTexture(t.video); // webcam stream
+      // this.video_texture.format = THREE.RGBAFormat;
     // }
   }
   setupMesh(){
@@ -615,11 +712,12 @@ class PlayerHead extends TweenableMesh {
       // new THREE.SphereGeometry(4.0,8,8),
       new THREE.PlaneGeometry( 16, 16 ),
       new THREE.MeshBasicMaterial({
+        color: 0x800080,
         // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
         // wireframe: true,
         transparent: this.player_is_me ? true : false,
         opacity: this.player_is_me ? 0.0 : 1.0,
-        map: this.video_texture,
+        // map: this.video_texture,
       })
     )
     this.mesh.lookAt(camera.position);
@@ -1342,8 +1440,8 @@ function init(){
   window.t = new Tabletop();
   t.scene = scene;
   t.camera = camera;
-  t.video = document.getElementById('video');
-  t.opponent_video = document.getElementById('opponent_video');
+
+  t.opponent_video = document.querySelector('.opponent_video');
 
   function checkReady(callback){
     console.log('check ready',document.readyState)
@@ -1403,90 +1501,6 @@ function getOpponentID(){
     console.warn('attempting media offer to peer:',ids[0],ids);
   }
   return ids[0];
-}
-
-function setupOpponentPeer(){
-  // oponent stream
-  const createPeerConnection = () => {
-    return new RTCPeerConnection({
-      iceServers: [
-        {
-          urls: "stun:stun.stunprotocol.org"
-        }
-      ]
-    });
-  };
-
-  t.peer = createPeerConnection();
-  t.peer.onicecandidate = t.onIceCandidateEvent;
-  const gotRemoteStream = event => {
-    const [stream] = event.streams;
-    t.opponent_stream = stream;
-    t.opponent_video.srcObject = stream;
-  };
-
-  t.peer.addEventListener('track', gotRemoteStream);
-}
-
-// current player's video stream
-function setupVideoStream(){
-  t.setupOpponentPeer = setupOpponentPeer
-  setupOpponentPeer();
-
-  if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
-    // todo add camera flip (self)
-    // add video mute (self/other)
-    // add audio mute (self/other)
-    const constraints = {
-      audio: true,
-      video: {
-        exposureMode: {ideal:'continuous'},
-        exposureCompensation: {ideal:0},
-        width: {ideal:1280},
-        height: {ideal:720},
-        facingMode: 'user'
-      }
-    };
-
-    navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
-
-      // apply the stream to the video element used in the texture
-      t.stream = stream;
-
-      stream.getTracks().forEach(track => t.peer.addTrack(track, stream));
-
-      t.video.srcObject = stream;
-      t.video.play();
-
-    } ).catch( function ( error ) {
-
-      console.error( 'Unable to access the camera/webcam.', error );
-
-    } );
-
-  } else {
-
-    console.error( 'MediaDevices interface not available.' );
-
-  }
-
-  t.call = async()=>{
-    if(!window.t.peer){
-      window.t.setupOpponentPeer();
-    }
-    //setupOpponentPeer();
-    const localPeerOffer = await t.peer.createOffer();
-    await t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
-    const opponent_id = getOpponentID()
-    t.server.send({
-      type:'mediaOffer',
-      offer: localPeerOffer,
-      stream_settings: t.stream.getVideoTracks()[0].getSettings(),
-      from: t.app.state.my_client_id,
-      to: opponent_id
-    })
-  }
-
 }
 
 function render(){
