@@ -1,3 +1,4 @@
+require('laravel-mix-tailwind');
 let webpack = require('webpack');
 let mix = require('laravel-mix');
 const path = require('path');
@@ -60,5 +61,7 @@ mix.webpackConfig(webpack => {
 mix.setPublicPath('./public')
 // .js('client/2d-client/client.mjs', 'dist')
 .js('client/client3d.mjs', './public/dist')
+.sass('client/client.scss', './public/dist')
+.tailwind()
 .vue({ version:3});
 

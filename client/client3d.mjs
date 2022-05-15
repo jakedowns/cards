@@ -35,6 +35,25 @@ async function delay(t){
     return new Promise(resolve => setTimeout(resolve, t));
 }
 
+THREE.VertexColorShader = {
+
+  uniforms: {
+  },
+  vertexShader: [
+      "varying vec3 vColor;",
+      "void main() {",
+      "vColor = color;",
+      "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+      "}"
+  ].join("\n"),
+  fragmentShader: [
+      "varying vec3 vColor;",
+      "void main( void ) {",
+      "gl_FragColor = vec4( vColor.rgb, 1. );",
+      "}"
+  ].join("\n")
+};
+
 const colorDark = new THREE.Color( 0xb0b0b0 );
 const colorLight = new THREE.Color( 0xffffff );
 const animationDuration = 0.5; // seconds
@@ -227,7 +246,16 @@ class SoundsManager{
 
 // Playfield?
 class Tabletop{
+    // enable/disable the debug inspector
+    toggleDebugInspector(){
+      this.debug_inspect_objects = !this.debug_inspect_objects;
+    }
     constructor(){
+
+        this.debug_inspect_objects = false;
+        this.debug_inspector_selected_object = null;
+
+        this.client_ignore_clicks = true;
         // table tops have uuids which can be shared / spectated / joined
         this.id = "id"+performance.now();
 
@@ -238,15 +266,24 @@ class Tabletop{
 
         this.webrtc_peer_connections = {};
         this.webrtc_peer_streams = {};
+        this.webrtc_peer_video_settings = {};
 
         this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
         this.deckgroup = new THREE.Group();
+        this.deckgroup.position.y = 10;
         scene.add(this.deckgroup);
 
         // playfield cards (intersection group)
         this.zonegroup = new THREE.Group();
+        this.zonegroup.position.y = -0.8
         scene.add(this.zonegroup);
+    }
+
+    getCameraSet(){
+      let pos = t.camera.position;
+      let rot = t.camera.rotation;
+      console.log(`t.camera.position.set(${pos.x},${pos.y},${pos.z});\nt.camera.rotation.x=${rot.x};\nt.camera.rotation.y=${rot.y};\nt.camera.rotation.z=${rot.z};`);
     }
 
     get opponentIDs(){
@@ -258,7 +295,7 @@ class Tabletop{
         initLights()
 
         // Table Top (groundplane)
-        initTableMesh();
+        initRoomMeshes();
 
         this.game = new Game_PVPMemory();
     }
@@ -284,11 +321,10 @@ class Tabletop{
       const gotRemoteStream = event => {
         const [stream] = event.streams;
         t.webrtc_peer_streams[client_id] = stream;
-        // TODO: need multiple video elements
-        t.opponent_video.srcObject = stream;
+        t.root.$refs[`opponent_video_${client_id}`].srcObject = stream;
       };
 
-      t.peer.addEventListener('track', gotRemoteStream);
+      t.webrtc_peer_connections[client_id].addEventListener('track', gotRemoteStream);
     }
 
     closeVideoStream(){
@@ -323,6 +359,7 @@ class Tabletop{
 
         navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
 
+          // NOTE: t.stream === the current client's outbound stream
           // apply the stream to the video element used in the texture
           t.stream = stream;
 
@@ -346,20 +383,28 @@ class Tabletop{
       t.call = async()=>{
         t.opponentIDs.forEach((id)=>{
           t.setupOpponentPeer(id);
-        })
-        // add our audio/video track to the peer connection
-        t.stream.getTracks().forEach(track => t.peer.addTrack(track, stream));
-        const localPeerOffer = await t.peer.createOffer();
-        await t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
-        const opponent_id = getOpponentID()
-        t.server.send({
-          type:'mediaOffer',
-          offer: localPeerOffer,
-          stream_settings: t.stream.getVideoTracks()[0].getSettings(),
-          from: t.app.state.my_client_id,
-          to: opponent_id
+          t.offerStreamToPeer(id);
         })
       }
+    }
+    async offerStreamToPeer(peer_id){
+      const peer = t.webrtc_peer_connections[peer_id];
+      if(!peer){
+        console.error('no peer connection for',peer_id);
+        return;
+      }
+      // offer our audio, video tracks to the peer connection
+      t.stream.getTracks().forEach(track => peer.addTrack(track, t.stream));
+      const localPeerOffer = await peer.createOffer();
+      await peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
+      //const opponent_id = getOpponentID()
+      t.server.send({
+        type:'mediaOffer',
+        offer: localPeerOffer,
+        stream_settings: t.stream.getVideoTracks()[0].getSettings(),
+        from: t.app.state.my_client_id,
+        to: peer_id
+      })
     }
     // animate the cards within the hand to maintain spacing
     // also handles animating cards from playfield to hand after a match is validated by the server
@@ -535,22 +580,31 @@ class Tabletop{
       console.log('todo: if we already have a peer, do we keep or destroy that connection to respond to the new offer?')
       console.log('onMediaOffer',decoded);
         try {
-          await t.peer.setRemoteDescription(new RTCSessionDescription(decoded.offer));
-          const peerAnswer = await t.peer.createAnswer();
-          await t.peer.setLocalDescription(new RTCSessionDescription(peerAnswer));
-          t.opponent_video_stream_settings = decoded.stream_settings; // save call initiators stream settings
-          if(t.opponent_video_stream_settings){
-            let ovss = t.opponent_video_stream_settings;
+          const FROM_PEER_ID = decoded.from;
+          const PEER = t.webrtc_peer_connections[FROM_PEER_ID];
+          if(!PEER){
+            t.setupOpponentPeer(FROM_PEER_ID);
+            // t.offerStreamToPeer(FROM_PEER_ID);
+            // console.error('no peer for',FROM_PEER_ID);
+            // return;
+          }
+          await PEER.setRemoteDescription(new RTCSessionDescription(decoded.offer));
+          const peerAnswer = await PEER.createAnswer();
+          await PEER.setLocalDescription(new RTCSessionDescription(peerAnswer));
+          // save call initiators stream settings
+          t.webrtc_peer_video_settings[FROM_PEER_ID] = decoded.stream_settings;
+          if(t.webrtc_peer_video_settings[FROM_PEER_ID]){
+            let ovss = t.webrtc_peer_video_settings[FROM_PEER_ID];
             let aspect_ratio = ovss.width / ovss.height;
-            // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
-            t?.players?.[getOpponentID()]?.head.mesh.scale.set(aspect_ratio,1,1);
-            // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+            // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
+            t?.players?.[FROM_PEER_ID]?.head.mesh.scale.set(aspect_ratio,1,1);
+            // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
           }
           t.server.send({
             type:'mediaAnswer',
             answer: peerAnswer,
             from: t.app.state.my_client_id,
-            to: decoded.from,
+            to: FROM_PEER_ID,
             stream_settings: t.stream.getVideoTracks()[0].getSettings()
           });
         } catch (error) {
@@ -561,7 +615,8 @@ class Tabletop{
     async onMediaAnswer(decoded){
       console.log('onMediaAnswer',decoded)
       await t.peer.setRemoteDescription(new RTCSessionDescription(decoded.answer));
-      t.opponent_video_stream_settings = decoded.stream_settings; // save call recipients stream settings
+      // save call recipients stream settings
+      t.opponent_video_stream_settings = decoded.stream_settings;
 
       // update opponent's "head" shape to match their video aspect ratio
       console.log('opponent stream ar',
@@ -598,9 +653,17 @@ class Tabletop{
     async onRemotePeerIceCandidate(data) {
       try {
         const candidate = new RTCIceCandidate(data.candidate);
-        await t.peer.addIceCandidate(candidate);
+        console.log('onRemotePeerIceCandidate',data);
+        const PEER_CONNECTION = t.webrtc_peer_connections?.[data.client_id];
+        console.log('PEER_CONNECTION',PEER_CONNECTION);
+        if(!PEER_CONNECTION){
+          console.error('no peer connection for',data.client_id);
+          return;
+        }
+        await PEER_CONNECTION.addIceCandidate(candidate);
       } catch (error) {
-        // Handle error
+        // Handle error // some shit occurred
+        console.error('onRemotePeerIceCandidate',error);
       }
     };
 }
@@ -828,6 +891,7 @@ class PlayerPointer{
         opacity: 0.5
       })
     )
+    this.mesh.name = "pointer";
     // this.mesh.rotation.z = Math.PI/2;
   }
 
@@ -1177,8 +1241,8 @@ class Deck{
           }
         }
         // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
-        if(!card.mesh){
-          console.error('failed to tween card to zone',i,j)
+        if(!card?.mesh){
+          console.error('failed to tween card to zone',i,card)
         }else{
           t.zonegroup.attach(card.mesh);
         }
@@ -1303,9 +1367,9 @@ class Layout{
                     card: null,
 
                     origin:{
-                        x: (2.5*r)-this.spacing.x+(r*0.5),
-                        y: 0,
-                        z: (3.5*c)-this.spacing.y+(c*0.5)
+                        x: (2.5*r)-this.spacing.x+(r*0.5)- .8,
+                        y: 10,
+                        z: (3.5*c)-this.spacing.y+(c*0.5) - 2
                     }
                 });
             }
@@ -1334,7 +1398,12 @@ class Game_PVPMemory{
             rows: 4,
             cols: 4
         })
-        this.ignore_clicks = false;
+        // moved to tabletop?
+        // maybe this should remain-per game?
+        // it's like the table should be able to say no clicking
+        // but the game should also be able to say no clicking (server-fed t.game.state.ignore_clicks)
+        // and the client should be able to disable clicks (when modal is open)
+        // this.ignore_clicks = false;
     }
     startRound(){
         let round = new Round();
@@ -1415,12 +1484,12 @@ function init(){
   });
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.soft = true;
 
   canvas = renderer.domElement;
   document.body.appendChild(canvas);
 
   camera = new THREE.PerspectiveCamera(75, 1, 0.01, 5000);
-  camera.position.set( 0, 5, -1.5 );
   scene.add(camera);
   controls = new THREE.OrbitControls(camera, canvas);
 
@@ -1435,11 +1504,21 @@ function init(){
   txtLoader = new THREE.TextureLoader();
   clock = new THREE.Clock();
 
-
   // init our game instance as window.t
   window.t = new Tabletop();
   t.scene = scene;
   t.camera = camera;
+
+  var axesHelper = new THREE.AxesHelper( 5 );
+  scene.add( axesHelper );
+
+  t.camera.position.set(0.16986347385576694,25.65695945633288,-10.061902520372364);
+  t.camera.rotation.x=-2.108777799386355;
+  t.camera.rotation.y=0.003962076364974097;
+  t.camera.rotation.z=3.134952666963505;
+
+  t.controls = controls;
+  t.controls.enabled = false;
 
   t.opponent_video = document.querySelector('.opponent_video');
 
@@ -1560,12 +1639,27 @@ function render(){
 }
 
 function initLights(){
-  var ambientLight = new THREE.AmbientLight( 0xffffff, 0.4 )
-  var dirLight = new THREE.DirectionalLight( 0xcceeff, 0.9 );
+  var ambientLight = new THREE.AmbientLight( 0xffffff, 0.5 )
+
+  var dirLight = new THREE.DirectionalLight( 0xcceeff, 0.5 );
   dirLight.castShadow = true;
-  dirLight.shadow.mapSize.width = 1024;
-  dirLight.shadow.mapSize.height = 1024;
-  dirLight.position.setScalar( 5 );
+  dirLight.shadowCameraVisible = true;
+  dirLight.shadow.mapSize.width = 512;
+  dirLight.shadow.mapSize.height = 512;
+  dirLight.position.y = 5;
+  dirLight.position.x = 5;
+  dirLight.position.z = 5;
+
+  var d = 100;
+
+  dirLight.shadowCameraLeft = -d;
+  dirLight.shadowCameraRight = d;
+  dirLight.shadowCameraTop = d;
+  dirLight.shadowCameraBottom = -d;
+
+  dirLight.shadowCameraFar = 100;
+  dirLight.shadowDarkness = 0.75;
+
   scene.add( dirLight , ambientLight );
 }
 
@@ -1681,21 +1775,105 @@ function getMeshTween(mesh,updateTo,options){
   return tween;
 }
 
-function initTableMesh(){
+function initRoomMeshes(){
 
-  t.tableMesh = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(50, 50),
+  const loader = new THREE.FBXLoader();
+				loader.load( './public/fbx/card-table.fbx', function ( object ) {
+          object.name="card-table"
+					// mixer = new THREE.AnimationMixer( object );
+
+					// const action = mixer.clipAction( object.animations[ 0 ] );
+					// action.play();
+
+          // var shader = THREE.VertexColorShader;
+          // var uniforms = THREE.UniformsUtils.clone(shader.uniforms);
+          var parameters = {
+            //this activates the 'colors' attribute (uses vertex colors stored in the created geometry)
+            vertexColors: true, //THREE.VertexColors,
+            // fragmentShader: shader.fragmentShader,
+            // vertexShader: shader.vertexShader,
+            side: THREE.DoubleSide,
+            // uniforms: uniforms
+          };
+          object.scale.set(0.1,0.1,0.1);
+
+          t.tableMesh = object;
+
+					object.traverse( function ( child ) {
+
+						if ( child.isMesh ) {
+
+							child.castShadow = true;
+							child.receiveShadow = true;
+              child.material = new THREE.MeshStandardMaterial(parameters);
+						}
+
+					} );
+
+
+
+
+          object.position.set(0,0,0);
+
+          console.log('fbx object?',object);
+
+					scene.add( object );
+
+				} );
+
+  t.wallMaterial = new THREE.MeshStandardMaterial({
+    metalness: 0,
+    roughness: 1,
+    color: '#4B0076',
+    side: THREE.DoubleSide,
+  })
+
+  t.northWall = new THREE.Mesh(
+    new THREE.PlaneBufferGeometry( 100, 50 ),
+    t.wallMaterial
+  )
+  t.northWall.name="northWall"
+  t.northWall.position.set(0, 25, 50);
+  t.northWall.castShadow = true;
+  t.northWall.receiveShadow = true;
+  scene.add(t.northWall);
+
+  t.westWall =t.northWall.clone();
+  t.westWall.name = "westWall"
+  scene.add(t.westWall)
+  t.westWall.rotation.y = THREE.MathUtils.degToRad(90);
+  t.westWall.position.x = -50;
+  t.westWall.position.z = 0;
+
+  t.floor = new THREE.Mesh(
+    new THREE.PlaneBufferGeometry( 100, 100 ),
     new THREE.MeshStandardMaterial({
-      //map: txtLoader.load( "https://threejs.org/examples/textures/hardwood2_diffuse.jpg" ),
       metalness: 0,
       roughness: 1,
-      color: '#000000'
+      // side: THREE.DoubleSide,
+      color: '#5C2890'
     })
-  );
-  t.tableMesh.geometry.rotateX(-Math.PI * 0.5);
-  t.tableMesh.position.set(0, -0.001, 0);
-  t.tableMesh.receiveShadow = true;
-  scene.add(t.tableMesh);
+  )
+  t.floor.castShadow = true;
+  t.floor.receiveShadow = true;
+  t.floor.position.set(0, 0, 0);
+  scene.add(t.floor);
+  t.floor.rotation.x = THREE.MathUtils.degToRad(-90);
+
+  // t.floorMesh = new THREE.Mesh(
+  //   new THREE.PlaneBufferGeometry(50, 50),
+  //   new THREE.MeshStandardMaterial({
+  //     //map: txtLoader.load( "https://threejs.org/examples/textures/hardwood2_diffuse.jpg" ),
+  //     metalness: 0,
+  //     roughness: 1,
+  //     side: THREE.DoubleSide,
+  //     color: '#000000'
+  //   })
+  // );
+  // t.floorMesh.geometry.rotateX(-Math.PI * 0.5);
+  // t.floorMesh.position.set(0, -0.001, 0);
+  // t.floorMesh.receiveShadow = true;
+  // scene.add(t.floorMesh);
 }
 
 // function createFlipUpsideClip( card, side ){ // 'faceup' or 'facedown'
@@ -1790,6 +1968,9 @@ function onTouchMove (evt){
 // TODO: use SHADER to blend
 // TODO: animate color transition
 async function onMouseMove( evt ){
+  if(t.root.show_modal){
+    return;
+  }
   updateClientCursor();
   updatePlayerHead();
   // t.players[getOpponentID()].head.mesh.lookAt(t.camera)
@@ -1829,6 +2010,13 @@ async function onMouseMove( evt ){
   //     // card.material[3].color.set( colorDark );
   //   }
   // }
+
+  // TODO: don't send server highlight when debug_inspect_objects is true
+
+  if(t.debug_inspect_objects){
+    onHoverDebugObject(intersectsGroup(t.scene.children));
+  }
+
   const intersects = intersectsGroup(t.zonegroup.children)
   // setupRaycast();
   // let intersects = raycaster.intersectObjects( t.zonegroup.children );
@@ -1869,6 +2057,24 @@ async function onMouseMove( evt ){
   //else{
     // console.log('not hovering any cards in zonegroup');
   //}
+}
+function onHoverDebugObject(intersects){
+  console.log('todo: highlight hovered object');
+}
+// TODO: loop through intersects array and skip if object is .cursor
+function onClickDebugObject(intersects){
+  console.log(intersects);
+  let closest_object_not_pointer = null;
+  intersects.forEach((intersection)=>{
+    if(intersection.object.name === 'pointer' || intersection.object.name.indexOf('player_head') > -1){
+      return;
+    }
+    if(!closest_object_not_pointer){
+      closest_object_not_pointer = intersection.object;
+    }
+  })
+  t.debug_inspector_selected_object = closest_object_not_pointer;
+  console.log('t.debug_inspector_selected_object set to:',t.debug_inspector_selected_object)
 }
 function throttle(callback,limit){
   var wait = false;                  // Initially, we're not waiting
@@ -1913,7 +2119,7 @@ function updateClientCursor(){
   // Toggle rotation bool for meshes that we clicked
   const pointer = t.players?.[t.app.state.my_client_id]?.pointer?.mesh;
   if(pointer){
-    var intersects = raycaster.intersectObjects( [...t.zonegroup.children, t.tableMesh] );
+    var intersects = raycaster.intersectObjects( t.zonegroup.children );
     // console.log('intersects',intersects);
     if ( intersects.length > 0 ) {
 
@@ -1989,7 +2195,16 @@ function onTouchEnd(evt){
 }
 
 function onMouseClick( evt ){
-  if(t.app.state.ignore_clicks || t.deck.shuffling){
+  if(t.root.show_modal){
+    return;
+  }
+
+  if(t.debug_inspect_objects){
+    onClickDebugObject(intersectsGroup(t.scene.children));
+    return;
+  }
+
+  if(t.app.state.ignore_clicks || t.client_ignore_clicks || t.deck.shuffling){
     return;
   }
   mouseClickCoord = {
@@ -2018,6 +2233,7 @@ function onMouseClick( evt ){
   if(drag_distance > 10){
     return;
   }
+
   // let keep_testing = true;
   // for(let i = 0; i<t.cards.length; i++){
   //   if(!keep_testing){
@@ -2029,7 +2245,7 @@ function onMouseClick( evt ){
     // TODO: we need to only react to the card that is closest to the camera
     // need to account for occluders too :/
     let player_id = t.app.state.my_client_id
-    const intersects = intersectsGroup(t.zonegroup.children)
+    const intersects = intersectsGroup(t.debug_inspect_objects ? t.scene.children : t.zonegroup.children)
     let card_id = intersects?.[0]?.object?.userData?.card_id;
     // console.log('click intersects',{intersects,card_id});
     // card is on the play field
@@ -2126,7 +2342,7 @@ function resetCards(){
          fc.faceUp = false;
        }
        t.game.flipped = [];
-       t.game.ignore_clicks = false;
+       t.client_ignore_clicks = false;
     },reset_delay);
 }
 

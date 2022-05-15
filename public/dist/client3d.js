@@ -13707,18 +13707,34 @@ __webpack_require__.r(__webpack_exports__);
   },
   setup: function setup() {
     return {
+      show_modal: true,
+      show_pause_menu: true,
+      show_player_request_modal: false,
+      show_spectator_joined_modal: false,
+      show_game_in_progress_modal: false,
       show: false,
       calling: false,
       show_end_call_button: false,
       messages: [],
       mic_muted: false,
-      video_enabled: false
+      video_enabled: false,
+      // modal data
+      world_selection: 'jakes-world-uuid',
+      // todo: use a uuid
+      new_world_name: '',
+      room_selection: 'jakes-room-uuid',
+      new_room_name: '',
+      game_selection: 'jakes-game-uuid',
+      new_game_name: '',
+      new_game_mode: '',
+      new_game_mode_name: ''
     };
   },
   mounted: function mounted() {
     var _this = this;
 
-    // console.log('vue app mounted');
+    t.root = this; // console.log('vue app mounted');
+
     document.addEventListener('keyup', function (e) {
       // Keys.d (lowercase "d")
       if (e.keyCode === 68) {
@@ -13805,6 +13821,22 @@ __webpack_require__.r(__webpack_exports__);
 
   },
   methods: {
+    openGameModal: function openGameModal() {
+      this.show_modal = true;
+      this.show_pause_menu = true;
+      t.client_ignore_clicks = true;
+    },
+    closePauseMenu: function closePauseMenu() {
+      this.show_modal = false;
+      this.show_pause_menu = false;
+      t.client_ignore_clicks = false;
+    },
+    submitModal: function submitModal() {
+      console.log('submit modal');
+      this.show_modal = false;
+      t.client_ignore_clicks = false;
+      t.controls.enabled = true;
+    },
     enableVideo: function enableVideo() {
       this.video_enabled = true;
       this.$nextTick(function () {
@@ -13862,6 +13894,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     restart_game: function restart_game() {
+      this.closePauseMenu();
       window.t.server.send({
         type: 'RESTART_GAME' //game_id: this.state.game_id // server should know based on client id
 
@@ -13869,6 +13902,15 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   computed: {
+    // show_modal(){
+    //     return true;
+    // },
+    gameHostByGameId: function gameHostByGameId() {
+      return function (game_id) {};
+    },
+    isHostOfSelectedGame: function isHostOfSelectedGame() {
+      return this.gameHostByGameId(this.game_selection) === this.state.my_client_id;
+    },
     game: function game() {
       var _this$state;
 
@@ -13912,145 +13954,380 @@ var _hoisted_1 = {
   id: "debug"
 };
 var _hoisted_2 = {
-  "class": "hit"
+  key: 0,
+  "class": "modal-wrapper"
 };
-
-var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" / ");
-
+var _hoisted_3 = {
+  key: 0,
+  "class": "world-room-game-modal modal"
+};
 var _hoisted_4 = {
-  "class": "miss"
+  "class": "modal-content"
 };
 
-var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-  "class": "video-chat-call-start"
-}, "Join Chat", -1
+var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  "class": "mb-4"
+}, "Menu", -1
 /* HOISTED */
 );
 
-var _hoisted_6 = [_hoisted_5];
-
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-  "class": "video-chat-call-end"
-}, "Leave Chat", -1
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, "World", -1
 /* HOISTED */
 );
 
-var _hoisted_8 = [_hoisted_7];
-
-var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  selected: "",
+  value: "jakes-world-uuid"
+}, "Jake's World", -1
 /* HOISTED */
 );
 
-var _hoisted_10 = {
-  "class": "inner"
-};
-var _hoisted_11 = {
-  "class": "details"
-};
-var _hoisted_12 = {
-  "class": "my_client_id"
-};
-
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
-
-var _hoisted_14 = {
-  "class": "value"
-};
-var _hoisted_15 = {
-  "class": "room_id"
-};
-
-var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
-
-var _hoisted_17 = {
-  "class": "value"
-};
-var _hoisted_18 = {
-  "class": "game_id"
-};
-
-var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
-
-var _hoisted_20 = {
-  "class": "value"
-};
-
-var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
-
-var _hoisted_22 = {
-  "class": "value"
-};
-var _hoisted_23 = {
-  "class": "host_id"
-};
-
-var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
-
-var _hoisted_25 = {
-  "class": "value"
-};
-
-var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
-
-var _hoisted_27 = {
-  "class": "round_id"
-};
-
-var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
-
-var _hoisted_29 = {
-  "class": "value"
-};
-
-var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
-
-var _hoisted_31 = {
-  "class": "value"
-};
-var _hoisted_32 = {
-  "class": "clients"
-};
-
-var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
-
-var _hoisted_34 = {
-  "class": "value"
-};
-
-var _hoisted_35 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
-
-var _hoisted_36 = {
+var _hoisted_8 = {
   key: 0
 };
 
-var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-  "class": "new-game"
-}, "Restart Game", -1
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "pick a name for your new world", -1
+/* HOISTED */
+);
+
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, "Room", -1
+/* HOISTED */
+);
+
+var _hoisted_12 = ["disabled"];
+
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  selected: "",
+  value: "jakes-room"
+}, "Jake's Room", -1
+/* HOISTED */
+);
+
+var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "new-room"
+}, "New Room", -1
+/* HOISTED */
+);
+
+var _hoisted_15 = [_hoisted_13, _hoisted_14];
+var _hoisted_16 = {
+  key: 1
+};
+
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "pick a name for your new room", -1
+/* HOISTED */
+);
+
+var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, "Game", -1
+/* HOISTED */
+);
+
+var _hoisted_20 = ["disabled"];
+
+var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  selected: "",
+  value: "jakes-game"
+}, "Jake's Game", -1
+/* HOISTED */
+);
+
+var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "new-game"
+}, "New Game", -1
+/* HOISTED */
+);
+
+var _hoisted_23 = [_hoisted_21, _hoisted_22];
+var _hoisted_24 = {
+  key: 2
+};
+
+var _hoisted_25 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "what would you like to call your new game?", -1
+/* HOISTED */
+);
+
+var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_27 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  disabled: "",
+  selected: "",
+  value: ""
+}, "Select Game Mode", -1
+/* HOISTED */
+);
+
+var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "memory"
+}, "Memory Matching Game", -1
+/* HOISTED */
+);
+
+var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "klondike"
+}, "Klondike Solitaire", -1
+/* HOISTED */
+);
+
+var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "new-game-mode"
+}, "New Custom Game Mode...", -1
+/* HOISTED */
+);
+
+var _hoisted_31 = [_hoisted_27, _hoisted_28, _hoisted_29, _hoisted_30];
+var _hoisted_32 = {
+  key: 0
+};
+
+var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "what would you like to call your new game?", -1
+/* HOISTED */
+);
+
+var _hoisted_34 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_35 = ["disabled"];
+var _hoisted_36 = {
+  key: 1,
+  "class": "game-in-progress-modal modal"
+};
+
+var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "modal-content"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  "class": "mb-4"
+}, "\"Jake's Game\" is already in progress"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", null, "Spectate"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", null, "Request to Play")], -1
 /* HOISTED */
 );
 
 var _hoisted_38 = [_hoisted_37];
 var _hoisted_39 = {
+  key: 2,
+  "class": "player-request-modal modal"
+};
+
+var _hoisted_40 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "modal-content"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  "class": "mb-4"
+}, "\"Brent\" wants to join your game!"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", null, "Allow (Continue)"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", null, "Allow (New)"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", null, "Ignore")], -1
+/* HOISTED */
+);
+
+var _hoisted_41 = [_hoisted_40];
+var _hoisted_42 = {
+  key: 3,
+  "class": "spectator-joined-modal modal"
+};
+
+var _hoisted_43 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "modal-content"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  "class": "mb-4"
+}, "\"Brent\" joined as a spectator"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", null, "Invite to play")], -1
+/* HOISTED */
+);
+
+var _hoisted_44 = [_hoisted_43];
+
+var _hoisted_45 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "modal-underlay"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_46 = {
+  "class": "debug-inner"
+};
+var _hoisted_47 = {
+  "class": "hit"
+};
+
+var _hoisted_48 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" / ");
+
+var _hoisted_49 = {
+  "class": "miss"
+};
+
+var _hoisted_50 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "video-chat-call-start"
+}, "Join Chat", -1
+/* HOISTED */
+);
+
+var _hoisted_51 = [_hoisted_50];
+
+var _hoisted_52 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "video-chat-call-end"
+}, "Leave Chat", -1
+/* HOISTED */
+);
+
+var _hoisted_53 = [_hoisted_52];
+
+var _hoisted_54 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_55 = {
+  "class": "inner"
+};
+var _hoisted_56 = {
+  "class": "details"
+};
+var _hoisted_57 = {
+  "class": "my_client_id"
+};
+
+var _hoisted_58 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
+
+var _hoisted_59 = {
+  "class": "value"
+};
+var _hoisted_60 = {
+  "class": "room_id"
+};
+
+var _hoisted_61 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
+
+var _hoisted_62 = {
+  "class": "value"
+};
+var _hoisted_63 = {
+  "class": "game_id"
+};
+
+var _hoisted_64 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
+
+var _hoisted_65 = {
+  "class": "value"
+};
+
+var _hoisted_66 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+
+var _hoisted_67 = {
+  "class": "value"
+};
+var _hoisted_68 = {
+  "class": "host_id"
+};
+
+var _hoisted_69 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
+
+var _hoisted_70 = {
+  "class": "value"
+};
+
+var _hoisted_71 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+
+var _hoisted_72 = {
+  "class": "round_id"
+};
+
+var _hoisted_73 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
+
+var _hoisted_74 = {
+  "class": "value"
+};
+
+var _hoisted_75 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+
+var _hoisted_76 = {
+  "class": "value"
+};
+var _hoisted_77 = {
+  "class": "clients"
+};
+
+var _hoisted_78 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
+
+var _hoisted_79 = {
+  "class": "value"
+};
+
+var _hoisted_80 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
+
+var _hoisted_81 = {
+  key: 0
+};
+
+var _hoisted_82 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "new-game"
+}, "Restart Game", -1
+/* HOISTED */
+);
+
+var _hoisted_83 = [_hoisted_82];
+var _hoisted_84 = {
   "class": "messages"
 };
-var _hoisted_40 = {
+var _hoisted_85 = {
   "class": "message-text"
 };
 
-var _hoisted_41 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_86 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "bg-blur"
 }, null, -1
 /* HOISTED */
 );
 
-var _hoisted_42 = {
+var _hoisted_87 = {
   "class": "hud"
 };
-var _hoisted_43 = {
+
+var _hoisted_88 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "1em",
+  height: "1em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 48 48"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "48",
+  height: "48",
+  fill: "none",
+  stroke: "none"
+}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("mask", {
+  id: "svgIDa"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("g", {
+  fill: "none",
+  stroke: "#fff",
+  "stroke-linejoin": "round",
+  "stroke-width": "4"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "#fff",
+  d: "M28 28h16v16H28zM13 4l9 16H4l9-16Zm23 16a8 8 0 1 0 0-16a8 8 0 0 0 0 16Z"
+}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  "stroke-linecap": "round",
+  d: "m4 28l16 16m0-16L4 44"
+})])]), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M0 0h48v48H0z",
+  mask: "url(#svgIDa)"
+})], -1
+/* HOISTED */
+);
+
+var _hoisted_89 = [_hoisted_88];
+var _hoisted_90 = {
   "class": "av-controls"
 };
 
-var _hoisted_44 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_91 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   width: "55",
   height: "38",
   viewBox: "0 0 55 38",
@@ -14063,9 +14340,9 @@ var _hoisted_44 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_45 = [_hoisted_44];
+var _hoisted_92 = [_hoisted_91];
 
-var _hoisted_46 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_93 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   "aria-hidden": "true",
   role: "img",
@@ -14088,35 +14365,108 @@ var _hoisted_46 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_47 = [_hoisted_46];
-var _hoisted_48 = {
+var _hoisted_94 = [_hoisted_93];
+var _hoisted_95 = {
   key: 0
 };
-var _hoisted_49 = {
+var _hoisted_96 = {
   key: 1
 };
-var _hoisted_50 = {
+var _hoisted_97 = {
   "class": "debug-video"
 };
 
-var _hoisted_51 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
+var _hoisted_98 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
   id: "sound_effects",
   src: "./public/sounds/flip.mp3"
 }, null, -1
 /* HOISTED */
 );
 
-var _hoisted_52 = {
+var _hoisted_99 = {
   id: "video",
   autoplay: "",
   playsinline: "",
   muted: ""
 };
-var _hoisted_53 = ["data-client-id"];
+var _hoisted_100 = {
+  "class": "opponent_videos"
+};
+var _hoisted_101 = ["data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state7, _$props$state$room_id, _$props$state8, _$props$state$game_id, _$props$state9, _$options$game, _$props$state$game_ho, _$props$state10, _$props$state$round_i, _$props$state11, _$options$round, _$props$state$player_4, _$props$state$client_2, _$props$state13;
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length), 1
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [$setup.show_pause_menu ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
+      return $setup.world_selection = $event;
+    })
+  }, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <option value=\"new-world\">New World</option> ")], 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.world_selection]]), $setup.world_selection === 'new-world' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_8, [_hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    placeholder: "My New World Name",
+    "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
+      return $setup.new_world_name = $event;
+    })
+  }, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.new_world_name]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_10, _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
+      return $setup.room_selection = $event;
+    }),
+    disabled: !$setup.world_selection
+  }, _hoisted_15, 8
+  /* PROPS */
+  , _hoisted_12), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.room_selection]]), $setup.room_selection === 'new-room' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_16, [_hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    placeholder: "My New Room Name",
+    "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
+      return $setup.new_room_name = $event;
+    })
+  }, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.new_room_name]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_18, _hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+      return $setup.game_selection = $event;
+    }),
+    disabled: !$setup.room_selection
+  }, _hoisted_23, 8
+  /* PROPS */
+  , _hoisted_20), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.game_selection]]), $setup.game_selection === 'new-game' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_24, [_hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    placeholder: "My New Game Name",
+    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
+      return $setup.new_game_name = $event;
+    })
+  }, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.new_game_name]]), _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
+      return $setup.new_game_mode = $event;
+    })
+  }, _hoisted_31, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.new_game_mode]]), $setup.new_game_mode === 'new-game-mode' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_32, [_hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    placeholder: "My New Game Mode Name",
+    "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
+      return $setup.new_game_mode_name = $event;
+    })
+  }, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.new_game_mode_name]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_34, $setup.game_selection !== 'new-game' && $options.isHostOfSelectedGame ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
+    key: 3,
+    onClick: _cache[8] || (_cache[8] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.restart_game && $options.restart_game.apply($options, arguments);
+    }, ["prevent"]))
+  }, "Restart Game")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[9] || (_cache[9] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.submitModal && $options.submitModal.apply($options, arguments);
+    }, ["prevent"])),
+    disabled: !$setup.world_selection || !$setup.room_selection || !$setup.game_selection
+  }, "Continue", 8
+  /* PROPS */
+  , _hoisted_35)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_36, _hoisted_38)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_39, _hoisted_41)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_42, _hoisted_44)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_45])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_46, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length), 1
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.round_number), 1
   /* TEXT */
@@ -14128,56 +14478,56 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       key: id
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$player = _$props$state4.player_names) === null || _$props$state4$player === void 0 ? void 0 : _$props$state4$player[id]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'player') + ": ", 1
     /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_47, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
     /* TEXT */
-    ), _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_3 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_3 !== void 0 ? _$props$state$player_3 : 0), 1
+    ), _hoisted_48, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_49, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_3 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_3 !== void 0 ? _$props$state$player_3 : 0), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
   )), !$setup.calling ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
-    onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[10] || (_cache[10] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.start_video_chat && $options.start_video_chat.apply($options, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_51)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
-    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[11] || (_cache[11] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.end_video_chat && $options.end_video_chat.apply($options, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[2] || (_cache[2] = function ($event) {
+  }, _hoisted_53)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_54, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[12] || (_cache[12] = function ($event) {
       return $setup.show = !$setup.show;
     })
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.show ? 'Hide' : 'Show Debug Info'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_12, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.my_client_id), 1
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_55, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_56, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_57, [_hoisted_58, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_59, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.my_client_id), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state8 = $props.state) === null || _$props$state8 === void 0 ? void 0 : _$props$state8.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_60, [_hoisted_61, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_62, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state8 = $props.state) === null || _$props$state8 === void 0 ? void 0 : _$props$state8.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state9 = $props.state) === null || _$props$state9 === void 0 ? void 0 : _$props$state9.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_63, [_hoisted_64, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_65, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state9 = $props.state) === null || _$props$state9 === void 0 ? void 0 : _$props$state9.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
   /* TEXT */
-  ), _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$game = $options.game) !== null && _$options$game !== void 0 && _$options$game.started ? 'started' : 'not-started'), 1
+  ), _hoisted_66, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_67, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$game = $options.game) !== null && _$options$game !== void 0 && _$options$game.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_23, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state10 = $props.state) === null || _$props$state10 === void 0 ? void 0 : _$props$state10.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_68, [_hoisted_69, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_70, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state10 = $props.state) === null || _$props$state10 === void 0 ? void 0 : _$props$state10.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
   /* TEXT */
-  ), _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  ), _hoisted_71, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
       color: $options.im_game_host ? 'green' : 'red'
     })
   }, "You're " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.im_game_host ? '' : 'NOT') + " the game host!", 5
   /* TEXT, STYLE */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_27, [_hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state11 = $props.state) === null || _$props$state11 === void 0 ? void 0 : _$props$state11.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_72, [_hoisted_73, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_74, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state11 = $props.state) === null || _$props$state11 === void 0 ? void 0 : _$props$state11.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
   /* TEXT */
-  ), _hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$round = $options.round) !== null && _$options$round !== void 0 && _$options$round.started ? 'started' : 'not-started'), 1
+  ), _hoisted_75, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_76, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$round = $options.round) !== null && _$options$round !== void 0 && _$options$round.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_32, [_hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_77, [_hoisted_78, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_79, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
   /* TEXT */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player turn id: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.state.player_turn) + " ", 1
   /* TEXT */
@@ -14189,77 +14539,87 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT, STYLE */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_4 = $props.state.player_type) !== null && _$props$state$player_4 !== void 0 ? _$props$state$player_4 : 'connecting'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_80, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
     var _$props$state$player_5, _$props$state$player_6, _$props$state12, _$props$state12$playe;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
       key: player_id
-    }, [!((_$props$state$player_5 = $props.state.player_hands) !== null && _$props$state$player_5 !== void 0 && (_$props$state$player_6 = _$props$state$player_5[player_id]) !== null && _$props$state$player_6 !== void 0 && _$props$state$player_6.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_36, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state12 = $props.state) === null || _$props$state12 === void 0 ? void 0 : (_$props$state12$playe = _$props$state12.player_hands) === null || _$props$state12$playe === void 0 ? void 0 : _$props$state12$playe[player_id])), 1
+    }, [!((_$props$state$player_5 = $props.state.player_hands) !== null && _$props$state$player_5 !== void 0 && (_$props$state$player_6 = _$props$state$player_5[player_id]) !== null && _$props$state$player_6 !== void 0 && _$props$state$player_6.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_81, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state12 = $props.state) === null || _$props$state12 === void 0 ? void 0 : (_$props$state12$playe = _$props$state12.player_hands) === null || _$props$state12$playe === void 0 ? void 0 : _$props$state12$playe[player_id])), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
   ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "Flipped: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.flipped)), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                <li v-if=\"!state?.room_id\">\n                    <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                </li>\n\n                <li v-if=\"state?.room_id && !state?.game_id\"\n                    @click.prevent=\"new_game\">\n                    <button class=\"new-game\">New Game</button>\n                </li> "), $options.im_game_host ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                    <li v-if=\"!state?.room_id\">\n                        <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                    </li>\n\n                    <li v-if=\"state?.room_id && !state?.game_id\"\n                        @click.prevent=\"new_game\">\n                        <button class=\"new-game\">New Game</button>\n                    </li> "), $options.im_game_host ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
     key: 0,
-    onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[13] || (_cache[13] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.restart_game && $options.restart_game.apply($options, arguments);
     }, ["prevent"]))
-  }, _hoisted_38)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                    @click.prevent=\"start_game\">\n                    <button class=\"start-game\">Start Game</button>\n                </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_39, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.messages, function (message, i) {
+  }, _hoisted_83)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                        @click.prevent=\"start_game\">\n                        <button class=\"start-game\">Start Game</button>\n                    </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_84, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.messages, function (message, i) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "message",
       key: i
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_85, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])])]), _hoisted_41], 512
+  ))])])]), _hoisted_86], 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.show]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.show]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_87, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    style: {
+      "pointer-events": "all"
+    },
+    "class": "game-modal-toggle-icon",
+    onClick: _cache[14] || (_cache[14] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.openGameModal && $options.openGameModal.apply($options, arguments);
+    }, ["prevent"]))
+  }, _hoisted_89), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_90, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
     style: {
       "pointer-events": "all"
     },
     id: "icon-video-enable",
-    onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+    onClick: _cache[15] || (_cache[15] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $options.enableVideo();
     }, ["prevent"]))
-  }, _hoisted_45)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_92)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
     style: {
       "pointer-events": "all"
     },
     id: "icon-video-disable",
-    onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+    onClick: _cache[16] || (_cache[16] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $options.disableVideo();
     }, ["prevent"]))
-  }, _hoisted_47)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $options.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_48, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_49, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_50, [_hoisted_51, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_52, null, 512
+  }, _hoisted_94)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $options.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_95, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_96, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_97, [_hoisted_98, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_99, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_2 = (_$props$state13 = $props.state) === null || _$props$state13 === void 0 ? void 0 : _$props$state13.client_ids) !== null && _$props$state$client_2 !== void 0 ? _$props$state$client_2 : []).filter(function (id) {
-    id !== $props.state.my_client_id;
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_100, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_2 = (_$props$state13 = $props.state) === null || _$props$state13 === void 0 ? void 0 : _$props$state13.client_ids) !== null && _$props$state$client_2 !== void 0 ? _$props$state$client_2 : []).filter(function (id) {
+    return id !== $props.state.my_client_id;
   }), function (client_id) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("video", {
       "class": "opponent_video",
       autoplay: "",
+      ref_for: true,
+      ref: "opponent_video_".concat(client_id),
       playsinline: "",
       onclick: "toggle_opponent_mute()",
       key: client_id,
       "data-client-id": client_id
     }, null, 8
     /* PROPS */
-    , _hoisted_53);
+    , _hoisted_101);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])]);
+  ))])])]);
 }
 
 /***/ }),
 
-/***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss":
+/***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss":
 /*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss ***!
+  !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss ***!
   \***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
@@ -14274,7 +14634,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 60px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 63px;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: auto;\n  height: 100vh;\n  pointer-events: none;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 60px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 63px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal {\n  pointer-events: all;\n  top: 60px;\n  position: absolute;\n  width: calc(33vw - 40px);\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  left: 50%;\n  transform: translateX(-16.5vw);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -14357,9 +14717,22 @@ module.exports = function (cssWithMappingToString) {
 
 /***/ }),
 
-/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss":
+/***/ "./client/client.scss":
+/*!****************************!*\
+  !*** ./client/client.scss ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss":
 /*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss ***!
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss ***!
   \***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -14370,7 +14743,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
 /* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_use_3_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_style_index_0_id_5acf4fce_lang_scss__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-11.use[1]!../../node_modules/vue-loader/dist/stylePostLoader.js!../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11.use[2]!../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11.use[3]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss */ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_use_3_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_style_index_0_id_5acf4fce_lang_scss__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!../../node_modules/vue-loader/dist/stylePostLoader.js!../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss */ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss");
 
             
 
@@ -14379,11 +14752,11 @@ var options = {};
 options.insert = "head";
 options.singleton = false;
 
-var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_use_3_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_style_index_0_id_5acf4fce_lang_scss__WEBPACK_IMPORTED_MODULE_1__["default"], options);
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_use_3_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_style_index_0_id_5acf4fce_lang_scss__WEBPACK_IMPORTED_MODULE_1__["default"], options);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_use_3_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_style_index_0_id_5acf4fce_lang_scss__WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_use_3_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_style_index_0_id_5acf4fce_lang_scss__WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
 
 /***/ }),
 
@@ -14759,7 +15132,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_use_3_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_style_index_0_id_5acf4fce_lang_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-11.use[1]!../../node_modules/vue-loader/dist/stylePostLoader.js!../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11.use[2]!../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11.use[3]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss");
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_use_3_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_style_index_0_id_5acf4fce_lang_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!../../node_modules/vue-loader/dist/stylePostLoader.js!../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss");
 
 
 /***/ }),
@@ -21265,95 +21638,15 @@ const getGlobalThis = () => {
 
 
 
-/***/ })
+/***/ }),
 
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			id: moduleId,
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/global */
-/******/ 	(() => {
-/******/ 		__webpack_require__.g = (function() {
-/******/ 			if (typeof globalThis === 'object') return globalThis;
-/******/ 			try {
-/******/ 				return this || new Function('return this')();
-/******/ 			} catch (e) {
-/******/ 				if (typeof window === 'object') return window;
-/******/ 			}
-/******/ 		})();
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
+/***/ "./client/client3d.mjs":
 /*!*****************************!*\
   !*** ./client/client3d.mjs ***!
   \*****************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
@@ -21361,14 +21654,6 @@ __webpack_require__.r(__webpack_exports__);
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 var _module;
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -21458,25 +21743,30 @@ function delay(_x) {
 }
 
 function _delay() {
-  _delay = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee13(t) {
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee13$(_context13) {
+  _delay = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee14(t) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee14$(_context14) {
       while (1) {
-        switch (_context13.prev = _context13.next) {
+        switch (_context14.prev = _context14.next) {
           case 0:
-            return _context13.abrupt("return", new Promise(function (resolve) {
+            return _context14.abrupt("return", new Promise(function (resolve) {
               return setTimeout(resolve, t);
             }));
 
           case 1:
           case "end":
-            return _context13.stop();
+            return _context14.stop();
         }
       }
-    }, _callee13);
+    }, _callee14);
   }));
   return _delay.apply(this, arguments);
 }
 
+THREE.VertexColorShader = {
+  uniforms: {},
+  vertexShader: ["varying vec3 vColor;", "void main() {", "vColor = color;", "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );", "}"].join("\n"),
+  fragmentShader: ["varying vec3 vColor;", "void main( void ) {", "gl_FragColor = vec4( vColor.rgb, 1. );", "}"].join("\n")
+};
 var colorDark = new THREE.Color(0xb0b0b0);
 var colorLight = new THREE.Color(0xffffff);
 var animationDuration = 0.5; // seconds
@@ -21720,7 +22010,10 @@ var Tabletop = /*#__PURE__*/function () {
   function Tabletop() {
     _classCallCheck(this, Tabletop);
 
-    // table tops have uuids which can be shared / spectated / joined
+    this.debug_inspect_objects = false;
+    this.debug_inspector_selected_object = null;
+    this.client_ignore_clicks = true; // table tops have uuids which can be shared / spectated / joined
+
     this.id = "id" + performance.now(); // t.server =
 
     this.server = new SocketConnection(); // t.sounds =
@@ -21728,16 +22021,32 @@ var Tabletop = /*#__PURE__*/function () {
     this.sounds = new SoundsManager();
     this.webrtc_peer_connections = {};
     this.webrtc_peer_streams = {};
+    this.webrtc_peer_video_settings = {};
     this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
     this.deckgroup = new THREE.Group();
+    this.deckgroup.position.y = 10;
     scene.add(this.deckgroup); // playfield cards (intersection group)
 
     this.zonegroup = new THREE.Group();
+    this.zonegroup.position.y = -0.8;
     scene.add(this.zonegroup);
   }
 
   _createClass(Tabletop, [{
+    key: "toggleDebugInspector",
+    value: // enable/disable the debug inspector
+    function toggleDebugInspector() {
+      this.debug_inspect_objects = !this.debug_inspect_objects;
+    }
+  }, {
+    key: "getCameraSet",
+    value: function getCameraSet() {
+      var pos = t.camera.position;
+      var rot = t.camera.rotation;
+      console.log("t.camera.position.set(".concat(pos.x, ",").concat(pos.y, ",").concat(pos.z, ");\nt.camera.rotation.x=").concat(rot.x, ";\nt.camera.rotation.y=").concat(rot.y, ";\nt.camera.rotation.z=").concat(rot.z, ";"));
+    }
+  }, {
     key: "opponentIDs",
     get: function get() {
       return t.app.state.client_ids.filter(function (id) {
@@ -21750,7 +22059,7 @@ var Tabletop = /*#__PURE__*/function () {
       // Lights
       initLights(); // Table Top (groundplane)
 
-      initTableMesh();
+      initRoomMeshes();
       this.game = new Game_PVPMemory();
     }
   }, {
@@ -21777,12 +22086,11 @@ var Tabletop = /*#__PURE__*/function () {
         var _event$streams = _slicedToArray(event.streams, 1),
             stream = _event$streams[0];
 
-        t.webrtc_peer_streams[client_id] = stream; // TODO: need multiple video elements
-
-        t.opponent_video.srcObject = stream;
+        t.webrtc_peer_streams[client_id] = stream;
+        t.root.$refs["opponent_video_".concat(client_id)].srcObject = stream;
       };
 
-      t.peer.addEventListener('track', gotRemoteStream);
+      t.webrtc_peer_connections[client_id].addEventListener('track', gotRemoteStream);
     }
   }, {
     key: "closeVideoStream",
@@ -21831,6 +22139,7 @@ var Tabletop = /*#__PURE__*/function () {
           }
         };
         navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+          // NOTE: t.stream === the current client's outbound stream
           // apply the stream to the video element used in the texture
           t.stream = stream;
           t.video.srcObject = stream;
@@ -21845,44 +22154,79 @@ var Tabletop = /*#__PURE__*/function () {
 
 
       t.call = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee2() {
-        var localPeerOffer, opponent_id;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 t.opponentIDs.forEach(function (id) {
                   t.setupOpponentPeer(id);
-                }); // add our audio/video track to the peer connection
-
-                t.stream.getTracks().forEach(function (track) {
-                  return t.peer.addTrack(track, stream);
-                });
-                _context2.next = 4;
-                return t.peer.createOffer();
-
-              case 4:
-                localPeerOffer = _context2.sent;
-                _context2.next = 7;
-                return t.peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
-
-              case 7:
-                opponent_id = getOpponentID();
-                t.server.send({
-                  type: 'mediaOffer',
-                  offer: localPeerOffer,
-                  stream_settings: t.stream.getVideoTracks()[0].getSettings(),
-                  from: t.app.state.my_client_id,
-                  to: opponent_id
+                  t.offerStreamToPeer(id);
                 });
 
-              case 9:
+              case 1:
               case "end":
                 return _context2.stop();
             }
           }
         }, _callee2);
       }));
-    } // animate the cards within the hand to maintain spacing
+    }
+  }, {
+    key: "offerStreamToPeer",
+    value: function () {
+      var _offerStreamToPeer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(peer_id) {
+        var peer, localPeerOffer;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                peer = t.webrtc_peer_connections[peer_id];
+
+                if (peer) {
+                  _context3.next = 4;
+                  break;
+                }
+
+                console.error('no peer connection for', peer_id);
+                return _context3.abrupt("return");
+
+              case 4:
+                // offer our audio, video tracks to the peer connection
+                t.stream.getTracks().forEach(function (track) {
+                  return peer.addTrack(track, t.stream);
+                });
+                _context3.next = 7;
+                return peer.createOffer();
+
+              case 7:
+                localPeerOffer = _context3.sent;
+                _context3.next = 10;
+                return peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
+
+              case 10:
+                //const opponent_id = getOpponentID()
+                t.server.send({
+                  type: 'mediaOffer',
+                  offer: localPeerOffer,
+                  stream_settings: t.stream.getVideoTracks()[0].getSettings(),
+                  from: t.app.state.my_client_id,
+                  to: peer_id
+                });
+
+              case 11:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }));
+
+      function offerStreamToPeer(_x3) {
+        return _offerStreamToPeer.apply(this, arguments);
+      }
+
+      return offerStreamToPeer;
+    }() // animate the cards within the hand to maintain spacing
     // also handles animating cards from playfield to hand after a match is validated by the server
 
   }, {
@@ -22079,62 +22423,72 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "onMediaOffer",
     value: function () {
-      var _onMediaOffer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(decoded) {
-        var peerAnswer, _t5, _t5$players, _t5$players$getOppone, ovss, aspect_ratio;
+      var _onMediaOffer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(decoded) {
+        var FROM_PEER_ID, PEER, peerAnswer, _t5, _t5$players, _t5$players$FROM_PEER, ovss, aspect_ratio;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 console.log('todo: if we already have a peer, do we keep or destroy that connection to respond to the new offer?');
                 console.log('onMediaOffer', decoded);
-                _context3.prev = 2;
-                _context3.next = 5;
-                return t.peer.setRemoteDescription(new RTCSessionDescription(decoded.offer));
+                _context4.prev = 2;
+                FROM_PEER_ID = decoded.from;
+                PEER = t.webrtc_peer_connections[FROM_PEER_ID];
 
-              case 5:
-                _context3.next = 7;
-                return t.peer.createAnswer();
+                if (!PEER) {
+                  t.setupOpponentPeer(FROM_PEER_ID); // t.offerStreamToPeer(FROM_PEER_ID);
+                  // console.error('no peer for',FROM_PEER_ID);
+                  // return;
+                }
 
-              case 7:
-                peerAnswer = _context3.sent;
-                _context3.next = 10;
-                return t.peer.setLocalDescription(new RTCSessionDescription(peerAnswer));
+                _context4.next = 8;
+                return PEER.setRemoteDescription(new RTCSessionDescription(decoded.offer));
+
+              case 8:
+                _context4.next = 10;
+                return PEER.createAnswer();
 
               case 10:
-                t.opponent_video_stream_settings = decoded.stream_settings; // save call initiators stream settings
+                peerAnswer = _context4.sent;
+                _context4.next = 13;
+                return PEER.setLocalDescription(new RTCSessionDescription(peerAnswer));
 
-                if (t.opponent_video_stream_settings) {
-                  ovss = t.opponent_video_stream_settings;
-                  aspect_ratio = ovss.width / ovss.height; // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+              case 13:
+                // save call initiators stream settings
+                t.webrtc_peer_video_settings[FROM_PEER_ID] = decoded.stream_settings;
 
-                  (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : (_t5$players$getOppone = _t5$players[getOpponentID()]) === null || _t5$players$getOppone === void 0 ? void 0 : _t5$players$getOppone.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+                if (t.webrtc_peer_video_settings[FROM_PEER_ID]) {
+                  ovss = t.webrtc_peer_video_settings[FROM_PEER_ID];
+                  aspect_ratio = ovss.width / ovss.height; // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
+
+                  (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : (_t5$players$FROM_PEER = _t5$players[FROM_PEER_ID]) === null || _t5$players$FROM_PEER === void 0 ? void 0 : _t5$players$FROM_PEER.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
                 }
 
                 t.server.send({
                   type: 'mediaAnswer',
                   answer: peerAnswer,
                   from: t.app.state.my_client_id,
-                  to: decoded.from,
+                  to: FROM_PEER_ID,
                   stream_settings: t.stream.getVideoTracks()[0].getSettings()
                 });
-                _context3.next = 18;
+                _context4.next = 21;
                 break;
 
-              case 15:
-                _context3.prev = 15;
-                _context3.t0 = _context3["catch"](2);
-                console.error('onMediaOffer', _context3.t0);
-
               case 18:
+                _context4.prev = 18;
+                _context4.t0 = _context4["catch"](2);
+                console.error('onMediaOffer', _context4.t0);
+
+              case 21:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, null, [[2, 15]]);
+        }, _callee4, null, [[2, 18]]);
       }));
 
-      function onMediaOffer(_x3) {
+      function onMediaOffer(_x4) {
         return _onMediaOffer.apply(this, arguments);
       }
 
@@ -22143,20 +22497,20 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "onMediaAnswer",
     value: function () {
-      var _onMediaAnswer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(decoded) {
+      var _onMediaAnswer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee5(decoded) {
         var _t6, _t6$players, _t6$players$getOppone, ovss, aspect_ratio;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
                 console.log('onMediaAnswer', decoded);
-                _context4.next = 3;
+                _context5.next = 3;
                 return t.peer.setRemoteDescription(new RTCSessionDescription(decoded.answer));
 
               case 3:
-                t.opponent_video_stream_settings = decoded.stream_settings; // save call recipients stream settings
-                // update opponent's "head" shape to match their video aspect ratio
+                // save call recipients stream settings
+                t.opponent_video_stream_settings = decoded.stream_settings; // update opponent's "head" shape to match their video aspect ratio
 
                 console.log('opponent stream ar', //stream.getVideoTracks()[0].getSettings()
                 t.opponent_video_stream_settings);
@@ -22171,13 +22525,13 @@ var Tabletop = /*#__PURE__*/function () {
 
               case 6:
               case "end":
-                return _context4.stop();
+                return _context5.stop();
             }
           }
-        }, _callee4);
+        }, _callee5);
       }));
 
-      function onMediaAnswer(_x4) {
+      function onMediaAnswer(_x5) {
         return _onMediaAnswer.apply(this, arguments);
       }
 
@@ -22205,34 +22559,50 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "onRemotePeerIceCandidate",
     value: function () {
-      var _onRemotePeerIceCandidate = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee5(data) {
-        var candidate;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee5$(_context5) {
+      var _onRemotePeerIceCandidate = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6(data) {
+        var _t$webrtc_peer_connec, candidate, PEER_CONNECTION;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
-                _context5.prev = 0;
+                _context6.prev = 0;
                 candidate = new RTCIceCandidate(data.candidate);
-                _context5.next = 4;
-                return t.peer.addIceCandidate(candidate);
+                console.log('onRemotePeerIceCandidate', data);
+                PEER_CONNECTION = (_t$webrtc_peer_connec = t.webrtc_peer_connections) === null || _t$webrtc_peer_connec === void 0 ? void 0 : _t$webrtc_peer_connec[data.client_id];
+                console.log('PEER_CONNECTION', PEER_CONNECTION);
 
-              case 4:
-                _context5.next = 8;
-                break;
+                if (PEER_CONNECTION) {
+                  _context6.next = 8;
+                  break;
+                }
 
-              case 6:
-                _context5.prev = 6;
-                _context5.t0 = _context5["catch"](0);
+                console.error('no peer connection for', data.client_id);
+                return _context6.abrupt("return");
 
               case 8:
+                _context6.next = 10;
+                return PEER_CONNECTION.addIceCandidate(candidate);
+
+              case 10:
+                _context6.next = 15;
+                break;
+
+              case 12:
+                _context6.prev = 12;
+                _context6.t0 = _context6["catch"](0);
+                // Handle error // some shit occurred
+                console.error('onRemotePeerIceCandidate', _context6.t0);
+
+              case 15:
               case "end":
-                return _context5.stop();
+                return _context6.stop();
             }
           }
-        }, _callee5, null, [[0, 6]]);
+        }, _callee6, null, [[0, 12]]);
       }));
 
-      function onRemotePeerIceCandidate(_x5) {
+      function onRemotePeerIceCandidate(_x6) {
         return _onRemotePeerIceCandidate.apply(this, arguments);
       }
 
@@ -22257,36 +22627,36 @@ var TweenableMesh = /*#__PURE__*/function () {
   _createClass(TweenableMesh, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6(destination, _ref3) {
+      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7(destination, _ref3) {
         var _this$mesh, _this$mesh$position, _destination$pos_x, _this$mesh2, _this$mesh2$position, _destination$pos_y, _this$mesh3, _this$mesh3$position, _destination$pos_z, _this$mesh4, _this$mesh4$position;
 
         var _ref3$duration, duration, _mesh, magnitude, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee6$(_context6) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
                 _ref3$duration = _ref3.duration, duration = _ref3$duration === void 0 ? 1000 : _ref3$duration;
                 // console.log('tweenTo',destination);
                 this.destination = destination; // todo: accept option to stop,finish,queue tweens
 
                 if (!this.tweening) {
-                  _context6.next = 6;
+                  _context7.next = 6;
                   break;
                 }
 
-                return _context6.abrupt("return", false);
+                return _context7.abrupt("return", false);
 
               case 6:
                 _mesh = this.mesh;
 
                 if (_mesh) {
-                  _context6.next = 10;
+                  _context7.next = 10;
                   break;
                 }
 
                 console.error('mesh not found', this);
-                return _context6.abrupt("return");
+                return _context7.abrupt("return");
 
               case 10:
                 this.tweening = true; // TODO: add ability to include/exclude properties from tween to save overhead
@@ -22305,12 +22675,12 @@ var TweenableMesh = /*#__PURE__*/function () {
                 }
 
                 if (!(magnitude < 0.1)) {
-                  _context6.next = 16;
+                  _context7.next = 16;
                   break;
                 }
 
                 this.tweening = false;
-                return _context6.abrupt("return");
+                return _context7.abrupt("return");
 
               case 16:
                 tweenEnd = getMeshTween(_mesh, destination, {
@@ -22322,7 +22692,7 @@ var TweenableMesh = /*#__PURE__*/function () {
                 }); // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
 
                 this.tween = tweenEnd.start();
-                _context6.next = 20;
+                _context7.next = 20;
                 return delay(duration);
 
               case 20:
@@ -22331,13 +22701,13 @@ var TweenableMesh = /*#__PURE__*/function () {
 
               case 21:
               case "end":
-                return _context6.stop();
+                return _context7.stop();
             }
           }
-        }, _callee6, this);
+        }, _callee7, this);
       }));
 
-      function tweenTo(_x6, _x7) {
+      function tweenTo(_x7, _x8) {
         return _tweenTo.apply(this, arguments);
       }
 
@@ -22446,34 +22816,34 @@ var PlayerPointer = /*#__PURE__*/function () {
   _createClass(PlayerPointer, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7(destination, _ref4) {
+      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8(destination, _ref4) {
         var _this$mesh5, _this$mesh5$position, _destination$pos_x2, _this$mesh6, _this$mesh6$position, _destination$pos_y2, _this$mesh7, _this$mesh7$position, _destination$pos_z2, _this$mesh8, _this$mesh8$position;
 
         var _ref4$duration, duration, _mesh, magnitude, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
                 _ref4$duration = _ref4.duration, duration = _ref4$duration === void 0 ? 1000 : _ref4$duration;
                 this.destination = destination;
 
                 if (!this.tweening) {
-                  _context7.next = 6;
+                  _context8.next = 6;
                   break;
                 }
 
-                return _context7.abrupt("return", false);
+                return _context8.abrupt("return", false);
 
               case 6:
                 _mesh = this.mesh;
 
                 if (_mesh) {
-                  _context7.next = 9;
+                  _context8.next = 9;
                   break;
                 }
 
-                return _context7.abrupt("return");
+                return _context8.abrupt("return");
 
               case 9:
                 this.tweening = true; // TODO: add ability to include/exclude properties from tween to save overhead
@@ -22492,12 +22862,12 @@ var PlayerPointer = /*#__PURE__*/function () {
                 }
 
                 if (!(magnitude < 0.1)) {
-                  _context7.next = 15;
+                  _context8.next = 15;
                   break;
                 }
 
                 this.tweening = false;
-                return _context7.abrupt("return");
+                return _context8.abrupt("return");
 
               case 15:
                 tweenEnd = getMeshTween(_mesh, destination, {
@@ -22509,7 +22879,7 @@ var PlayerPointer = /*#__PURE__*/function () {
                 }); // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
 
                 this.tween = tweenEnd.start();
-                _context7.next = 19;
+                _context8.next = 19;
                 return delay(duration);
 
               case 19:
@@ -22518,13 +22888,13 @@ var PlayerPointer = /*#__PURE__*/function () {
 
               case 20:
               case "end":
-                return _context7.stop();
+                return _context8.stop();
             }
           }
-        }, _callee7, this);
+        }, _callee8, this);
       }));
 
-      function tweenTo(_x8, _x9) {
+      function tweenTo(_x9, _x10) {
         return _tweenTo2.apply(this, arguments);
       }
 
@@ -22543,7 +22913,8 @@ var PlayerPointer = /*#__PURE__*/function () {
         wireframe: true,
         transparent: true,
         opacity: 0.5
-      })); // this.mesh.rotation.z = Math.PI/2;
+      }));
+      this.mesh.name = "pointer"; // this.mesh.rotation.z = Math.PI/2;
     }
   }, {
     key: "destroy",
@@ -22638,16 +23009,16 @@ var Card = /*#__PURE__*/function () {
   }, {
     key: "tweenTo",
     value: function () {
-      var _tweenTo3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8(destination, options) {
+      var _tweenTo3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9(destination, options) {
         var _options$priority,
             _this3 = this,
             _this$tween;
 
         var priority, _mesh, tweenMid, duration, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
                 // console.log('card move to point',destination,options);
                 // this generates a tween between the current position and the destination
@@ -22655,16 +23026,16 @@ var Card = /*#__PURE__*/function () {
                 priority = (_options$priority = options === null || options === void 0 ? void 0 : options.priority) !== null && _options$priority !== void 0 ? _options$priority : 3; // 1-4 default: 3
 
                 if (!this.tweening) {
-                  _context8.next = 5;
+                  _context9.next = 5;
                   break;
                 }
 
                 if (!(priority === 4)) {
-                  _context8.next = 5;
+                  _context9.next = 5;
                   break;
                 }
 
-                return _context8.abrupt("return");
+                return _context9.abrupt("return");
 
               case 5:
                 this.current_tween_priority = priority;
@@ -22683,12 +23054,12 @@ var Card = /*#__PURE__*/function () {
                 });
 
                 if (!(priority === 3)) {
-                  _context8.next = 14;
+                  _context9.next = 14;
                   break;
                 }
 
                 if (!(this.tweening && this.tween && !this.tween.stopped)) {
-                  _context8.next = 14;
+                  _context9.next = 14;
                   break;
                 }
 
@@ -22708,7 +23079,7 @@ var Card = /*#__PURE__*/function () {
                 // TODO: put this in a callback
                 // this.tweening = false;
 
-                return _context8.abrupt("return");
+                return _context9.abrupt("return");
 
               case 14:
                 if (priority === 2) {// jump the tween to the last frame, then do the next tween
@@ -22729,13 +23100,13 @@ var Card = /*#__PURE__*/function () {
 
               case 20:
               case "end":
-                return _context8.stop();
+                return _context9.stop();
             }
           }
-        }, _callee8, this);
+        }, _callee9, this);
       }));
 
-      function tweenTo(_x10, _x11) {
+      function tweenTo(_x11, _x12) {
         return _tweenTo3.apply(this, arguments);
       }
 
@@ -22891,11 +23262,11 @@ var Deck = /*#__PURE__*/function () {
   _createClass(Deck, [{
     key: "tweenCardsToDeck",
     value: function () {
-      var _tweenCardsToDeck = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9() {
+      var _tweenCardsToDeck = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10() {
         var i, card;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
                 for (i in t.cards) {
                   card = t.cards[i];
@@ -22916,10 +23287,10 @@ var Deck = /*#__PURE__*/function () {
 
               case 1:
               case "end":
-                return _context9.stop();
+                return _context10.stop();
             }
           }
-        }, _callee9);
+        }, _callee10);
       }));
 
       function tweenCardsToDeck() {
@@ -22931,77 +23302,77 @@ var Deck = /*#__PURE__*/function () {
   }, {
     key: "tweenCardsToZones",
     value: function () {
-      var _tweenCardsToZones = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10() {
-        var i, _card2, zone, card, _j, c;
+      var _tweenCardsToZones = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee11() {
+        var i, _card2, _card3, zone, card, j, c;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee11$(_context11) {
           while (1) {
-            switch (_context10.prev = _context10.next) {
+            switch (_context11.prev = _context11.next) {
               case 0:
-                _context10.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.game.layout.zones);
+                _context11.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.game.layout.zones);
 
               case 1:
-                if ((_context10.t1 = _context10.t0()).done) {
-                  _context10.next = 20;
+                if ((_context11.t1 = _context11.t0()).done) {
+                  _context11.next = 20;
                   break;
                 }
 
-                i = _context10.t1.value;
+                i = _context11.t1.value;
                 zone = t.game.layout.zones[i];
                 card = null; //cardforzone
 
-                _context10.t2 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.app.state.cards);
+                _context11.t2 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.app.state.cards);
 
               case 6:
-                if ((_context10.t3 = _context10.t2()).done) {
-                  _context10.next = 14;
+                if ((_context11.t3 = _context11.t2()).done) {
+                  _context11.next = 14;
                   break;
                 }
 
-                _j = _context10.t3.value;
-                c = t.app.state.cards[_j];
+                j = _context11.t3.value;
+                c = t.app.state.cards[j];
 
                 if (!(c.zone == i)) {
-                  _context10.next = 12;
+                  _context11.next = 12;
                   break;
                 }
 
-                card = t.cards[_j];
-                return _context10.abrupt("break", 14);
+                card = t.cards[j];
+                return _context11.abrupt("break", 14);
 
               case 12:
-                _context10.next = 6;
+                _context11.next = 6;
                 break;
 
               case 14:
                 // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
-                if (!card.mesh) {
-                  console.error('failed to tween card to zone', i, j);
+                if (!((_card2 = card) !== null && _card2 !== void 0 && _card2.mesh)) {
+                  console.error('failed to tween card to zone', i, card);
                 } else {
                   t.zonegroup.attach(card.mesh);
                 } // console.log('tween card to zone',card);
 
 
-                (_card2 = card) === null || _card2 === void 0 ? void 0 : _card2.tweenTo({
+                (_card3 = card) === null || _card3 === void 0 ? void 0 : _card3.tweenTo({
                   pos_x: zone.origin.x,
                   pos_y: zone.origin.y,
                   pos_z: zone.origin.z
                 }, {
                   duration: 1000
                 });
-                _context10.next = 18;
+                _context11.next = 18;
                 return delay(150);
 
               case 18:
-                _context10.next = 1;
+                _context11.next = 1;
                 break;
 
               case 20:
               case "end":
-                return _context10.stop();
+                return _context11.stop();
             }
           }
-        }, _callee10);
+        }, _callee11);
       }));
 
       function tweenCardsToZones() {
@@ -23049,10 +23420,10 @@ var Round = /*#__PURE__*/function () {
   _createClass(Round, [{
     key: "start",
     value: function () {
-      var _start = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee11() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee11$(_context11) {
+      var _start = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee12() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee12$(_context12) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context12.prev = _context12.next) {
               case 0:
                 console.log('round start', 'deck', window.t.deck); // center the deck
                 // animate the camera
@@ -23071,7 +23442,7 @@ var Round = /*#__PURE__*/function () {
                     updatePlayerHead();
                   }
                 }).start();
-                _context11.next = 4;
+                _context12.next = 4;
                 return delay(1000);
 
               case 4:
@@ -23087,15 +23458,15 @@ var Round = /*#__PURE__*/function () {
                   duration: 1000,
                   easing: TWEEN.Easing.Quadratic.Out
                 }).start();
-                _context11.next = 7;
+                _context12.next = 7;
                 return delay(1000);
 
               case 7:
               case "end":
-                return _context11.stop();
+                return _context12.stop();
             }
           }
-        }, _callee11);
+        }, _callee12);
       }));
 
       function start() {
@@ -23146,9 +23517,9 @@ var Layout = /*#__PURE__*/_createClass(function Layout(options) {
         col: c,
         card: null,
         origin: {
-          x: 2.5 * r - this.spacing.x + r * 0.5,
-          y: 0,
-          z: 3.5 * c - this.spacing.y + c * 0.5
+          x: 2.5 * r - this.spacing.x + r * 0.5 - .8,
+          y: 10,
+          z: 3.5 * c - this.spacing.y + c * 0.5 - 2
         }
       });
     }
@@ -23178,8 +23549,12 @@ var Game_PVPMemory = /*#__PURE__*/function () {
     this.layout = new Layout({
       rows: 4,
       cols: 4
-    });
-    this.ignore_clicks = false;
+    }); // moved to tabletop?
+    // maybe this should remain-per game?
+    // it's like the table should be able to say no clicking
+    // but the game should also be able to say no clicking (server-fed t.game.state.ignore_clicks)
+    // and the client should be able to disable clicks (when modal is open)
+    // this.ignore_clicks = false;
   }
 
   _createClass(Game_PVPMemory, [{
@@ -23245,10 +23620,10 @@ var Game_PVPMemory = /*#__PURE__*/function () {
   }, {
     key: "checkForMatches",
     value: function () {
-      var _checkForMatches = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee12() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee12$(_context12) {
+      var _checkForMatches = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee13() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee13$(_context13) {
           while (1) {
-            switch (_context12.prev = _context12.next) {
+            switch (_context13.prev = _context13.next) {
               case 0:
                 // we've flipped 2+ cards,
                 t.game.ignore_clicks = true; // server is checking for matches
@@ -23272,10 +23647,10 @@ var Game_PVPMemory = /*#__PURE__*/function () {
 
               case 1:
               case "end":
-                return _context12.stop();
+                return _context13.stop();
             }
           }
-        }, _callee12);
+        }, _callee13);
       }));
 
       function checkForMatches() {
@@ -23298,10 +23673,10 @@ function init() {
   });
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.soft = true;
   canvas = renderer.domElement;
   document.body.appendChild(canvas);
   camera = new THREE.PerspectiveCamera(75, 1, 0.01, 5000);
-  camera.position.set(0, 5, -1.5);
   scene.add(camera);
   controls = new THREE.OrbitControls(camera, canvas);
   window.addEventListener('mousemove', onMouseMove, false);
@@ -23318,6 +23693,14 @@ function init() {
   window.t = new Tabletop();
   t.scene = scene;
   t.camera = camera;
+  var axesHelper = new THREE.AxesHelper(5);
+  scene.add(axesHelper);
+  t.camera.position.set(0.16986347385576694, 25.65695945633288, -10.061902520372364);
+  t.camera.rotation.x = -2.108777799386355;
+  t.camera.rotation.y = 0.003962076364974097;
+  t.camera.rotation.z = 3.134952666963505;
+  t.controls = controls;
+  t.controls.enabled = false;
   t.opponent_video = document.querySelector('.opponent_video');
 
   function checkReady(callback) {
@@ -23438,12 +23821,22 @@ function render() {
 }
 
 function initLights() {
-  var ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-  var dirLight = new THREE.DirectionalLight(0xcceeff, 0.9);
+  var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  var dirLight = new THREE.DirectionalLight(0xcceeff, 0.5);
   dirLight.castShadow = true;
-  dirLight.shadow.mapSize.width = 1024;
-  dirLight.shadow.mapSize.height = 1024;
-  dirLight.position.setScalar(5);
+  dirLight.shadowCameraVisible = true;
+  dirLight.shadow.mapSize.width = 512;
+  dirLight.shadow.mapSize.height = 512;
+  dirLight.position.y = 5;
+  dirLight.position.x = 5;
+  dirLight.position.z = 5;
+  var d = 100;
+  dirLight.shadowCameraLeft = -d;
+  dirLight.shadowCameraRight = d;
+  dirLight.shadowCameraTop = d;
+  dirLight.shadowCameraBottom = -d;
+  dirLight.shadowCameraFar = 100;
+  dirLight.shadowDarkness = 0.75;
   scene.add(dirLight, ambientLight);
 }
 
@@ -23539,17 +23932,79 @@ function getMeshTween(mesh, updateTo, options) {
   return tween;
 }
 
-function initTableMesh() {
-  t.tableMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(50, 50), new THREE.MeshStandardMaterial({
-    //map: txtLoader.load( "https://threejs.org/examples/textures/hardwood2_diffuse.jpg" ),
+function initRoomMeshes() {
+  var loader = new THREE.FBXLoader();
+  loader.load('./public/fbx/card-table.fbx', function (object) {
+    object.name = "card-table"; // mixer = new THREE.AnimationMixer( object );
+    // const action = mixer.clipAction( object.animations[ 0 ] );
+    // action.play();
+    // var shader = THREE.VertexColorShader;
+    // var uniforms = THREE.UniformsUtils.clone(shader.uniforms);
+
+    var parameters = {
+      //this activates the 'colors' attribute (uses vertex colors stored in the created geometry)
+      vertexColors: true,
+      //THREE.VertexColors,
+      // fragmentShader: shader.fragmentShader,
+      // vertexShader: shader.vertexShader,
+      side: THREE.DoubleSide // uniforms: uniforms
+
+    };
+    object.scale.set(0.1, 0.1, 0.1);
+    t.tableMesh = object;
+    object.traverse(function (child) {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        child.material = new THREE.MeshStandardMaterial(parameters);
+      }
+    });
+    object.position.set(0, 0, 0);
+    console.log('fbx object?', object);
+    scene.add(object);
+  });
+  t.wallMaterial = new THREE.MeshStandardMaterial({
     metalness: 0,
     roughness: 1,
-    color: '#000000'
+    color: '#4B0076',
+    side: THREE.DoubleSide
+  });
+  t.northWall = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 50), t.wallMaterial);
+  t.northWall.name = "northWall";
+  t.northWall.position.set(0, 25, 50);
+  t.northWall.castShadow = true;
+  t.northWall.receiveShadow = true;
+  scene.add(t.northWall);
+  t.westWall = t.northWall.clone();
+  t.westWall.name = "westWall";
+  scene.add(t.westWall);
+  t.westWall.rotation.y = THREE.MathUtils.degToRad(90);
+  t.westWall.position.x = -50;
+  t.westWall.position.z = 0;
+  t.floor = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshStandardMaterial({
+    metalness: 0,
+    roughness: 1,
+    // side: THREE.DoubleSide,
+    color: '#5C2890'
   }));
-  t.tableMesh.geometry.rotateX(-Math.PI * 0.5);
-  t.tableMesh.position.set(0, -0.001, 0);
-  t.tableMesh.receiveShadow = true;
-  scene.add(t.tableMesh);
+  t.floor.castShadow = true;
+  t.floor.receiveShadow = true;
+  t.floor.position.set(0, 0, 0);
+  scene.add(t.floor);
+  t.floor.rotation.x = THREE.MathUtils.degToRad(-90); // t.floorMesh = new THREE.Mesh(
+  //   new THREE.PlaneBufferGeometry(50, 50),
+  //   new THREE.MeshStandardMaterial({
+  //     //map: txtLoader.load( "https://threejs.org/examples/textures/hardwood2_diffuse.jpg" ),
+  //     metalness: 0,
+  //     roughness: 1,
+  //     side: THREE.DoubleSide,
+  //     color: '#000000'
+  //   })
+  // );
+  // t.floorMesh.geometry.rotateX(-Math.PI * 0.5);
+  // t.floorMesh.position.set(0, -0.001, 0);
+  // t.floorMesh.receiveShadow = true;
+  // scene.add(t.floorMesh);
 } // function createFlipUpsideClip( card, side ){ // 'faceup' or 'facedown'
 //   // Create a keyframe track (i.e. a timed sequence of keyframes) for each animated property
 //   // Note: the keyframe track type should correspond to the type of the property being animated
@@ -23632,18 +24087,26 @@ function onTouchMove(evt) {
 // TODO: animate color transition
 
 
-function onMouseMove(_x12) {
+function onMouseMove(_x13) {
   return _onMouseMove.apply(this, arguments);
 }
 
 function _onMouseMove() {
-  _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee14(evt) {
+  _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee15(evt) {
     var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i3;
 
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee14$(_context14) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee15$(_context15) {
       while (1) {
-        switch (_context14.prev = _context14.next) {
+        switch (_context15.prev = _context15.next) {
           case 0:
+            if (!t.root.show_modal) {
+              _context15.next = 2;
+              break;
+            }
+
+            return _context15.abrupt("return");
+
+          case 2:
             updateClientCursor();
             updatePlayerHead(); // t.players[getOpponentID()].head.mesh.lookAt(t.camera)
             // prevent looking under the table
@@ -23680,7 +24143,12 @@ function _onMouseMove() {
             //     // card.material[3].color.set( colorDark );
             //   }
             // }
+            // TODO: don't send server highlight when debug_inspect_objects is true
 
+
+            if (t.debug_inspect_objects) {
+              onHoverDebugObject(intersectsGroup(t.scene.children));
+            }
 
             intersects = intersectsGroup(t.zonegroup.children); // setupRaycast();
             // let intersects = raycaster.intersectObjects( t.zonegroup.children );
@@ -23727,14 +24195,35 @@ function _onMouseMove() {
             //}
 
 
-          case 5:
+          case 8:
           case "end":
-            return _context14.stop();
+            return _context15.stop();
         }
       }
-    }, _callee14);
+    }, _callee15);
   }));
   return _onMouseMove.apply(this, arguments);
+}
+
+function onHoverDebugObject(intersects) {
+  console.log('todo: highlight hovered object');
+} // TODO: loop through intersects array and skip if object is .cursor
+
+
+function onClickDebugObject(intersects) {
+  console.log(intersects);
+  var closest_object_not_pointer = null;
+  intersects.forEach(function (intersection) {
+    if (intersection.object.name === 'pointer' || intersection.object.name.indexOf('player_head') > -1) {
+      return;
+    }
+
+    if (!closest_object_not_pointer) {
+      closest_object_not_pointer = intersection.object;
+    }
+  });
+  t.debug_inspector_selected_object = closest_object_not_pointer;
+  console.log('t.debug_inspector_selected_object set to:', t.debug_inspector_selected_object);
 }
 
 function throttle(callback, limit) {
@@ -23788,7 +24277,7 @@ function updateClientCursor() {
   var pointer = (_t$players3 = t.players) === null || _t$players3 === void 0 ? void 0 : (_t$players3$t$app$sta = _t$players3[t.app.state.my_client_id]) === null || _t$players3$t$app$sta === void 0 ? void 0 : (_t$players3$t$app$sta2 = _t$players3$t$app$sta.pointer) === null || _t$players3$t$app$sta2 === void 0 ? void 0 : _t$players3$t$app$sta2.mesh;
 
   if (pointer) {
-    var intersects = raycaster.intersectObjects([].concat(_toConsumableArray(t.zonegroup.children), [t.tableMesh])); // console.log('intersects',intersects);
+    var intersects = raycaster.intersectObjects(t.zonegroup.children); // console.log('intersects',intersects);
 
     if (intersects.length > 0) {
       pointer.position.copy(intersects[0].point);
@@ -23855,7 +24344,16 @@ function onTouchEnd(evt) {
 function onMouseClick(evt) {
   var _intersects$, _intersects$$object, _intersects$$object$u, _t$cards;
 
-  if (t.app.state.ignore_clicks || t.deck.shuffling) {
+  if (t.root.show_modal) {
+    return;
+  }
+
+  if (t.debug_inspect_objects) {
+    onClickDebugObject(intersectsGroup(t.scene.children));
+    return;
+  }
+
+  if (t.app.state.ignore_clicks || t.client_ignore_clicks || t.deck.shuffling) {
     return;
   }
 
@@ -23894,7 +24392,7 @@ function onMouseClick(evt) {
 
 
   var player_id = t.app.state.my_client_id;
-  var intersects = intersectsGroup(t.zonegroup.children);
+  var intersects = intersectsGroup(t.debug_inspect_objects ? t.scene.children : t.zonegroup.children);
   var card_id = intersects === null || intersects === void 0 ? void 0 : (_intersects$ = intersects[0]) === null || _intersects$ === void 0 ? void 0 : (_intersects$$object = _intersects$.object) === null || _intersects$$object === void 0 ? void 0 : (_intersects$$object$u = _intersects$$object.userData) === null || _intersects$$object$u === void 0 ? void 0 : _intersects$$object$u.card_id; // console.log('click intersects',{intersects,card_id});
   // card is on the play field
   // TODO: certain games will allow you to click on cards that do not have a zone?
@@ -23993,7 +24491,7 @@ function resetCards() {
     }
 
     t.game.flipped = [];
-    t.game.ignore_clicks = false;
+    t.client_ignore_clicks = false;
   }, reset_delay);
 }
 
@@ -24050,7 +24548,185 @@ function resize(renderer) {
 
   return needResize;
 }
-})();
 
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			id: moduleId,
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = __webpack_modules__;
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/chunk loaded */
+/******/ 	(() => {
+/******/ 		var deferred = [];
+/******/ 		__webpack_require__.O = (result, chunkIds, fn, priority) => {
+/******/ 			if(chunkIds) {
+/******/ 				priority = priority || 0;
+/******/ 				for(var i = deferred.length; i > 0 && deferred[i - 1][2] > priority; i--) deferred[i] = deferred[i - 1];
+/******/ 				deferred[i] = [chunkIds, fn, priority];
+/******/ 				return;
+/******/ 			}
+/******/ 			var notFulfilled = Infinity;
+/******/ 			for (var i = 0; i < deferred.length; i++) {
+/******/ 				var [chunkIds, fn, priority] = deferred[i];
+/******/ 				var fulfilled = true;
+/******/ 				for (var j = 0; j < chunkIds.length; j++) {
+/******/ 					if ((priority & 1 === 0 || notFulfilled >= priority) && Object.keys(__webpack_require__.O).every((key) => (__webpack_require__.O[key](chunkIds[j])))) {
+/******/ 						chunkIds.splice(j--, 1);
+/******/ 					} else {
+/******/ 						fulfilled = false;
+/******/ 						if(priority < notFulfilled) notFulfilled = priority;
+/******/ 					}
+/******/ 				}
+/******/ 				if(fulfilled) {
+/******/ 					deferred.splice(i--, 1)
+/******/ 					var r = fn();
+/******/ 					if (r !== undefined) result = r;
+/******/ 				}
+/******/ 			}
+/******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/jsonp chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded and loading chunks
+/******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
+/******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
+/******/ 		var installedChunks = {
+/******/ 			"/dist/client3d": 0,
+/******/ 			"dist/client": 0
+/******/ 		};
+/******/ 		
+/******/ 		// no chunk on demand loading
+/******/ 		
+/******/ 		// no prefetching
+/******/ 		
+/******/ 		// no preloaded
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 		
+/******/ 		__webpack_require__.O.j = (chunkId) => (installedChunks[chunkId] === 0);
+/******/ 		
+/******/ 		// install a JSONP callback for chunk loading
+/******/ 		var webpackJsonpCallback = (parentChunkLoadingFunction, data) => {
+/******/ 			var [chunkIds, moreModules, runtime] = data;
+/******/ 			// add "moreModules" to the modules object,
+/******/ 			// then flag all "chunkIds" as loaded and fire callback
+/******/ 			var moduleId, chunkId, i = 0;
+/******/ 			if(chunkIds.some((id) => (installedChunks[id] !== 0))) {
+/******/ 				for(moduleId in moreModules) {
+/******/ 					if(__webpack_require__.o(moreModules, moduleId)) {
+/******/ 						__webpack_require__.m[moduleId] = moreModules[moduleId];
+/******/ 					}
+/******/ 				}
+/******/ 				if(runtime) var result = runtime(__webpack_require__);
+/******/ 			}
+/******/ 			if(parentChunkLoadingFunction) parentChunkLoadingFunction(data);
+/******/ 			for(;i < chunkIds.length; i++) {
+/******/ 				chunkId = chunkIds[i];
+/******/ 				if(__webpack_require__.o(installedChunks, chunkId) && installedChunks[chunkId]) {
+/******/ 					installedChunks[chunkId][0]();
+/******/ 				}
+/******/ 				installedChunks[chunkId] = 0;
+/******/ 			}
+/******/ 			return __webpack_require__.O(result);
+/******/ 		}
+/******/ 		
+/******/ 		var chunkLoadingGlobal = self["webpackChunkCardBox"] = self["webpackChunkCardBox"] || [];
+/******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
+/******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
+/******/ 	__webpack_require__.O(undefined, ["dist/client"], () => (__webpack_require__("./client/client3d.mjs")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["dist/client"], () => (__webpack_require__("./client/client.scss")))
+/******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
+/******/ 	
 /******/ })()
 ;

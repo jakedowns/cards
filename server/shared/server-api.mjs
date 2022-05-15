@@ -10,6 +10,10 @@ class ServerAPI {
     }
 
     request(req, res){
+        if(req.url.startsWith('/api/game/')){
+            this.getGame(req,res);
+            return;
+        }
         switch(req.url){
             case '/api/state':
                 this.getState(req, res);
@@ -19,9 +23,18 @@ class ServerAPI {
 
     getState(req, res){
         this.state = this.getStateFromDisk() ?? this.freshState();
+        this.jsonResponse(this.state,res);
+    }
+
+    jsonResponse(data,res){
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(this.state));
+        res.end(JSON.stringify(data));
+    }
+
+    getGame(req, res){
+        let game_id = req.url.split('/')[3];
+        this.jsonResponse(this.state.games?.[game_id],res);
     }
 
     getStateFromDisk(){

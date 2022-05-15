@@ -1,105 +1,182 @@
 <template>
     <div id="debug" >
-        <div>Online: {{state?.client_ids?.length}}</div>
-        <div>Round {{state?.round_number}}</div>
-        <div class="scores" v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: <span class="hit">{{state?.player_scores?.[id]?.[0] ?? 0}}</span> / <span class="miss">{{state?.player_scores?.[id]?.[1] ?? 0}}</span> </div>
 
-        <div v-if="!calling"
-            @click.prevent="start_video_chat"
-            style="pointer-events:all;">
-            <button class="video-chat-call-start">Join Chat</button>
-        </div>
-        <div v-if="!show_end_call_button"
-            @click.prevent="end_video_chat"
-            style="pointer-events:all;">
-            <button class="video-chat-call-end">Leave Chat</button>
-        </div>
-        <br/>
-        <button @click="show=!show">{{show?'Hide':'Show Debug Info'}}</button>
-        <div class="inner" v-show="show">
-            <ul class="details">
-                <li class="my_client_id">My Client ID:
-                    <span class="value">{{state?.my_client_id}}</span></li>
-
-                <li class="room_id">Current Room ID:
-                    <span class="value">{{state?.room_id ?? 'server-lobby'}}</span></li>
-
-                <li class="game_id">Current Game ID:
-                    <span class="value">{{state?.game_id ?? 'no-game'}}</span>
-                    &nbsp;
-                    <span class="value">{{game?.started ? 'started' : 'not-started'}}</span>
-                </li>
-
-                <li class="host_id">Current Host ID:
-                    <span class="value">{{state?.game_host ?? 'no-host'}}</span>
-                    &nbsp;
-                    <span :style="{color:im_game_host ? 'green' : 'red'}">You're {{im_game_host ? '' : 'NOT'}} the game host!</span>
-                </li>
-
-                <li class="round_id">Current Round ID:
-                    <span class="value">{{state?.round_id ?? 'no-round'}}</span>
-                    &nbsp;
-                    <span class="value">{{round?.started ? 'started' : 'not-started'}}</span></li>
-
-
-
-                <li class="clients">Clients:
-                    <span class="value">{{JSON.stringify(state.client_ids) }}</span></li>
-
-                <li>player turn id: {{state.player_turn}}
-
-                    <span :style="{color:its_my_turn ? 'green' : 'red'}">It's {{its_my_turn ? '' : 'NOT'}} Your Turn!</span>
-
-                </li>
-
-                <li>player type: {{state.player_type ?? 'connecting'}}</li>
-                <li>player hands:
-                    <ul>
-                        <li v-for="player_id in state.client_ids" :key="player_id">
-                            <span v-if="!state.player_hands?.[player_id]?.length">Empty</span>
-                            {{JSON.stringify(state?.player_hands?.[player_id])}}
-                        </li>
-                    </ul>
-
-                </li>
-
-                <li>Flipped:
-                    {{JSON.stringify(state.flipped)}}
-                </li>
-
-                <!--
-                <li v-if="!state?.room_id">
-                    <button class="new-room" @click.prevent="new_room">New Room</button>
-                </li>
-
-                <li v-if="state?.room_id && !state?.game_id"
-                    @click.prevent="new_game">
-                    <button class="new-game">New Game</button>
-                </li> -->
-
-                <li v-if="im_game_host"
-                    @click.prevent="restart_game">
-                    <button class="new-game">Restart Game</button>
-                </li>
-
-
-
-                <!-- <li v-if="state?.room_id && state?.game_id && !state?.game?.started"
-                    @click.prevent="start_game">
-                    <button class="start-game">Start Game</button>
-                </li> -->
-
-                <li>
-                    <div class="messages">
-                    <div class="message" v-for="(message,i) in messages" :key="i">
-                        <div class="message-text">{{message.type}}</div>
+        <div class="modal-wrapper" v-if="show_modal">
+            <div class="world-room-game-modal modal" v-if="show_pause_menu">
+                <div class="modal-content">
+                    <h2 class="mb-4">Menu</h2>
+                    <h3>World</h3>
+                    <select v-model="world_selection">
+                        <option selected value="jakes-world-uuid">Jake's World</option>
+                        <!-- <option value="new-world">New World</option> -->
+                    </select>
+                    <div v-if="world_selection === 'new-world'">
+                        <label>pick a name for your new world</label>
+                        <input type="text" placeholder="My New World Name" v-model="new_world_name">
                     </div>
+
+                    <hr/>
+
+                    <h3>Room</h3>
+                    <select v-model="room_selection" :disabled="!world_selection">
+                        <option selected value="jakes-room">Jake's Room</option>
+                        <option value="new-room">New Room</option>
+                    </select>
+                    <div v-if="room_selection === 'new-room'">
+                        <label>pick a name for your new room</label>
+                        <input type="text" placeholder="My New Room Name" v-model="new_room_name">
+                    </div>
+
+                    <hr/>
+
+                    <h3>Game</h3>
+                    <select v-model="game_selection" :disabled="!room_selection">
+                        <option selected value="jakes-game">Jake's Game</option>
+                        <option value="new-game">New Game</option>
+                    </select>
+                    <div v-if="game_selection === 'new-game'">
+                        <label>what would you like to call your new game?</label>
+                        <input type="text" placeholder="My New Game Name" v-model="new_game_name">
+                        <br/>
+                        <select v-model="new_game_mode">
+                            <option disabled selected value="">Select Game Mode</option>
+                            <option value="memory">Memory Matching Game</option>
+                            <option value="klondike">Klondike Solitaire</option>
+                            <option value="new-game-mode">New Custom Game Mode...</option>
+                        </select>
+                        <div v-if="new_game_mode === 'new-game-mode'">
+                            <label>what would you like to call your new game?</label>
+                            <input type="text" placeholder="My New Game Mode Name" v-model="new_game_mode_name">
+                        </div>
+                    </div>
+
+                    <hr/>
+                    <button v-if="game_selection !== 'new-game' && isHostOfSelectedGame" @click.prevent="restart_game">Restart Game</button>
+                    <button @click.prevent="submitModal" :disabled="!world_selection ||!room_selection || !game_selection">Continue</button>
                 </div>
-                </li>
-            </ul>
-            <div class="bg-blur"></div>
+            </div>
+
+            <div class="game-in-progress-modal modal" v-if="show_game_in_progress_modal">
+                <div class="modal-content"><h2 class="mb-4">"Jake's Game" is already in progress</h2><button>Spectate</button><button>Request to Play</button></div>
+            </div>
+
+            <div class="player-request-modal modal" v-if="show_player_request_modal">
+                <div class="modal-content"><h2 class="mb-4">"Brent" wants to join your game!</h2><button>Allow (Continue)</button><button>Allow (New)</button><button>Ignore</button></div>
+            </div>
+
+            <div class="spectator-joined-modal modal" v-if="show_spectator_joined_modal">
+                <div class="modal-content"><h2 class="mb-4">"Brent" joined as a spectator</h2><button>Invite to play</button></div>
+            </div>
+
+            <div class="modal-underlay"></div>
         </div>
+
+        <div class="debug-inner">
+            <div>Online: {{state?.client_ids?.length}}</div>
+            <div>Round {{state?.round_number}}</div>
+            <div class="scores" v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: <span class="hit">{{state?.player_scores?.[id]?.[0] ?? 0}}</span> / <span class="miss">{{state?.player_scores?.[id]?.[1] ?? 0}}</span> </div>
+
+            <div v-if="!calling"
+                @click.prevent="start_video_chat"
+                style="pointer-events:all;">
+                <button class="video-chat-call-start">Join Chat</button>
+            </div>
+            <div v-if="!show_end_call_button"
+                @click.prevent="end_video_chat"
+                style="pointer-events:all;">
+                <button class="video-chat-call-end">Leave Chat</button>
+            </div>
+            <br/>
+            <button @click="show=!show">{{show?'Hide':'Show Debug Info'}}</button>
+            <div class="inner" v-show="show">
+                <ul class="details">
+                    <li class="my_client_id">My Client ID:
+                        <span class="value">{{state?.my_client_id}}</span></li>
+
+                    <li class="room_id">Current Room ID:
+                        <span class="value">{{state?.room_id ?? 'server-lobby'}}</span></li>
+
+                    <li class="game_id">Current Game ID:
+                        <span class="value">{{state?.game_id ?? 'no-game'}}</span>
+                        &nbsp;
+                        <span class="value">{{game?.started ? 'started' : 'not-started'}}</span>
+                    </li>
+
+                    <li class="host_id">Current Host ID:
+                        <span class="value">{{state?.game_host ?? 'no-host'}}</span>
+                        &nbsp;
+                        <span :style="{color:im_game_host ? 'green' : 'red'}">You're {{im_game_host ? '' : 'NOT'}} the game host!</span>
+                    </li>
+
+                    <li class="round_id">Current Round ID:
+                        <span class="value">{{state?.round_id ?? 'no-round'}}</span>
+                        &nbsp;
+                        <span class="value">{{round?.started ? 'started' : 'not-started'}}</span></li>
+
+
+
+                    <li class="clients">Clients:
+                        <span class="value">{{JSON.stringify(state.client_ids) }}</span></li>
+
+                    <li>player turn id: {{state.player_turn}}
+
+                        <span :style="{color:its_my_turn ? 'green' : 'red'}">It's {{its_my_turn ? '' : 'NOT'}} Your Turn!</span>
+
+                    </li>
+
+                    <li>player type: {{state.player_type ?? 'connecting'}}</li>
+                    <li>player hands:
+                        <ul>
+                            <li v-for="player_id in state.client_ids" :key="player_id">
+                                <span v-if="!state.player_hands?.[player_id]?.length">Empty</span>
+                                {{JSON.stringify(state?.player_hands?.[player_id])}}
+                            </li>
+                        </ul>
+
+                    </li>
+
+                    <li>Flipped:
+                        {{JSON.stringify(state.flipped)}}
+                    </li>
+
+                    <!--
+                    <li v-if="!state?.room_id">
+                        <button class="new-room" @click.prevent="new_room">New Room</button>
+                    </li>
+
+                    <li v-if="state?.room_id && !state?.game_id"
+                        @click.prevent="new_game">
+                        <button class="new-game">New Game</button>
+                    </li> -->
+
+                    <li v-if="im_game_host"
+                        @click.prevent="restart_game">
+                        <button class="new-game">Restart Game</button>
+                    </li>
+
+
+
+                    <!-- <li v-if="state?.room_id && state?.game_id && !state?.game?.started"
+                        @click.prevent="start_game">
+                        <button class="start-game">Start Game</button>
+                    </li> -->
+
+                    <li>
+                        <div class="messages">
+                        <div class="message" v-for="(message,i) in messages" :key="i">
+                            <div class="message-text">{{message.type}}</div>
+                        </div>
+                    </div>
+                    </li>
+                </ul>
+                <div class="bg-blur"></div>
+            </div>
+        </div>
+
         <div class="hud">
+            <div style="pointer-events:all;" class="game-modal-toggle-icon" @click.prevent="openGameModal">
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 48 48"><rect x="0" y="0" width="48" height="48" fill="none" stroke="none" /><mask id="svgIDa"><g fill="none" stroke="#fff" stroke-linejoin="round" stroke-width="4"><path fill="#fff" d="M28 28h16v16H28zM13 4l9 16H4l9-16Zm23 16a8 8 0 1 0 0-16a8 8 0 0 0 0 16Z"/><path stroke-linecap="round" d="m4 28l16 16m0-16L4 44"/></g></mask><path fill="currentColor" d="M0 0h48v48H0z" mask="url(#svgIDa)"/></svg>
+            </div>
             <div class="av-controls">
                  <!-- TOGGLE YOUR OWN VIDEO -->
                 <div style="pointer-events:all;" id="icon-video-enable" v-if="!video_enabled" @click.prevent="enableVideo()">
@@ -125,13 +202,16 @@
             <!-- players webcam feed -->
             <video id="video" autoplay playsinline muted v-show="video_enabled"/>
             <!-- opponent video streams -->
+            <div class="opponent_videos">
             <video class="opponent_video"
                 autoplay
+                :ref="`opponent_video_${client_id}`"
                 playsinline
                 onclick="toggle_opponent_mute()"
-                v-for="client_id in (state?.client_ids ?? []).filter((id)=>{id!==state.my_client_id})"
+                v-for="client_id in (state?.client_ids ?? []).filter((id)=>{return id!==state.my_client_id})"
                 :key="client_id"
                 :data-client-id="client_id" />
+            </div>
         </div>
     </div>
 </template>
@@ -145,16 +225,33 @@ export default {
 
     setup(){
         return {
+            show_modal: true,
+            show_pause_menu: true,
+            show_player_request_modal: false,
+            show_spectator_joined_modal: false,
+            show_game_in_progress_modal: false,
+
             show: false,
             calling: false,
             show_end_call_button: false,
             messages: [],
             mic_muted: false,
             video_enabled: false,
+
+            // modal data
+            world_selection: 'jakes-world-uuid', // todo: use a uuid
+                new_world_name: '',
+            room_selection: 'jakes-room-uuid',
+                new_room_name: '',
+            game_selection: 'jakes-game-uuid',
+                new_game_name: '',
+                new_game_mode: '',
+                    new_game_mode_name: '',
         }
     },
 
     mounted(){
+        t.root = this;
         // console.log('vue app mounted');
         document.addEventListener('keyup', e => {
             // Keys.d (lowercase "d")
@@ -244,6 +341,22 @@ export default {
     },
 
     methods:{
+        openGameModal(){
+            this.show_modal = true;
+            this.show_pause_menu = true;
+            t.client_ignore_clicks = true;
+        },
+        closePauseMenu(){
+            this.show_modal = false;
+            this.show_pause_menu = false;
+            t.client_ignore_clicks = false;
+        },
+        submitModal(){
+            console.log('submit modal');
+            this.show_modal = false;
+            t.client_ignore_clicks = false;
+            t.controls.enabled = true;
+        },
         enableVideo(){
             this.video_enabled = true;
             this.$nextTick(()=>{
@@ -297,6 +410,7 @@ export default {
             })
         },
         restart_game(){
+            this.closePauseMenu()
             window.t.server.send({
                 type: 'RESTART_GAME',
                 //game_id: this.state.game_id // server should know based on client id
@@ -305,6 +419,17 @@ export default {
     },
 
     computed:{
+        // show_modal(){
+        //     return true;
+        // },
+        gameHostByGameId(){
+            return(game_id)=>{
+
+            }
+        },
+        isHostOfSelectedGame(){
+            return this.gameHostByGameId(this.game_selection) === this.state.my_client_id
+        },
         game(){
             return this.state?.game;
             //return this.state.games?.[this.state.game_id];
@@ -325,7 +450,20 @@ export default {
     }
 }
 </script>
+
 <style lang="scss">
+.game-modal-toggle-icon {
+    cursor: pointer;
+    pointer-events: all;
+    position: fixed;
+    top: 40px;
+    right: 20px;
+    width: 32px;
+    svg {
+        width: 100%;
+        height: auto;
+    }
+}
 #icon-video-enable, #icon-video-disable{
     position: absolute;
     bottom: 60px;
@@ -338,17 +476,89 @@ export default {
     right: 21px;
     bottom: 63px;
 }
+select {
+    background: #000;
+}
+button {
+    border: 1px solid #eee;
+    padding: 5px 10px;
+    margin: 3px;
+    border-radius: 20px;
+}
+.debug-inner {
+    pointer-events: all;
+}
+.modal {
+    h2 {
+        text-align: center;
+    }
+    hr {
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+    pointer-events: all;
+    top: 60px;
+    position: absolute;
+    width: calc(33vw - 40px);
+    background-color: rgba(0,0,0,0.8);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgb(0 0 0 / 90%);
+    backdrop-filter: blur(10px);
+    left: 50%;
+    transform: translateX( calc( ( -33vw ) / 2) );
+    box-sizing: border-box;
+    // pointer-events: none;
+    input, select, label {
+        pointer-events: auto;
+    }
+    z-index: 2;
+}
+.modal-underlay {
+    pointer-events: none;
+    background-color: rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+}
+canvas {
+    z-index: 1;
+}
+#vue-layer {
+    z-index: 2;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    pointer-events: none;
+}
+.modal-wrapper {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    height: 100vh;
+}
 #debug {
     background: transparent;
     color: #fff;
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
+    // right: 0;
     bottom: auto;
+
+    width: auto;
+    right: auto;
+
     // width: 30vw;
     height: 100vh;
-    pointer-events: none;
+    // pointer-events: none;
 
     .details {
         z-index: 2;
@@ -374,5 +584,21 @@ export default {
     .scores .miss {
         color: red;
     }
+}
+.opponent_videos {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+
+    position: fixed;
+    right: 0;
+    height: 100px;
+    width: 100vw;
+    bottom: 0;
+}
+.opponent_video {
+    border: 1px solid yellow;
+    position: relative;
+    display: inline-block;
 }
 </style>

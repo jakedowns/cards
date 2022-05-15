@@ -50,6 +50,8 @@ const loadFile = function(path,res){
                 res.setHeader('Content-Type', 'image/png');
             }else if(path_lower.endsWith('.jpg')||path_lower.endsWith('.jpeg')){
                 res.setHeader('Content-Type', 'image/jpg');
+            }else if(path_lower.endsWith('.fbx')){
+                res.setHeader('Content-Type', 'application/octet-stream');
             }
             res.end(data);
         })

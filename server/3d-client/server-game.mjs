@@ -7,8 +7,15 @@ function delay(ms) {
 }
 class ServerGame{
     constructor(){
+        // TODO: put these things in a game.state object
+        // TODO: cache game.state to disk periodically
+        // TODO: load game.state from disk on startup
         this.clients = {};
+        // worlds are created by clients
+        this.worlds = {};
+        // rooms are assigned to worlds
         this.rooms = {};
+        // games are assigned to rooms
         this.games = {
             default:{
                 started:false,
@@ -148,16 +155,22 @@ class ServerGame{
                     room.player_turn = room.players[0];
                 }
             }else{
-                // no players left, remove rounds,game,room
-                delete this.games[this.game_id];
-                this.game_id = null;
-
-                delete this.rounds[this.round_id];
-                this.round_id = null;
-
-                delete this.rooms[this.room_id];
-                this.room_id = null;
+                room.game_host = null;
             }
+        }
+
+        if(!room.game_host && !room.players.length){
+            // no players left, remove rounds,game,room
+            delete this.games[this.game_id];
+            this.game_id = null;
+
+            delete this.rounds[this.round_id];
+            this.round_id = null;
+
+            delete this.rooms[this.room_id];
+            this.room_id = null;
+
+            console.log('last player left, closing game TODO: clean up on timeout to allow last player time to reconnect');
         }
         // if all players have left, set host to null; so that the next player to join can become host
         // if last player in a room, end game, delete room
