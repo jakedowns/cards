@@ -2,8 +2,11 @@
     <div id="debug" >
 
         <div class="modal-wrapper" v-if="show_modal">
+            <LoginModal v-if="show_login_modal" @authenticated="onLoginAuthenticated" />
+            <NameModal v-if="show_name_modal" @nameUpdated="onNameUpdated"/>
             <div class="world-room-game-modal modal" v-if="show_pause_menu">
                 <div class="modal-content">
+                    logged in as {{user?.first_name}}
                     <h2 class="mb-4">Menu</h2>
                     <h3>World</h3>
                     <select v-model="world_selection">
@@ -217,16 +220,28 @@
 </template>
 
 <script>
+import LoginModal from './loginmodal.vue';
+import NameModal from './namemodal.vue'
 export default {
 
+    components:{
+        LoginModal,
+        NameModal
+    },
+
     props:{
-        state:{required:true, default: {}}
+        state:{required:true, default: {}},
     },
 
     setup(){
         return {
+            user: {},
+            directus_loaded: false,
+
             show_modal: true,
-            show_pause_menu: true,
+            show_login_modal: true,
+            show_name_modal: false,
+            show_pause_menu: false,
             show_player_request_modal: false,
             show_spectator_joined_modal: false,
             show_game_in_progress_modal: false,
@@ -341,6 +356,20 @@ export default {
     },
 
     methods:{
+        onNameUpdated(){
+            this.show_name_modal = false;
+            this.show_pause_menu = true;
+        },
+        async onLoginAuthenticated(){
+            this.show_login_modal = false;
+            console.warn('TODO: if user has no name set, show name modal');
+            this.user = await t.server.directus.users.me.read({fields:['first_name']})
+            if(!this.user?.first_name?.length){
+                this.show_name_modal = true;
+            }else{
+                this.show_pause_menu = true;
+            }
+        },
         openGameModal(){
             this.show_modal = true;
             this.show_pause_menu = true;
@@ -537,6 +566,23 @@ canvas {
     width: 100%;
     pointer-events: none;
 }
+.modal-content a {
+    text-decoration: underline;
+}
+input[type=text],input[type=password]{
+    border: 1px solid white;
+    background: transparent;
+    color: #fff;
+    border-radius: 20px;
+    padding: 5px 10px;
+    margin: 3px;
+    outline: none !important;
+    transition: border 0.2s ease-out, margin 0.2s ease-out;
+    &:hover,&:active,&:focus{
+        margin: 0;
+        border: 3px solid #fff;
+    }
+}
 .modal-wrapper {
     position: absolute;
     left: 0;
@@ -600,5 +646,10 @@ canvas {
     border: 1px solid yellow;
     position: relative;
     display: inline-block;
+}
+.modal-error {
+    color: red;
+    display: inline-block;
+    margin: 10px 0;
 }
 </style>

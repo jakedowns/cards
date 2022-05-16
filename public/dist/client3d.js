@@ -776,6 +776,3173 @@ module.exports = __webpack_require__(/*! regenerator-runtime */ "./node_modules/
 
 /***/ }),
 
+/***/ "./node_modules/@directus/sdk/dist/sdk.bundler.js":
+/*!********************************************************!*\
+  !*** ./node_modules/@directus/sdk/dist/sdk.bundler.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ActivityHandler": () => (/* binding */ ActivityHandler),
+/* harmony export */   "Auth": () => (/* binding */ Auth),
+/* harmony export */   "BaseStorage": () => (/* binding */ BaseStorage),
+/* harmony export */   "CollectionsHandler": () => (/* binding */ CollectionsHandler),
+/* harmony export */   "CommentsHandler": () => (/* binding */ CommentsHandler),
+/* harmony export */   "Directus": () => (/* binding */ Directus),
+/* harmony export */   "EmptyParamError": () => (/* binding */ EmptyParamError),
+/* harmony export */   "FieldsHandler": () => (/* binding */ FieldsHandler),
+/* harmony export */   "FilesHandler": () => (/* binding */ FilesHandler),
+/* harmony export */   "FoldersHandler": () => (/* binding */ FoldersHandler),
+/* harmony export */   "IAuth": () => (/* binding */ IAuth),
+/* harmony export */   "IStorage": () => (/* binding */ IStorage),
+/* harmony export */   "ITransport": () => (/* binding */ ITransport),
+/* harmony export */   "ItemsHandler": () => (/* binding */ ItemsHandler),
+/* harmony export */   "LocalStorage": () => (/* binding */ LocalStorage),
+/* harmony export */   "MemoryStorage": () => (/* binding */ MemoryStorage),
+/* harmony export */   "Meta": () => (/* binding */ Meta),
+/* harmony export */   "PermissionsHandler": () => (/* binding */ PermissionsHandler),
+/* harmony export */   "PresetsHandler": () => (/* binding */ PresetsHandler),
+/* harmony export */   "RelationsHandler": () => (/* binding */ RelationsHandler),
+/* harmony export */   "RevisionsHandler": () => (/* binding */ RevisionsHandler),
+/* harmony export */   "RolesHandler": () => (/* binding */ RolesHandler),
+/* harmony export */   "ServerHandler": () => (/* binding */ ServerHandler),
+/* harmony export */   "SettingsHandler": () => (/* binding */ SettingsHandler),
+/* harmony export */   "Transport": () => (/* binding */ Transport),
+/* harmony export */   "TransportError": () => (/* binding */ TransportError),
+/* harmony export */   "UsersHandler": () => (/* binding */ UsersHandler),
+/* harmony export */   "UtilsHandler": () => (/* binding */ UtilsHandler)
+/* harmony export */ });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/@directus/sdk/node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+
+
+class IAuth {
+    constructor() {
+        this.mode = (typeof window === 'undefined' ? 'json' : 'cookie');
+    }
+}
+
+var Meta;
+(function (Meta) {
+    Meta["TOTAL_COUNT"] = "total_count";
+    Meta["FILTER_COUNT"] = "filter_count";
+})(Meta || (Meta = {}));
+class EmptyParamError extends Error {
+    constructor(paramName) {
+        super(`${paramName !== null && paramName !== void 0 ? paramName : 'ID'} cannot be an empty string`);
+    }
+}
+
+class ItemsHandler {
+    constructor(collection, transport) {
+        this.collection = collection;
+        this.transport = transport;
+        this.endpoint = collection.startsWith('directus_') ? `/${collection.substring(9)}` : `/items/${collection}`;
+    }
+    async readOne(id, query, options) {
+        if (`${id}` === '')
+            throw new EmptyParamError('id');
+        const response = await this.transport.get(`${this.endpoint}/${encodeURI(id)}`, {
+            params: query,
+            ...options === null || options === void 0 ? void 0 : options.requestOptions,
+        });
+        return response.data;
+    }
+    async readMany(ids, query, options) {
+        var _a;
+        const collectionFields = await this.transport.get(`/fields/${this.collection}`);
+        const primaryKeyField = (_a = collectionFields.data) === null || _a === void 0 ? void 0 : _a.find((field) => field.schema.is_primary_key === true);
+        const { data, meta } = await this.transport.get(`${this.endpoint}`, {
+            params: {
+                filter: {
+                    [primaryKeyField.field]: { _in: ids },
+                    ...query === null || query === void 0 ? void 0 : query.filter,
+                },
+                sort: (query === null || query === void 0 ? void 0 : query.sort) || primaryKeyField.field,
+                ...query,
+            },
+            ...options === null || options === void 0 ? void 0 : options.requestOptions,
+        });
+        return {
+            data,
+            ...(meta && { meta }),
+        };
+    }
+    async readByQuery(query, options) {
+        const { data, meta } = await this.transport.get(`${this.endpoint}`, {
+            params: query,
+            ...options === null || options === void 0 ? void 0 : options.requestOptions,
+        });
+        return {
+            data,
+            ...(meta && { meta }),
+        };
+    }
+    async createOne(item, query, options) {
+        return (await this.transport.post(`${this.endpoint}`, item, {
+            params: query,
+            ...options === null || options === void 0 ? void 0 : options.requestOptions,
+        })).data;
+    }
+    async createMany(items, query, options) {
+        return await this.transport.post(`${this.endpoint}`, items, {
+            params: query,
+            ...options === null || options === void 0 ? void 0 : options.requestOptions,
+        });
+    }
+    async updateOne(id, item, query, options) {
+        if (`${id}` === '')
+            throw new EmptyParamError('id');
+        return (await this.transport.patch(`${this.endpoint}/${encodeURI(id)}`, item, {
+            params: query,
+            ...options === null || options === void 0 ? void 0 : options.requestOptions,
+        })).data;
+    }
+    async updateMany(ids, data, query, options) {
+        return await this.transport.patch(`${this.endpoint}`, {
+            keys: ids,
+            data,
+        }, {
+            params: query,
+            ...options === null || options === void 0 ? void 0 : options.requestOptions,
+        });
+    }
+    async updateByQuery(updateQuery, data, query, options) {
+        return await this.transport.patch(`${this.endpoint}`, {
+            query: updateQuery,
+            data,
+        }, {
+            params: query,
+            ...options === null || options === void 0 ? void 0 : options.requestOptions,
+        });
+    }
+    async deleteOne(id, options) {
+        if (`${id}` === '')
+            throw new EmptyParamError('id');
+        await this.transport.delete(`${this.endpoint}/${encodeURI(id)}`, undefined, options === null || options === void 0 ? void 0 : options.requestOptions);
+    }
+    async deleteMany(ids, options) {
+        await this.transport.delete(`${this.endpoint}`, ids, options === null || options === void 0 ? void 0 : options.requestOptions);
+    }
+}
+
+class CommentsHandler {
+    constructor(transport) {
+        this.transport = transport;
+    }
+    async create(comment) {
+        const response = await this.transport.post('/activity/comment', comment);
+        return response.data;
+    }
+    async update(comment_activity_id, comment) {
+        if (`${comment_activity_id}` === '')
+            throw new EmptyParamError('comment_activity_id');
+        const response = await this.transport.patch(`/activity/comment/${encodeURI(comment_activity_id)}`, {
+            comment,
+        });
+        return response.data;
+    }
+    async delete(comment_activity_id) {
+        if (`${comment_activity_id}` === '')
+            throw new EmptyParamError('comment_activity_id');
+        await this.transport.delete(`/activity/comment/${encodeURI(comment_activity_id)}`);
+    }
+}
+
+/**
+ * Activity handler
+ */
+class ActivityHandler extends ItemsHandler {
+    constructor(transport) {
+        super('directus_activity', transport);
+        this._comments = new CommentsHandler(this.transport);
+    }
+    get comments() {
+        return this._comments;
+    }
+}
+
+/**
+ * Collections handler
+ */
+class CollectionsHandler {
+    constructor(transport) {
+        this.transport = transport;
+    }
+    async readOne(collection) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        const response = await this.transport.get(`/collections/${collection}`);
+        return response.data;
+    }
+    async readAll() {
+        const { data, meta } = await this.transport.get(`/collections`);
+        return {
+            data,
+            meta,
+        };
+    }
+    async createOne(collection) {
+        return (await this.transport.post(`/collections`, collection)).data;
+    }
+    async createMany(collections) {
+        const { data, meta } = await this.transport.post(`/collections`, collections);
+        return {
+            data,
+            meta,
+        };
+    }
+    async updateOne(collection, item, query) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        return (await this.transport.patch(`/collections/${collection}`, item, {
+            params: query,
+        })).data;
+    }
+    async deleteOne(collection) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        await this.transport.delete(`/collections/${collection}`);
+    }
+}
+
+/**
+ * Fields handler
+ */
+class FieldsHandler {
+    constructor(transport) {
+        this.transport = transport;
+    }
+    async readOne(collection, id) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        if (`${id}` === '')
+            throw new EmptyParamError('id');
+        const response = await this.transport.get(`/fields/${collection}/${id}`);
+        return response.data;
+    }
+    async readMany(collection) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        const response = await this.transport.get(`/fields/${collection}`);
+        return response.data;
+    }
+    async readAll() {
+        const response = await this.transport.get(`/fields`);
+        return response.data;
+    }
+    async createOne(collection, item) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        return (await this.transport.post(`/fields/${collection}`, item)).data;
+    }
+    async updateOne(collection, field, item) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        if (`${field}` === '')
+            throw new EmptyParamError('field');
+        return (await this.transport.patch(`/fields/${collection}/${field}`, item)).data;
+    }
+    async deleteOne(collection, field) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        if (`${field}` === '')
+            throw new EmptyParamError('field');
+        await this.transport.delete(`/fields/${collection}/${field}`);
+    }
+}
+
+/**
+ * Files handler
+ */
+class FilesHandler extends ItemsHandler {
+    constructor(transport) {
+        super('directus_files', transport);
+    }
+    async import(body) {
+        const response = await this.transport.post(`/files/import`, body);
+        return response.data;
+    }
+}
+
+/**
+ * Folders handler
+ */
+class FoldersHandler extends ItemsHandler {
+    constructor(transport) {
+        super('directus_folders', transport);
+    }
+}
+
+/**
+ * Permissions handler
+ */
+class PermissionsHandler extends ItemsHandler {
+    constructor(transport) {
+        super('directus_permissions', transport);
+    }
+}
+
+/**
+ * Presets handler
+ */
+class PresetsHandler extends ItemsHandler {
+    constructor(transport) {
+        super('directus_presets', transport);
+    }
+}
+
+/**
+ * Relations handler
+ */
+class RelationsHandler {
+    constructor(transport) {
+        this.transport = transport;
+    }
+    async readOne(collection, id) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        if (`${id}` === '')
+            throw new EmptyParamError('id');
+        const response = await this.transport.get(`/relations/${collection}/${id}`);
+        return response.data;
+    }
+    async readMany(collection) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        const response = await this.transport.get(`/relations/${collection}`);
+        return response.data;
+    }
+    async readAll() {
+        const response = await this.transport.get(`/relations`);
+        return response.data;
+    }
+    async createOne(item) {
+        return (await this.transport.post(`/relations`, item)).data;
+    }
+    async updateOne(collection, field, item) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        if (`${field}` === '')
+            throw new EmptyParamError('field');
+        return (await this.transport.patch(`/relations/${collection}/${field}`, {
+            params: item,
+        })).data;
+    }
+    async deleteOne(collection, field) {
+        if (`${collection}` === '')
+            throw new EmptyParamError('collection');
+        if (`${field}` === '')
+            throw new EmptyParamError('field');
+        await this.transport.delete(`/relations/${collection}/${field}`);
+    }
+}
+
+/**
+ * Revisions handler
+ */
+class RevisionsHandler extends ItemsHandler {
+    constructor(transport) {
+        super('directus_revisions', transport);
+    }
+}
+
+/**
+ * Roles handler
+ */
+class RolesHandler extends ItemsHandler {
+    constructor(transport) {
+        super('directus_roles', transport);
+    }
+}
+
+/**
+ * Server handler
+ */
+class ServerHandler {
+    constructor(transport) {
+        this.transport = transport;
+    }
+    async ping() {
+        return (await this.transport.get('/server/ping')).raw;
+    }
+    async info() {
+        return (await this.transport.get('/server/info')).data;
+    }
+}
+
+class SingletonHandler {
+    constructor(collection, transport) {
+        this.collection = collection;
+        this.transport = transport;
+        this.endpoint = collection.startsWith('directus_') ? `/${collection.substring(9)}` : `/items/${collection}`;
+    }
+    async read(query) {
+        const item = await this.transport.get(`${this.endpoint}`, {
+            params: query,
+        });
+        return item.data;
+    }
+    async update(data, _query) {
+        const item = await this.transport.patch(`${this.endpoint}`, data, {
+            params: _query,
+        });
+        return item.data;
+    }
+}
+
+class SettingsHandler extends SingletonHandler {
+    constructor(transport) {
+        super('directus_settings', transport);
+    }
+}
+
+class InvitesHandler {
+    constructor(transport) {
+        this.transport = transport;
+    }
+    async send(email, role, invite_url) {
+        await this.transport.post('/users/invite', {
+            email,
+            role,
+            invite_url,
+        });
+    }
+    async accept(token, password) {
+        await this.transport.post(`/users/invite/accept`, {
+            token,
+            password,
+        });
+    }
+}
+
+class TFAHandler {
+    constructor(transport) {
+        this.transport = transport;
+    }
+    async generate(password) {
+        const result = await this.transport.post('/users/me/tfa/generate', { password });
+        return result.data;
+    }
+    async enable(secret, otp) {
+        await this.transport.post('/users/me/tfa/enable', { secret, otp });
+    }
+    async disable(otp) {
+        await this.transport.post('/users/me/tfa/disable', { otp });
+    }
+}
+
+class MeHandler {
+    constructor(transport) {
+        this._transport = transport;
+    }
+    get tfa() {
+        return this._tfa || (this._tfa = new TFAHandler(this._transport));
+    }
+    async read(query) {
+        const response = await this._transport.get('/users/me', {
+            params: query,
+        });
+        return response.data;
+    }
+    async update(data, query) {
+        const response = await this._transport.patch(`/users/me`, data, {
+            params: query,
+        });
+        return response.data;
+    }
+}
+
+/**
+ * Users handler
+ */
+class UsersHandler extends ItemsHandler {
+    constructor(transport) {
+        super('directus_users', transport);
+    }
+    get invites() {
+        return this._invites || (this._invites = new InvitesHandler(this.transport));
+    }
+    get me() {
+        return this._me || (this._me = new MeHandler(this.transport));
+    }
+}
+
+/**
+ * Utils handler
+ */
+class UtilsHandler {
+    constructor(transport) {
+        this.random = {
+            string: async (length = 32) => {
+                const result = await this.transport.get('/utils/random/string', { params: { length } });
+                return result.data;
+            },
+        };
+        this.hash = {
+            generate: async (string) => {
+                const result = await this.transport.post('/utils/hash/generate', { string });
+                return result.data;
+            },
+            verify: async (string, hash) => {
+                const result = await this.transport.post('/utils/hash/verify', { string, hash });
+                return result.data;
+            },
+        };
+        this.transport = transport;
+    }
+    async sort(collection, item, to) {
+        await this.transport.post(`/utils/sort/${encodeURI(collection)}`, { item, to });
+    }
+    async revert(revision) {
+        await this.transport.post(`/utils/revert/${encodeURI(revision)}`);
+    }
+}
+
+class IStorage {
+}
+
+class ITransport {
+}
+class TransportError extends Error {
+    constructor(parent, response) {
+        var _a, _b;
+        if ((_a = response === null || response === void 0 ? void 0 : response.errors) === null || _a === void 0 ? void 0 : _a.length) {
+            super((_b = response === null || response === void 0 ? void 0 : response.errors[0]) === null || _b === void 0 ? void 0 : _b.message);
+        }
+        else {
+            super((parent === null || parent === void 0 ? void 0 : parent.message) || 'Unknown transport error');
+        }
+        this.parent = parent;
+        this.response = response;
+        this.errors = (response === null || response === void 0 ? void 0 : response.errors) || [];
+        if (!Object.values(response || {}).some((value) => value !== undefined)) {
+            this.response = undefined;
+        }
+        Object.setPrototypeOf(this, TransportError.prototype);
+    }
+}
+
+var Keys;
+(function (Keys) {
+    Keys["AuthToken"] = "auth_token";
+    Keys["RefreshToken"] = "auth_refresh_token";
+    Keys["Expires"] = "auth_expires";
+    Keys["ExpiresAt"] = "auth_expires_at";
+})(Keys || (Keys = {}));
+class BaseStorage extends IStorage {
+    constructor(options) {
+        var _a;
+        super();
+        this.prefix = (_a = options === null || options === void 0 ? void 0 : options.prefix) !== null && _a !== void 0 ? _a : '';
+    }
+    get auth_token() {
+        return this.get(Keys.AuthToken);
+    }
+    set auth_token(value) {
+        if (value === null) {
+            this.delete(Keys.AuthToken);
+        }
+        else {
+            this.set(Keys.AuthToken, value);
+        }
+    }
+    get auth_expires() {
+        const value = this.get(Keys.Expires);
+        if (value === null) {
+            return null;
+        }
+        return parseInt(value);
+    }
+    set auth_expires(value) {
+        if (value === null) {
+            this.delete(Keys.Expires);
+        }
+        else {
+            this.set(Keys.Expires, value.toString());
+        }
+    }
+    get auth_expires_at() {
+        const value = this.get(Keys.ExpiresAt);
+        if (value === null) {
+            return null;
+        }
+        return parseInt(value);
+    }
+    set auth_expires_at(value) {
+        if (value === null) {
+            this.delete(Keys.ExpiresAt);
+        }
+        else {
+            this.set(Keys.ExpiresAt, value.toString());
+        }
+    }
+    get auth_refresh_token() {
+        return this.get(Keys.RefreshToken);
+    }
+    set auth_refresh_token(value) {
+        if (value === null) {
+            this.delete(Keys.RefreshToken);
+        }
+        else {
+            this.set(Keys.RefreshToken, value);
+        }
+    }
+}
+
+class MemoryStorage extends BaseStorage {
+    constructor() {
+        super(...arguments);
+        this.values = {};
+    }
+    get(key) {
+        const k = this.key(key);
+        if (k in this.values) {
+            return this.values[k];
+        }
+        return null;
+    }
+    set(key, value) {
+        this.values[this.key(key)] = value;
+        return value;
+    }
+    delete(key) {
+        const k = this.key(key);
+        const value = this.get(key);
+        if (k in this.values) {
+            delete this.values[k];
+        }
+        return value;
+    }
+    key(name) {
+        return `${this.prefix}${name}`;
+    }
+}
+
+class LocalStorage extends BaseStorage {
+    get(key) {
+        const value = localStorage.getItem(this.key(key));
+        if (value !== null) {
+            return value;
+        }
+        return null;
+    }
+    set(key, value) {
+        localStorage.setItem(this.key(key), value);
+        return value;
+    }
+    delete(key) {
+        const k = this.key(key);
+        const value = this.get(k);
+        if (value) {
+            localStorage.removeItem(k);
+        }
+        return value;
+    }
+    key(name) {
+        return `${this.prefix}${name}`;
+    }
+}
+
+/**
+ * Transport implementation
+ */
+class Transport extends ITransport {
+    constructor(config) {
+        var _a;
+        super();
+        this.config = config;
+        this.axios = axios__WEBPACK_IMPORTED_MODULE_0___default().create({
+            baseURL: this.config.url,
+            params: this.config.params,
+            headers: this.config.headers,
+            onUploadProgress: this.config.onUploadProgress,
+            withCredentials: true,
+        });
+        if ((_a = this.config) === null || _a === void 0 ? void 0 : _a.beforeRequest)
+            this.beforeRequest = this.config.beforeRequest;
+    }
+    async beforeRequest(config) {
+        return config;
+    }
+    get url() {
+        return this.config.url;
+    }
+    async request(method, path, data, options) {
+        var _a, _b, _c, _d, _e;
+        try {
+            let config = {
+                method,
+                url: path,
+                data: data,
+                params: options === null || options === void 0 ? void 0 : options.params,
+                headers: options === null || options === void 0 ? void 0 : options.headers,
+                onUploadProgress: options === null || options === void 0 ? void 0 : options.onUploadProgress,
+            };
+            config = await this.beforeRequest(config);
+            const response = await this.axios.request(config);
+            const content = {
+                raw: response.data,
+                status: response.status,
+                statusText: response.statusText,
+                headers: response.headers,
+                data: response.data.data,
+                meta: response.data.meta,
+                errors: response.data.errors,
+            };
+            if (response.data.errors) {
+                throw new TransportError(null, content);
+            }
+            return content;
+        }
+        catch (err) {
+            if (!err || err instanceof Error === false) {
+                throw err;
+            }
+            if (axios__WEBPACK_IMPORTED_MODULE_0___default().isAxiosError(err)) {
+                const data = (_a = err.response) === null || _a === void 0 ? void 0 : _a.data;
+                throw new TransportError(err, {
+                    raw: (_b = err.response) === null || _b === void 0 ? void 0 : _b.data,
+                    status: (_c = err.response) === null || _c === void 0 ? void 0 : _c.status,
+                    statusText: (_d = err.response) === null || _d === void 0 ? void 0 : _d.statusText,
+                    headers: (_e = err.response) === null || _e === void 0 ? void 0 : _e.headers,
+                    data: data === null || data === void 0 ? void 0 : data.data,
+                    meta: data === null || data === void 0 ? void 0 : data.meta,
+                    errors: data === null || data === void 0 ? void 0 : data.errors,
+                });
+            }
+            throw new TransportError(err);
+        }
+    }
+    async get(path, options) {
+        return await this.request('get', path, undefined, options);
+    }
+    async head(path, options) {
+        return await this.request('head', path, undefined, options);
+    }
+    async options(path, options) {
+        return await this.request('options', path, undefined, options);
+    }
+    async delete(path, data, options) {
+        return await this.request('delete', path, data, options);
+    }
+    async put(path, data, options) {
+        return await this.request('put', path, data, options);
+    }
+    async post(path, data, options) {
+        return await this.request('post', path, data, options);
+    }
+    async patch(path, data, options) {
+        return await this.request('patch', path, data, options);
+    }
+}
+
+class PasswordsHandler {
+    constructor(transport) {
+        this.transport = transport;
+    }
+    async request(email, reset_url) {
+        await this.transport.post('/auth/password/request', { email, reset_url });
+    }
+    async reset(token, password) {
+        await this.transport.post('/auth/password/reset', { token, password });
+    }
+}
+
+class Auth extends IAuth {
+    constructor(options) {
+        var _a, _b, _c;
+        super();
+        this.autoRefresh = true;
+        this.msRefreshBeforeExpires = 30000;
+        this.staticToken = '';
+        this._transport = options.transport;
+        this._storage = options.storage;
+        this.autoRefresh = (_a = options === null || options === void 0 ? void 0 : options.autoRefresh) !== null && _a !== void 0 ? _a : this.autoRefresh;
+        this.mode = (_b = options === null || options === void 0 ? void 0 : options.mode) !== null && _b !== void 0 ? _b : this.mode;
+        this.msRefreshBeforeExpires = (_c = options === null || options === void 0 ? void 0 : options.msRefreshBeforeExpires) !== null && _c !== void 0 ? _c : this.msRefreshBeforeExpires;
+        if (options === null || options === void 0 ? void 0 : options.staticToken) {
+            this.staticToken = options === null || options === void 0 ? void 0 : options.staticToken;
+            this.updateStorage({ access_token: this.staticToken, expires: null, refresh_token: null });
+        }
+    }
+    get storage() {
+        return this._storage;
+    }
+    get transport() {
+        return this._transport;
+    }
+    get token() {
+        return this._storage.auth_token;
+    }
+    get password() {
+        return (this.passwords = this.passwords || new PasswordsHandler(this._transport));
+    }
+    resetStorage() {
+        this._storage.auth_token = null;
+        this._storage.auth_refresh_token = null;
+        this._storage.auth_expires = null;
+        this._storage.auth_expires_at = null;
+    }
+    updateStorage(result) {
+        var _a, _b;
+        const expires = (_a = result.expires) !== null && _a !== void 0 ? _a : null;
+        this._storage.auth_token = result.access_token;
+        this._storage.auth_refresh_token = (_b = result.refresh_token) !== null && _b !== void 0 ? _b : null;
+        this._storage.auth_expires = expires;
+        this._storage.auth_expires_at = new Date().getTime() + (expires !== null && expires !== void 0 ? expires : 0);
+    }
+    async refreshIfExpired() {
+        if (this.staticToken)
+            return;
+        if (!this.autoRefresh)
+            return;
+        if (!this._storage.auth_expires_at) {
+            // wait because resetStorage() call in refresh()
+            await this._refreshPromise;
+            return;
+        }
+        if (this._storage.auth_expires_at < new Date().getTime() + this.msRefreshBeforeExpires) {
+            this._refreshPromise = this.refresh();
+        }
+        await this._refreshPromise; // wait for refresh
+    }
+    async refresh() {
+        var _a;
+        const refresh_token = this._storage.auth_refresh_token;
+        this.resetStorage();
+        const response = await this._transport.post('/auth/refresh', {
+            refresh_token: this.mode === 'json' ? refresh_token : undefined,
+        });
+        this.updateStorage(response.data);
+        return {
+            access_token: response.data.access_token,
+            ...(((_a = response.data) === null || _a === void 0 ? void 0 : _a.refresh_token) && { refresh_token: response.data.refresh_token }),
+            expires: response.data.expires,
+        };
+    }
+    async login(credentials) {
+        var _a;
+        this.resetStorage();
+        const response = await this._transport.post('/auth/login', { mode: this.mode, ...credentials }, { headers: { Authorization: null } });
+        this.updateStorage(response.data);
+        return {
+            access_token: response.data.access_token,
+            ...(((_a = response.data) === null || _a === void 0 ? void 0 : _a.refresh_token) && { refresh_token: response.data.refresh_token }),
+            expires: response.data.expires,
+        };
+    }
+    async static(token) {
+        if (!this.staticToken)
+            this.staticToken = token;
+        await this._transport.get('/users/me', { params: { access_token: token }, headers: { Authorization: null } });
+        this.updateStorage({ access_token: token, expires: null, refresh_token: null });
+        return true;
+    }
+    async logout() {
+        let refresh_token;
+        if (this.mode === 'json') {
+            refresh_token = this._storage.auth_refresh_token || undefined;
+        }
+        await this._transport.post('/auth/logout', { refresh_token });
+        this.updateStorage({ access_token: null, expires: null, refresh_token: null });
+    }
+}
+
+class GraphQLHandler {
+    constructor(transport) {
+        this.transport = transport;
+    }
+    async request(base, query, variables) {
+        return await this.transport.post(base, {
+            query,
+            variables: typeof variables === 'undefined' ? {} : variables,
+        });
+    }
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    async items(query, variables) {
+        return await this.request('/graphql', query, variables);
+    }
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    async system(query, variables) {
+        return await this.request('/graphql/system', query, variables);
+    }
+}
+
+class Directus {
+    constructor(url, options) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+        this._url = url;
+        this._options = options;
+        this._items = {};
+        this._singletons = {};
+        if (((_a = this._options) === null || _a === void 0 ? void 0 : _a.storage) && ((_b = this._options) === null || _b === void 0 ? void 0 : _b.storage) instanceof IStorage)
+            this._storage = this._options.storage;
+        else {
+            const directusStorageOptions = (_c = this._options) === null || _c === void 0 ? void 0 : _c.storage;
+            const { mode, ...storageOptions } = directusStorageOptions !== null && directusStorageOptions !== void 0 ? directusStorageOptions : {};
+            if (mode === 'MemoryStorage' || typeof window === 'undefined') {
+                this._storage = new MemoryStorage(storageOptions);
+            }
+            else {
+                this._storage = new LocalStorage(storageOptions);
+            }
+        }
+        if (((_d = this._options) === null || _d === void 0 ? void 0 : _d.transport) && ((_e = this._options) === null || _e === void 0 ? void 0 : _e.transport) instanceof ITransport)
+            this._transport = this._options.transport;
+        else {
+            this._transport = new Transport({
+                url: this.url,
+                beforeRequest: async (config) => {
+                    await this._auth.refreshIfExpired();
+                    const token = this.storage.auth_token;
+                    const bearer = token
+                        ? token.startsWith(`Bearer `)
+                            ? String(this.storage.auth_token)
+                            : `Bearer ${this.storage.auth_token}`
+                        : '';
+                    return {
+                        ...config,
+                        headers: {
+                            Authorization: bearer,
+                            ...config.headers,
+                        },
+                    };
+                },
+                ...(_f = this._options) === null || _f === void 0 ? void 0 : _f.transport,
+            });
+        }
+        if (((_g = this._options) === null || _g === void 0 ? void 0 : _g.auth) && ((_h = this._options) === null || _h === void 0 ? void 0 : _h.auth) instanceof IAuth)
+            this._auth = this._options.auth;
+        else
+            this._auth = new Auth({
+                transport: this._transport,
+                storage: this._storage,
+                ...(_j = this._options) === null || _j === void 0 ? void 0 : _j.auth,
+            });
+    }
+    get url() {
+        return this._url;
+    }
+    get auth() {
+        return this._auth;
+    }
+    get storage() {
+        return this._storage;
+    }
+    get transport() {
+        return this._transport;
+    }
+    get activity() {
+        return this._activity || (this._activity = new ActivityHandler(this.transport));
+    }
+    get collections() {
+        return (this._collections ||
+            (this._collections = new CollectionsHandler(this.transport)));
+    }
+    get fields() {
+        return this._fields || (this._fields = new FieldsHandler(this.transport));
+    }
+    get files() {
+        return this._files || (this._files = new FilesHandler(this.transport));
+    }
+    get folders() {
+        return this._folders || (this._folders = new FoldersHandler(this.transport));
+    }
+    get permissions() {
+        return (this._permissions ||
+            (this._permissions = new PermissionsHandler(this.transport)));
+    }
+    get presets() {
+        return this._presets || (this._presets = new PresetsHandler(this.transport));
+    }
+    get relations() {
+        return this._relations || (this._relations = new RelationsHandler(this.transport));
+    }
+    get revisions() {
+        return this._revisions || (this._revisions = new RevisionsHandler(this.transport));
+    }
+    get roles() {
+        return this._roles || (this._roles = new RolesHandler(this.transport));
+    }
+    get users() {
+        return this._users || (this._users = new UsersHandler(this.transport));
+    }
+    get settings() {
+        return this._settings || (this._settings = new SettingsHandler(this.transport));
+    }
+    get server() {
+        return this._server || (this._server = new ServerHandler(this.transport));
+    }
+    get utils() {
+        return this._utils || (this._utils = new UtilsHandler(this.transport));
+    }
+    get graphql() {
+        return this._graphql || (this._graphql = new GraphQLHandler(this.transport));
+    }
+    singleton(collection) {
+        return (this._singletons[collection] ||
+            (this._singletons[collection] = new SingletonHandler(collection, this.transport)));
+    }
+    items(collection) {
+        return this._items[collection] || (this._items[collection] = new ItemsHandler(collection, this.transport));
+    }
+}
+
+
+//# sourceMappingURL=sdk.bundler.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/index.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/index.js ***!
+  \****************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__(/*! ./lib/axios */ "./node_modules/@directus/sdk/node_modules/axios/lib/axios.js");
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/adapters/xhr.js":
+/*!***************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/adapters/xhr.js ***!
+  \***************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+var settle = __webpack_require__(/*! ./../core/settle */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/settle.js");
+var cookies = __webpack_require__(/*! ./../helpers/cookies */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/cookies.js");
+var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/buildURL.js");
+var buildFullPath = __webpack_require__(/*! ../core/buildFullPath */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/buildFullPath.js");
+var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/parseHeaders.js");
+var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/isURLSameOrigin.js");
+var createError = __webpack_require__(/*! ../core/createError */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/createError.js");
+var defaults = __webpack_require__(/*! ../defaults */ "./node_modules/@directus/sdk/node_modules/axios/lib/defaults.js");
+var Cancel = __webpack_require__(/*! ../cancel/Cancel */ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/Cancel.js");
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+    var responseType = config.responseType;
+    var onCanceled;
+    function done() {
+      if (config.cancelToken) {
+        config.cancelToken.unsubscribe(onCanceled);
+      }
+
+      if (config.signal) {
+        config.signal.removeEventListener('abort', onCanceled);
+      }
+    }
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    function onloadend() {
+      if (!request) {
+        return;
+      }
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !responseType || responseType === 'text' ||  responseType === 'json' ?
+        request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(function _resolve(value) {
+        resolve(value);
+        done();
+      }, function _reject(err) {
+        reject(err);
+        done();
+      }, response);
+
+      // Clean up request
+      request = null;
+    }
+
+    if ('onloadend' in request) {
+      // Use onloadend if available
+      request.onloadend = onloadend;
+    } else {
+      // Listen for ready state to emulate onloadend
+      request.onreadystatechange = function handleLoad() {
+        if (!request || request.readyState !== 4) {
+          return;
+        }
+
+        // The request errored out and we didn't get a response, this will be
+        // handled by onerror instead
+        // With one exception: request that using file: protocol, most browsers
+        // will return status as 0 even though it's a successful request
+        if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+          return;
+        }
+        // readystate handler is calling before onerror or ontimeout handlers,
+        // so we should call onloadend on the next 'tick'
+        setTimeout(onloadend);
+      };
+    }
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = config.timeout ? 'timeout of ' + config.timeout + 'ms exceeded' : 'timeout exceeded';
+      var transitional = config.transitional || defaults.transitional;
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(
+        timeoutErrorMessage,
+        config,
+        transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (responseType && responseType !== 'json') {
+      request.responseType = config.responseType;
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken || config.signal) {
+      // Handle cancellation
+      // eslint-disable-next-line func-names
+      onCanceled = function(cancel) {
+        if (!request) {
+          return;
+        }
+        reject(!cancel || (cancel && cancel.type) ? new Cancel('canceled') : cancel);
+        request.abort();
+        request = null;
+      };
+
+      config.cancelToken && config.cancelToken.subscribe(onCanceled);
+      if (config.signal) {
+        config.signal.aborted ? onCanceled() : config.signal.addEventListener('abort', onCanceled);
+      }
+    }
+
+    if (!requestData) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/axios.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/axios.js ***!
+  \********************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/bind.js");
+var Axios = __webpack_require__(/*! ./core/Axios */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/Axios.js");
+var mergeConfig = __webpack_require__(/*! ./core/mergeConfig */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/mergeConfig.js");
+var defaults = __webpack_require__(/*! ./defaults */ "./node_modules/@directus/sdk/node_modules/axios/lib/defaults.js");
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  // Factory for creating new instances
+  instance.create = function create(instanceConfig) {
+    return createInstance(mergeConfig(defaultConfig, instanceConfig));
+  };
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Expose Cancel & CancelToken
+axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/Cancel.js");
+axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/CancelToken.js");
+axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/isCancel.js");
+axios.VERSION = (__webpack_require__(/*! ./env/data */ "./node_modules/@directus/sdk/node_modules/axios/lib/env/data.js").version);
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = __webpack_require__(/*! ./helpers/spread */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/spread.js");
+
+// Expose isAxiosError
+axios.isAxiosError = __webpack_require__(/*! ./helpers/isAxiosError */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/isAxiosError.js");
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports["default"] = axios;
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/Cancel.js":
+/*!****************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/cancel/Cancel.js ***!
+  \****************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/CancelToken.js":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/cancel/CancelToken.js ***!
+  \*********************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var Cancel = __webpack_require__(/*! ./Cancel */ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/Cancel.js");
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+
+  // eslint-disable-next-line func-names
+  this.promise.then(function(cancel) {
+    if (!token._listeners) return;
+
+    var i;
+    var l = token._listeners.length;
+
+    for (i = 0; i < l; i++) {
+      token._listeners[i](cancel);
+    }
+    token._listeners = null;
+  });
+
+  // eslint-disable-next-line func-names
+  this.promise.then = function(onfulfilled) {
+    var _resolve;
+    // eslint-disable-next-line func-names
+    var promise = new Promise(function(resolve) {
+      token.subscribe(resolve);
+      _resolve = resolve;
+    }).then(onfulfilled);
+
+    promise.cancel = function reject() {
+      token.unsubscribe(_resolve);
+    };
+
+    return promise;
+  };
+
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Subscribe to the cancel signal
+ */
+
+CancelToken.prototype.subscribe = function subscribe(listener) {
+  if (this.reason) {
+    listener(this.reason);
+    return;
+  }
+
+  if (this._listeners) {
+    this._listeners.push(listener);
+  } else {
+    this._listeners = [listener];
+  }
+};
+
+/**
+ * Unsubscribe from the cancel signal
+ */
+
+CancelToken.prototype.unsubscribe = function unsubscribe(listener) {
+  if (!this._listeners) {
+    return;
+  }
+  var index = this._listeners.indexOf(listener);
+  if (index !== -1) {
+    this._listeners.splice(index, 1);
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/isCancel.js":
+/*!******************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/cancel/isCancel.js ***!
+  \******************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/core/Axios.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/core/Axios.js ***!
+  \*************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+var buildURL = __webpack_require__(/*! ../helpers/buildURL */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/buildURL.js");
+var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/InterceptorManager.js");
+var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/dispatchRequest.js");
+var mergeConfig = __webpack_require__(/*! ./mergeConfig */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/mergeConfig.js");
+var validator = __webpack_require__(/*! ../helpers/validator */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/validator.js");
+
+var validators = validator.validators;
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  var transitional = config.transitional;
+
+  if (transitional !== undefined) {
+    validator.assertOptions(transitional, {
+      silentJSONParsing: validators.transitional(validators.boolean),
+      forcedJSONParsing: validators.transitional(validators.boolean),
+      clarifyTimeoutError: validators.transitional(validators.boolean)
+    }, false);
+  }
+
+  // filter out skipped interceptors
+  var requestInterceptorChain = [];
+  var synchronousRequestInterceptors = true;
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
+      return;
+    }
+
+    synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+
+    requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  var responseInterceptorChain = [];
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  var promise;
+
+  if (!synchronousRequestInterceptors) {
+    var chain = [dispatchRequest, undefined];
+
+    Array.prototype.unshift.apply(chain, requestInterceptorChain);
+    chain = chain.concat(responseInterceptorChain);
+
+    promise = Promise.resolve(config);
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift());
+    }
+
+    return promise;
+  }
+
+
+  var newConfig = config;
+  while (requestInterceptorChain.length) {
+    var onFulfilled = requestInterceptorChain.shift();
+    var onRejected = requestInterceptorChain.shift();
+    try {
+      newConfig = onFulfilled(newConfig);
+    } catch (error) {
+      onRejected(error);
+      break;
+    }
+  }
+
+  try {
+    promise = dispatchRequest(newConfig);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
+  while (responseInterceptorChain.length) {
+    promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: (config || {}).data
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/core/InterceptorManager.js":
+/*!**************************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/core/InterceptorManager.js ***!
+  \**************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected,
+    synchronous: options ? options.synchronous : false,
+    runWhen: options ? options.runWhen : null
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/core/buildFullPath.js":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/core/buildFullPath.js ***!
+  \*********************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var isAbsoluteURL = __webpack_require__(/*! ../helpers/isAbsoluteURL */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/isAbsoluteURL.js");
+var combineURLs = __webpack_require__(/*! ../helpers/combineURLs */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/combineURLs.js");
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+module.exports = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/core/createError.js":
+/*!*******************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/core/createError.js ***!
+  \*******************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var enhanceError = __webpack_require__(/*! ./enhanceError */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/enhanceError.js");
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/core/dispatchRequest.js":
+/*!***********************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/core/dispatchRequest.js ***!
+  \***********************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+var transformData = __webpack_require__(/*! ./transformData */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/transformData.js");
+var isCancel = __webpack_require__(/*! ../cancel/isCancel */ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/isCancel.js");
+var defaults = __webpack_require__(/*! ../defaults */ "./node_modules/@directus/sdk/node_modules/axios/lib/defaults.js");
+var Cancel = __webpack_require__(/*! ../cancel/Cancel */ "./node_modules/@directus/sdk/node_modules/axios/lib/cancel/Cancel.js");
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+
+  if (config.signal && config.signal.aborted) {
+    throw new Cancel('canceled');
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData.call(
+    config,
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData.call(
+      config,
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData.call(
+          config,
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/core/enhanceError.js":
+/*!********************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/core/enhanceError.js ***!
+  \********************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function toJSON() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code,
+      status: this.response && this.response.status ? this.response.status : null
+    };
+  };
+  return error;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/core/mergeConfig.js":
+/*!*******************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/core/mergeConfig.js ***!
+  \*******************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+module.exports = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  function getMergedValue(target, source) {
+    if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
+      return utils.merge(target, source);
+    } else if (utils.isPlainObject(source)) {
+      return utils.merge({}, source);
+    } else if (utils.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+
+  // eslint-disable-next-line consistent-return
+  function mergeDeepProperties(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      return getMergedValue(config1[prop], config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      return getMergedValue(undefined, config1[prop]);
+    }
+  }
+
+  // eslint-disable-next-line consistent-return
+  function valueFromConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      return getMergedValue(undefined, config2[prop]);
+    }
+  }
+
+  // eslint-disable-next-line consistent-return
+  function defaultToConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      return getMergedValue(undefined, config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      return getMergedValue(undefined, config1[prop]);
+    }
+  }
+
+  // eslint-disable-next-line consistent-return
+  function mergeDirectKeys(prop) {
+    if (prop in config2) {
+      return getMergedValue(config1[prop], config2[prop]);
+    } else if (prop in config1) {
+      return getMergedValue(undefined, config1[prop]);
+    }
+  }
+
+  var mergeMap = {
+    'url': valueFromConfig2,
+    'method': valueFromConfig2,
+    'data': valueFromConfig2,
+    'baseURL': defaultToConfig2,
+    'transformRequest': defaultToConfig2,
+    'transformResponse': defaultToConfig2,
+    'paramsSerializer': defaultToConfig2,
+    'timeout': defaultToConfig2,
+    'timeoutMessage': defaultToConfig2,
+    'withCredentials': defaultToConfig2,
+    'adapter': defaultToConfig2,
+    'responseType': defaultToConfig2,
+    'xsrfCookieName': defaultToConfig2,
+    'xsrfHeaderName': defaultToConfig2,
+    'onUploadProgress': defaultToConfig2,
+    'onDownloadProgress': defaultToConfig2,
+    'decompress': defaultToConfig2,
+    'maxContentLength': defaultToConfig2,
+    'maxBodyLength': defaultToConfig2,
+    'transport': defaultToConfig2,
+    'httpAgent': defaultToConfig2,
+    'httpsAgent': defaultToConfig2,
+    'cancelToken': defaultToConfig2,
+    'socketPath': defaultToConfig2,
+    'responseEncoding': defaultToConfig2,
+    'validateStatus': mergeDirectKeys
+  };
+
+  utils.forEach(Object.keys(config1).concat(Object.keys(config2)), function computeConfigValue(prop) {
+    var merge = mergeMap[prop] || mergeDeepProperties;
+    var configValue = merge(prop);
+    (utils.isUndefined(configValue) && merge !== mergeDirectKeys) || (config[prop] = configValue);
+  });
+
+  return config;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/core/settle.js":
+/*!**************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/core/settle.js ***!
+  \**************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var createError = __webpack_require__(/*! ./createError */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/createError.js");
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/core/transformData.js":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/core/transformData.js ***!
+  \*********************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+var defaults = __webpack_require__(/*! ./../defaults */ "./node_modules/@directus/sdk/node_modules/axios/lib/defaults.js");
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  var context = this || defaults;
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn.call(context, data, headers);
+  });
+
+  return data;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/defaults.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/defaults.js ***!
+  \***********************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+/* provided dependency */ var process = __webpack_require__(/*! process/browser.js */ "./node_modules/process/browser.js");
+
+
+var utils = __webpack_require__(/*! ./utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/normalizeHeaderName.js");
+var enhanceError = __webpack_require__(/*! ./core/enhanceError */ "./node_modules/@directus/sdk/node_modules/axios/lib/core/enhanceError.js");
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = __webpack_require__(/*! ./adapters/xhr */ "./node_modules/@directus/sdk/node_modules/axios/lib/adapters/xhr.js");
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = __webpack_require__(/*! ./adapters/http */ "./node_modules/@directus/sdk/node_modules/axios/lib/adapters/xhr.js");
+  }
+  return adapter;
+}
+
+function stringifySafely(rawValue, parser, encoder) {
+  if (utils.isString(rawValue)) {
+    try {
+      (parser || JSON.parse)(rawValue);
+      return utils.trim(rawValue);
+    } catch (e) {
+      if (e.name !== 'SyntaxError') {
+        throw e;
+      }
+    }
+  }
+
+  return (encoder || JSON.stringify)(rawValue);
+}
+
+var defaults = {
+
+  transitional: {
+    silentJSONParsing: true,
+    forcedJSONParsing: true,
+    clarifyTimeoutError: false
+  },
+
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data) || (headers && headers['Content-Type'] === 'application/json')) {
+      setContentTypeIfUnset(headers, 'application/json');
+      return stringifySafely(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    var transitional = this.transitional || defaults.transitional;
+    var silentJSONParsing = transitional && transitional.silentJSONParsing;
+    var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
+    var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
+
+    if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        if (strictJSONParsing) {
+          if (e.name === 'SyntaxError') {
+            throw enhanceError(e, this, 'E_JSON_PARSE');
+          }
+          throw e;
+        }
+      }
+    }
+
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+  maxBodyLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  },
+
+  headers: {
+    common: {
+      'Accept': 'application/json, text/plain, */*'
+    }
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/env/data.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/env/data.js ***!
+  \***********************************************************************/
+/***/ ((module) => {
+
+module.exports = {
+  "version": "0.24.0"
+};
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/bind.js":
+/*!***************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/bind.js ***!
+  \***************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/buildURL.js":
+/*!*******************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/buildURL.js ***!
+  \*******************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/combineURLs.js":
+/*!**********************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/combineURLs.js ***!
+  \**********************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/cookies.js":
+/*!******************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/cookies.js ***!
+  \******************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/isAbsoluteURL.js":
+/*!************************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/isAxiosError.js":
+/*!***********************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/isAxiosError.js ***!
+  \***********************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Determines whether the payload is an error thrown by Axios
+ *
+ * @param {*} payload The value to test
+ * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+ */
+module.exports = function isAxiosError(payload) {
+  return (typeof payload === 'object') && (payload.isAxiosError === true);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/isURLSameOrigin.js":
+/*!**************************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \**************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/normalizeHeaderName.js":
+/*!******************************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \******************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/parseHeaders.js":
+/*!***********************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \***********************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js");
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/spread.js":
+/*!*****************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/spread.js ***!
+  \*****************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/validator.js":
+/*!********************************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/helpers/validator.js ***!
+  \********************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var VERSION = (__webpack_require__(/*! ../env/data */ "./node_modules/@directus/sdk/node_modules/axios/lib/env/data.js").version);
+
+var validators = {};
+
+// eslint-disable-next-line func-names
+['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(function(type, i) {
+  validators[type] = function validator(thing) {
+    return typeof thing === type || 'a' + (i < 1 ? 'n ' : ' ') + type;
+  };
+});
+
+var deprecatedWarnings = {};
+
+/**
+ * Transitional option validator
+ * @param {function|boolean?} validator - set to false if the transitional option has been removed
+ * @param {string?} version - deprecated version / removed since version
+ * @param {string?} message - some message with additional info
+ * @returns {function}
+ */
+validators.transitional = function transitional(validator, version, message) {
+  function formatMessage(opt, desc) {
+    return '[Axios v' + VERSION + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
+  }
+
+  // eslint-disable-next-line func-names
+  return function(value, opt, opts) {
+    if (validator === false) {
+      throw new Error(formatMessage(opt, ' has been removed' + (version ? ' in ' + version : '')));
+    }
+
+    if (version && !deprecatedWarnings[opt]) {
+      deprecatedWarnings[opt] = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        formatMessage(
+          opt,
+          ' has been deprecated since v' + version + ' and will be removed in the near future'
+        )
+      );
+    }
+
+    return validator ? validator(value, opt, opts) : true;
+  };
+};
+
+/**
+ * Assert object's properties type
+ * @param {object} options
+ * @param {object} schema
+ * @param {boolean?} allowUnknown
+ */
+
+function assertOptions(options, schema, allowUnknown) {
+  if (typeof options !== 'object') {
+    throw new TypeError('options must be an object');
+  }
+  var keys = Object.keys(options);
+  var i = keys.length;
+  while (i-- > 0) {
+    var opt = keys[i];
+    var validator = schema[opt];
+    if (validator) {
+      var value = options[opt];
+      var result = value === undefined || validator(value, opt, options);
+      if (result !== true) {
+        throw new TypeError('option ' + opt + ' must be ' + result);
+      }
+      continue;
+    }
+    if (allowUnknown !== true) {
+      throw Error('Unknown option ' + opt);
+    }
+  }
+}
+
+module.exports = {
+  assertOptions: assertOptions,
+  validators: validators
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@directus/sdk/node_modules/axios/lib/utils.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/@directus/sdk/node_modules/axios/lib/utils.js ***!
+  \********************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/@directus/sdk/node_modules/axios/lib/helpers/bind.js");
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a plain Object
+ *
+ * @param {Object} val The value to test
+ * @return {boolean} True if value is a plain Object, otherwise false
+ */
+function isPlainObject(val) {
+  if (toString.call(val) !== '[object Object]') {
+    return false;
+  }
+
+  var prototype = Object.getPrototypeOf(val);
+  return prototype === null || prototype === Object.prototype;
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (isPlainObject(result[key]) && isPlainObject(val)) {
+      result[key] = merge(result[key], val);
+    } else if (isPlainObject(val)) {
+      result[key] = merge({}, val);
+    } else if (isArray(val)) {
+      result[key] = val.slice();
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+/**
+ * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+ *
+ * @param {string} content with BOM
+ * @return {string} content value without BOM
+ */
+function stripBOM(content) {
+  if (content.charCodeAt(0) === 0xFEFF) {
+    content = content.slice(1);
+  }
+  return content;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isPlainObject: isPlainObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  extend: extend,
+  trim: trim,
+  stripBOM: stripBOM
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js":
 /*!*********************************************************************!*\
   !*** ./node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js ***!
@@ -13698,7 +16865,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _loginmodal_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./loginmodal.vue */ "./client/components/loginmodal.vue");
+/* harmony import */ var _namemodal_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./namemodal.vue */ "./client/components/namemodal.vue");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  components: {
+    LoginModal: _loginmodal_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
+    NameModal: _namemodal_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
+  },
   props: {
     state: {
       required: true,
@@ -13707,8 +16890,12 @@ __webpack_require__.r(__webpack_exports__);
   },
   setup: function setup() {
     return {
+      user: {},
+      directus_loaded: false,
       show_modal: true,
-      show_pause_menu: true,
+      show_login_modal: true,
+      show_name_modal: false,
+      show_pause_menu: false,
       show_player_request_modal: false,
       show_spectator_joined_modal: false,
       show_game_in_progress_modal: false,
@@ -13821,6 +17008,44 @@ __webpack_require__.r(__webpack_exports__);
 
   },
   methods: {
+    onNameUpdated: function onNameUpdated() {
+      this.show_name_modal = false;
+      this.show_pause_menu = true;
+    },
+    onLoginAuthenticated: function onLoginAuthenticated() {
+      var _this2 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var _this2$user, _this2$user$first_nam;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _this2.show_login_modal = false;
+                console.warn('TODO: if user has no name set, show name modal');
+                _context.next = 4;
+                return t.server.directus.users.me.read({
+                  fields: ['first_name']
+                });
+
+              case 4:
+                _this2.user = _context.sent;
+
+                if (!((_this2$user = _this2.user) !== null && _this2$user !== void 0 && (_this2$user$first_nam = _this2$user.first_name) !== null && _this2$user$first_nam !== void 0 && _this2$user$first_nam.length)) {
+                  _this2.show_name_modal = true;
+                } else {
+                  _this2.show_pause_menu = true;
+                }
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
     openGameModal: function openGameModal() {
       this.show_modal = true;
       this.show_pause_menu = true;
@@ -13937,6 +17162,318 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/loginmodal.vue?vue&type=script&setup=true&lang=js":
+/*!*********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/loginmodal.vue?vue&type=script&setup=true&lang=js ***!
+  \*********************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+// import TextField from './TextField.vue'
+var __default__ = {
+  components: {// TextField
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return _this.checkIsAuthenticated();
+
+            case 2:
+              _this.focusInput(); // this.setRegister(true);
+              // alert('hi');
+              // window.checkThis = this;
+
+
+            case 3:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }))();
+  },
+  methods: {
+    checkIsAuthenticated: function checkIsAuthenticated() {
+      var _this2 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                // But, we need to authenticate if data is private
+                _this2.authenticated = false; // Try to authenticate with token if exists
+
+                _context2.next = 3;
+                return t.server.directus.auth.refresh().then(function () {
+                  _this2.authenticated = true;
+
+                  _this2.$emit('authenticated');
+                })["catch"](function (error) {
+                  console.warn('not authenticated', error);
+                });
+
+              case 3:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }))();
+    },
+    focusInput: function focusInput() {
+      var _this3 = this;
+
+      this.$nextTick(function () {
+        var _this3$$refs, _this3$$refs$email_fi;
+
+        (_this3$$refs = _this3.$refs) === null || _this3$$refs === void 0 ? void 0 : (_this3$$refs$email_fi = _this3$$refs.email_field) === null || _this3$$refs$email_fi === void 0 ? void 0 : _this3$$refs$email_fi.focus();
+      });
+    },
+    // setRegister(value){
+    //     console.log(this);
+    //     // this.register = value
+    // },
+    onFormSubmit: function onFormSubmit() {
+      if (this.show_forgot_password) {
+        this.onClickRequestPWReset();
+      } else if (this.register) {
+        this.onClickRegister();
+      } else {
+        this.onClickLogin();
+      }
+    },
+    onClickLogin: function onClickLogin() {
+      var _this4 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _this4.submitting = true;
+                _this4.error = null;
+                console.log('logging in');
+                _context3.next = 5;
+                return t.server.directus.auth.login({
+                  email: _this4.email,
+                  password: _this4.password
+                }).then(function () {
+                  _this4.submitting = false;
+                  _this4.authenticated = true;
+
+                  _this4.$emit('authenticated');
+                })["catch"](function (err) {
+                  _this4.submitting = false;
+                  console.error(err);
+                  _this4.error = 'Invalid email or password';
+                });
+
+              case 5:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }))();
+    },
+    onClickRegister: function onClickRegister() {
+      var _this5 = this;
+
+      this.submitting = true;
+      this.error = null;
+      axios.post('/api/user/register', {
+        email: this.email
+      }).then(function (res) {
+        console.log(res);
+        _this5.show_check_email = true;
+        _this5.submitting = false;
+      })["catch"](function (err) {
+        console.log(err);
+        _this5.error = err;
+        _this5.submitting = false;
+      });
+    },
+    onClickRequestPWReset: function onClickRequestPWReset() {
+      var _this6 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _this6.submitting = true;
+                _this6.error = null;
+                axios.post('/api/user/reset-pw', {
+                  email: _this6.email
+                }).then(function (res) {
+                  console.log(res);
+                  _this6.submitting = false;
+                  _this6.show_check_email = true;
+                })["catch"](function (err) {
+                  console.log(err);
+                  _this6.error = err;
+                  _this6.submitting = false;
+                });
+
+              case 3:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
+      }))();
+    },
+    onClickGuest: function onClickGuest() {// todo: create a guest user and a guest session...
+    }
+  }
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/*#__PURE__*/Object.assign(__default__, {
+  setup: function setup(__props, _ref) {
+    var expose = _ref.expose;
+    expose();
+    var submitting = (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)(false);
+    var authenticated = (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)(false);
+    var show_forgot_password = (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)(false);
+    var error = (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)('');
+    var name = (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)('');
+    var email = (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)('');
+    var password = (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)('');
+    var register = (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)(false);
+    var show_check_email = (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)(false);
+    var state = (0,vue__WEBPACK_IMPORTED_MODULE_1__.reactive)({
+      show_forgot_password: show_forgot_password,
+      submitting: submitting,
+      authenticated: authenticated,
+      error: error,
+      name: name,
+      email: email,
+      password: password,
+      register: register,
+      show_check_email: show_check_email
+    });
+
+    function toggleRegister(value) {
+      state.register = value;
+
+      if (value) {
+        state.show_forgot_password = false;
+      }
+    }
+
+    var __returned__ = {
+      submitting: submitting,
+      authenticated: authenticated,
+      show_forgot_password: show_forgot_password,
+      error: error,
+      name: name,
+      email: email,
+      password: password,
+      register: register,
+      show_check_email: show_check_email,
+      state: state,
+      toggleRegister: toggleRegister,
+      reactive: vue__WEBPACK_IMPORTED_MODULE_1__.reactive,
+      ref: vue__WEBPACK_IMPORTED_MODULE_1__.ref
+    };
+    Object.defineProperty(__returned__, '__isScriptSetup', {
+      enumerable: false,
+      value: true
+    });
+    return __returned__;
+  }
+}));
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/namemodal.vue?vue&type=script&lang=js":
+/*!*********************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/namemodal.vue?vue&type=script&lang=js ***!
+  \*********************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  setup: function setup() {
+    return {
+      submitting: (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)(false),
+      first_name: (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)(null),
+      error: (0,vue__WEBPACK_IMPORTED_MODULE_1__.ref)(null)
+    };
+  },
+  methods: {
+    onSubmit: function onSubmit() {
+      var _this = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _this.submitting = true;
+                _context.next = 3;
+                return t.server.directus.users.me.update({
+                  first_name: _this.first_name
+                }, {
+                  fields: ['last_access']
+                }).then(function (res) {
+                  _this.$emit('nameUpdated');
+                })["catch"](function (err) {
+                  _this.error = err.message;
+                  _this.submitting = false;
+                });
+
+              case 3:
+                response = _context.sent;
+
+              case 4:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=template&id=5acf4fce":
 /*!*******************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=template&id=5acf4fce ***!
@@ -13958,7 +17495,7 @@ var _hoisted_2 = {
   "class": "modal-wrapper"
 };
 var _hoisted_3 = {
-  key: 0,
+  key: 2,
   "class": "world-room-game-modal modal"
 };
 var _hoisted_4 = {
@@ -14099,7 +17636,7 @@ var _hoisted_34 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 
 var _hoisted_35 = ["disabled"];
 var _hoisted_36 = {
-  key: 1,
+  key: 3,
   "class": "game-in-progress-modal modal"
 };
 
@@ -14113,7 +17650,7 @@ var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 
 var _hoisted_38 = [_hoisted_37];
 var _hoisted_39 = {
-  key: 2,
+  key: 4,
   "class": "player-request-modal modal"
 };
 
@@ -14127,7 +17664,7 @@ var _hoisted_40 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 
 var _hoisted_41 = [_hoisted_40];
 var _hoisted_42 = {
-  key: 3,
+  key: 5,
   "class": "spectator-joined-modal modal"
 };
 
@@ -14394,9 +17931,25 @@ var _hoisted_100 = {
 };
 var _hoisted_101 = ["data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state7, _$props$state$room_id, _$props$state8, _$props$state$game_id, _$props$state9, _$options$game, _$props$state$game_ho, _$props$state10, _$props$state$round_i, _$props$state11, _$options$round, _$props$state$player_4, _$props$state$client_2, _$props$state13;
+  var _$setup$user, _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state7, _$props$state$room_id, _$props$state8, _$props$state$game_id, _$props$state9, _$options$game, _$props$state$game_ho, _$props$state10, _$props$state$round_i, _$props$state11, _$options$round, _$props$state$player_4, _$props$state$client_2, _$props$state13;
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [$setup.show_pause_menu ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+  var _component_LoginModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("LoginModal");
+
+  var _component_NameModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("NameModal");
+
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [$setup.show_login_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LoginModal, {
+    key: 0,
+    onAuthenticated: $options.onLoginAuthenticated
+  }, null, 8
+  /* PROPS */
+  , ["onAuthenticated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_name_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_NameModal, {
+    key: 1,
+    onNameUpdated: $options.onNameUpdated
+  }, null, 8
+  /* PROPS */
+  , ["onNameUpdated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_pause_menu ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" logged in as " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$setup$user = $setup.user) === null || _$setup$user === void 0 ? void 0 : _$setup$user.first_name) + " ", 1
+  /* TEXT */
+  ), _hoisted_5, _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
       return $setup.world_selection = $event;
     })
@@ -14617,6 +18170,209 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/loginmodal.vue?vue&type=template&id=989cef72":
+/*!**************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/loginmodal.vue?vue&type=template&id=989cef72 ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+var _hoisted_1 = {
+  "class": "login-modal modal"
+};
+var _hoisted_2 = {
+  "class": "modal-content"
+};
+
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  "class": "mb-4"
+}, "Hi, who are you?", -1
+/* HOISTED */
+);
+
+var _hoisted_4 = {
+  key: 0
+};
+var _hoisted_5 = {
+  key: 1,
+  "class": "modal-error"
+};
+var _hoisted_6 = {
+  key: 2
+};
+
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" No Account? ");
+
+var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_9 = {
+  key: 3
+};
+
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_11 = {
+  key: 5
+};
+
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_13 = {
+  key: 7
+};
+var _hoisted_14 = {
+  key: 1
+};
+
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Request Password Reset Link", -1
+/* HOISTED */
+);
+
+var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
+    onSubmit: _cache[8] || (_cache[8] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return _ctx.formSubmit && _ctx.formSubmit.apply(_ctx, arguments);
+    }, ["prevent"]))
+  }, [!$setup.submitting && ($setup.register || $setup.show_forgot_password) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    href: "#",
+    onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return $setup.toggleRegister(false);
+    }, ["prevent"]))
+  }, "Login")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.error), 1
+  /* TEXT */
+  )) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.register && !$setup.submitting && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_6, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    href: "#",
+    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return $setup.toggleRegister(true);
+    }, ["prevent"]))
+  }, "Register")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_8, $setup.submitting ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_9, "loading...")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <input style=\"display:none;\" type=\"checkbox\" v-model=\"register\" /> "), !$setup.submitting && !$setup.show_check_email ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("input", {
+    key: 4,
+    type: "text",
+    ref: "email_field",
+    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
+      return $setup.email = $event;
+    }),
+    name: "email",
+    placeholder: "email",
+    required: ""
+  }, null, 512
+  /* NEED_PATCH */
+  )), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.email]]) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <input type=\"text\" v-show=\"register\" v-model=\"name\" placeholder=\"name (public)\" /> "), $setup.show_check_email ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_11, "Please check your email to finish registration.")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.show_forgot_password && !$setup.register && !$setup.submitting && !$setup.show_check_email ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("input", {
+    key: 6,
+    type: "password",
+    name: "password",
+    "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
+      return $setup.password = $event;
+    }),
+    required: "",
+    placeholder: "password"
+  }, null, 512
+  /* NEED_PATCH */
+  )), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.password]]) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_12, !$setup.submitting ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_13, [!$setup.register && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
+    key: 0,
+    onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.onClickLogin && $options.onClickLogin.apply($options, arguments);
+    }, ["prevent"]))
+  }, "Login")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_forgot_password && !$setup.show_check_email ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_14, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.onClickRequestPWReset && $options.onClickRequestPWReset.apply($options, arguments);
+    }, ["prevent"]))
+  }, "Submit")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.register ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
+    key: 2,
+    onClick: _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.onClickRegister && $options.onClickRegister.apply($options, arguments);
+    }, ["prevent"]))
+  }, "Register")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.submitting && !$setup.show_forgot_password && !$setup.register ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("a", {
+    key: 3,
+    href: "#",
+    onClick: _cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return $setup.show_forgot_password = true;
+    }, ["prevent"]))
+  }, "forgot password?")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click.prevent=\"onClickGuest\">Continue as Guest</button> ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 32
+  /* HYDRATE_EVENTS */
+  )])]);
+}
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/namemodal.vue?vue&type=template&id=cf25cf22":
+/*!*************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/namemodal.vue?vue&type=template&id=cf25cf22 ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+var _hoisted_1 = {
+  "class": "name-modal modal"
+};
+var _hoisted_2 = {
+  "class": "modal-content"
+};
+var _hoisted_3 = {
+  key: 0
+};
+
+var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  "class": "mb-4"
+}, "What's your name?", -1
+/* HOISTED */
+);
+
+var _hoisted_5 = {
+  key: 0,
+  "class": "modal-error"
+};
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [$setup.submitting ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, "loading...")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.submitting ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("form", {
+    key: 1,
+    onSubmit: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.onSubmit && $options.onSubmit.apply($options, arguments);
+    }, ["prevent"]))
+  }, [_hoisted_4, $setup.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.error), 1
+  /* TEXT */
+  )) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
+      return $setup.first_name = $event;
+    }),
+    required: "",
+    placeholder: "Name (public)"
+  }, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.first_name]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.onSubmit && $options.onSubmit.apply($options, arguments);
+    }, ["prevent"])),
+    type: "submit"
+  }, "Submit")], 32
+  /* HYDRATE_EVENTS */
+  )) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]);
+}
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss":
 /*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12.use[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=style&index=0&id=5acf4fce&lang=scss ***!
@@ -14634,7 +18390,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 60px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 63px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal {\n  pointer-events: all;\n  top: 60px;\n  position: absolute;\n  width: calc(33vw - 40px);\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  left: 50%;\n  transform: translateX(-16.5vw);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 60px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 63px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal {\n  pointer-events: all;\n  top: 60px;\n  position: absolute;\n  width: calc(33vw - 40px);\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  left: 50%;\n  transform: translateX(-16.5vw);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -14726,6 +18482,200 @@ module.exports = function (cssWithMappingToString) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 // extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./node_modules/process/browser.js":
+/*!*****************************************!*\
+  !*** ./node_modules/process/browser.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
 
 
 /***/ }),
@@ -15092,6 +19042,62 @@ if (false) {}
 
 /***/ }),
 
+/***/ "./client/components/loginmodal.vue":
+/*!******************************************!*\
+  !*** ./client/components/loginmodal.vue ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _loginmodal_vue_vue_type_template_id_989cef72__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loginmodal.vue?vue&type=template&id=989cef72 */ "./client/components/loginmodal.vue?vue&type=template&id=989cef72");
+/* harmony import */ var _loginmodal_vue_vue_type_script_setup_true_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./loginmodal.vue?vue&type=script&setup=true&lang=js */ "./client/components/loginmodal.vue?vue&type=script&setup=true&lang=js");
+/* harmony import */ var _root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+
+
+
+
+;
+const __exports__ = /*#__PURE__*/(0,_root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_loginmodal_vue_vue_type_script_setup_true_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_loginmodal_vue_vue_type_template_id_989cef72__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"client/components/loginmodal.vue"]])
+/* hot reload */
+if (false) {}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__exports__);
+
+/***/ }),
+
+/***/ "./client/components/namemodal.vue":
+/*!*****************************************!*\
+  !*** ./client/components/namemodal.vue ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _namemodal_vue_vue_type_template_id_cf25cf22__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./namemodal.vue?vue&type=template&id=cf25cf22 */ "./client/components/namemodal.vue?vue&type=template&id=cf25cf22");
+/* harmony import */ var _namemodal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./namemodal.vue?vue&type=script&lang=js */ "./client/components/namemodal.vue?vue&type=script&lang=js");
+/* harmony import */ var _root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+
+
+
+
+;
+const __exports__ = /*#__PURE__*/(0,_root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_namemodal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_namemodal_vue_vue_type_template_id_cf25cf22__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"client/components/namemodal.vue"]])
+/* hot reload */
+if (false) {}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__exports__);
+
+/***/ }),
+
 /***/ "./client/components/app.vue?vue&type=script&lang=js":
 /*!***********************************************************!*\
   !*** ./client/components/app.vue?vue&type=script&lang=js ***!
@@ -15108,6 +19114,38 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./client/components/loginmodal.vue?vue&type=script&setup=true&lang=js":
+/*!*****************************************************************************!*\
+  !*** ./client/components/loginmodal.vue?vue&type=script&setup=true&lang=js ***!
+  \*****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_loginmodal_vue_vue_type_script_setup_true_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_loginmodal_vue_vue_type_script_setup_true_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./loginmodal.vue?vue&type=script&setup=true&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/loginmodal.vue?vue&type=script&setup=true&lang=js");
+ 
+
+/***/ }),
+
+/***/ "./client/components/namemodal.vue?vue&type=script&lang=js":
+/*!*****************************************************************!*\
+  !*** ./client/components/namemodal.vue?vue&type=script&lang=js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_namemodal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_namemodal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./namemodal.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/namemodal.vue?vue&type=script&lang=js");
+ 
+
+/***/ }),
+
 /***/ "./client/components/app.vue?vue&type=template&id=5acf4fce":
 /*!*****************************************************************!*\
   !*** ./client/components/app.vue?vue&type=template&id=5acf4fce ***!
@@ -15120,6 +19158,38 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "render": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_template_id_5acf4fce__WEBPACK_IMPORTED_MODULE_0__.render)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_app_vue_vue_type_template_id_5acf4fce__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./app.vue?vue&type=template&id=5acf4fce */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=template&id=5acf4fce");
+
+
+/***/ }),
+
+/***/ "./client/components/loginmodal.vue?vue&type=template&id=989cef72":
+/*!************************************************************************!*\
+  !*** ./client/components/loginmodal.vue?vue&type=template&id=989cef72 ***!
+  \************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_loginmodal_vue_vue_type_template_id_989cef72__WEBPACK_IMPORTED_MODULE_0__.render)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_loginmodal_vue_vue_type_template_id_989cef72__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./loginmodal.vue?vue&type=template&id=989cef72 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/loginmodal.vue?vue&type=template&id=989cef72");
+
+
+/***/ }),
+
+/***/ "./client/components/namemodal.vue?vue&type=template&id=cf25cf22":
+/*!***********************************************************************!*\
+  !*** ./client/components/namemodal.vue?vue&type=template&id=cf25cf22 ***!
+  \***********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_namemodal_vue_vue_type_template_id_cf25cf22__WEBPACK_IMPORTED_MODULE_0__.render)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_namemodal_vue_vue_type_template_id_cf25cf22__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./namemodal.vue?vue&type=template&id=cf25cf22 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/namemodal.vue?vue&type=template&id=cf25cf22");
 
 
 /***/ }),
@@ -21651,6 +25721,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 /* harmony import */ var _components_app_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/app.vue */ "./client/components/app.vue");
+/* harmony import */ var _directus_sdk__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @directus/sdk */ "./node_modules/@directus/sdk/dist/sdk.bundler.js");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 var _module;
@@ -21778,6 +25849,7 @@ var PORT = 3091;
 var WSHOSTNAME = "cards.site";
 console.log('hostname?port?', ["".concat(WSHOSTNAME), // `${HOST}`,
 "".concat(PORT)]);
+
 
 var SocketConnection = /*#__PURE__*/function () {
   function SocketConnection() {//this.connectWS();
@@ -23720,7 +27792,12 @@ function init() {
   }
 
   checkReady(function () {
-    // alert('mounting vue');
+    t.server.directus = new _directus_sdk__WEBPACK_IMPORTED_MODULE_3__.Directus("https://u2ijwrng.directus.app", {
+      auth: {
+        mode: 'cookie'
+      }
+    }); // alert('mounting vue');
+
     t.app = (0,vue__WEBPACK_IMPORTED_MODULE_1__.createApp)({
       components: {
         App: _components_app_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
@@ -23735,6 +27812,9 @@ function init() {
             player_heads: {}
           }
         };
+      },
+      mounted: function mounted() {
+        t.root.directus_loaded = true;
       }
     }).mount('#vue-layer'); // set it up
 
@@ -23824,18 +27904,18 @@ function initLights() {
   var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   var dirLight = new THREE.DirectionalLight(0xcceeff, 0.5);
   dirLight.castShadow = true;
-  dirLight.shadowCameraVisible = true;
+  dirLight.shadow.camera.visible = true;
   dirLight.shadow.mapSize.width = 512;
   dirLight.shadow.mapSize.height = 512;
   dirLight.position.y = 5;
   dirLight.position.x = 5;
   dirLight.position.z = 5;
   var d = 100;
-  dirLight.shadowCameraLeft = -d;
-  dirLight.shadowCameraRight = d;
-  dirLight.shadowCameraTop = d;
-  dirLight.shadowCameraBottom = -d;
-  dirLight.shadowCameraFar = 100;
+  dirLight.shadow.camera.left = -d;
+  dirLight.shadow.camera.right = d;
+  dirLight.shadow.camera.top = d;
+  dirLight.shadow.camera.bottom = -d;
+  dirLight.shadow.camera.Far = 100;
   dirLight.shadowDarkness = 0.75;
   scene.add(dirLight, ambientLight);
 }

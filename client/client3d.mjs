@@ -69,6 +69,7 @@ console.log('hostname?port?',[
     `${PORT}`
 ])
 
+import { Directus } from '@directus/sdk';
 class SocketConnection{
     constructor(){
         //this.connectWS();
@@ -1536,6 +1537,11 @@ function init(){
     }
   }
   checkReady(()=>{
+    t.server.directus = new Directus("https://u2ijwrng.directus.app",{
+      auth:{
+        mode:'cookie',
+      }
+    })
     // alert('mounting vue');
     t.app = createApp({
       components:{App},
@@ -1550,9 +1556,14 @@ function init(){
               },
           }
       },
+      mounted(){
+        t.root.directus_loaded = true
+      }
     }).mount('#vue-layer');
     // set it up
     t.server.connectWS();
+
+
     t.setupGame();
     // start the first round
     // !!! wait for server to kick this off...
@@ -1643,7 +1654,7 @@ function initLights(){
 
   var dirLight = new THREE.DirectionalLight( 0xcceeff, 0.5 );
   dirLight.castShadow = true;
-  dirLight.shadowCameraVisible = true;
+  dirLight.shadow.camera.visible = true;
   dirLight.shadow.mapSize.width = 512;
   dirLight.shadow.mapSize.height = 512;
   dirLight.position.y = 5;
@@ -1652,12 +1663,12 @@ function initLights(){
 
   var d = 100;
 
-  dirLight.shadowCameraLeft = -d;
-  dirLight.shadowCameraRight = d;
-  dirLight.shadowCameraTop = d;
-  dirLight.shadowCameraBottom = -d;
+  dirLight.shadow.camera.left = -d;
+  dirLight.shadow.camera.right = d;
+  dirLight.shadow.camera.top = d;
+  dirLight.shadow.camera.bottom = -d;
 
-  dirLight.shadowCameraFar = 100;
+  dirLight.shadow.camera.Far = 100;
   dirLight.shadowDarkness = 0.75;
 
   scene.add( dirLight , ambientLight );
