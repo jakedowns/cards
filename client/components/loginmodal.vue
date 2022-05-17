@@ -4,17 +4,14 @@
             <h2 class="mb-4">Hi, who are you?</h2>
 
             <form @submit.prevent="formSubmit">
-                <p v-if="!submitting && (register || show_forgot_password)">
-                    <a href="#" @click.prevent="toggleRegister(false)">Login</a>
-                </p>
 
                 <span v-if="error" class="modal-error">{{error}}</span>
 
+                <h3 v-if="!register && !show_forgot_password">Login</h3>
+                <h3 v-if="register && !show_forgot_password">Register</h3>
 
-                <span v-if="!register && !submitting && !show_forgot_password"> No Account? <a href="#" @click.prevent="toggleRegister(true)">Register</a></span>
-                <br/>
 
-                <span v-if="submitting">loading...</span>
+                <div v-if="submitting">loading...</div>
                 <!-- <input style="display:none;" type="checkbox" v-model="register" /> -->
 
                 <input type="text" ref="email_field" v-model="email" name="email" v-if="!submitting && !show_check_email" placeholder="email" required />
@@ -39,13 +36,21 @@
                     </div>
 
                     <button @click.prevent="onClickRegister" v-if="register">Register</button>
-
+                    <br/>
                     <a href="#" @click.prevent="show_forgot_password = true" v-if="!submitting && !show_forgot_password && !register">forgot password?</a>
 
-                    <hr/>
 
                     <!-- <button @click.prevent="onClickGuest">Continue as Guest</button> -->
                 </span>
+
+                    <hr/>
+                <!-- <hr/> -->
+                <p v-if="!submitting && (register || show_forgot_password)">
+                    <a href="#" @click.prevent="toggleRegister(false);show_forgot_password = false;">Login</a>
+                </p>
+
+                <span v-if="!register && !submitting && !show_forgot_password"> No Account? <a href="#" @click.prevent="toggleRegister(true)">Register</a></span>
+                <br/>
             </form>
         </div>
     </div>

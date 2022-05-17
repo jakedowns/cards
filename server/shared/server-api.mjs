@@ -28,8 +28,20 @@ class ServerAPI {
             // -
             // debugger;
             let segments = req.url.split('/');
+            console.log('segments',segments);
             if(segments?.[4] === 'rooms'){
                 this.getRoomsForWorld(req,res,segments[3]);
+                return;
+            }
+        }
+        if(req.url.startsWith('/api/rooms/')){
+            // do we have access to a pathnname here?
+            // -
+            // debugger;
+            let segments = req.url.split('/');
+            console.log('segments',segments);
+            if(segments?.[4] === 'games'){
+                this.getGamesForRoom(req,res,segments[3]);
                 return;
             }
         }
@@ -83,11 +95,52 @@ class ServerAPI {
         this.jsonResponse(worlds,res);
     }
 
+    async getGamesForRoom(req, res, room_id){
+        let games = [];
+        let game_types = [];
+
+        try{
+            games = await this.directus.items('Games').readByQuery({
+                limit: 10,
+                filterBy:{room:room_id}
+            })
+
+        }catch(e){
+            this.jsonError(500,e,res);
+            return;
+        }
+
+        // todo: limit to types that are in the room
+        try{
+            game_types = await this.directus.items('Game_Types').readByQuery({
+                limit: 10,
+            })
+
+        }catch(e){
+            this.jsonError(500,e,res);
+            return;
+        }
+
+        this.jsonResponse({
+            games:games.data,
+            game_types: game_types.data
+        },res);
+    }
+
     async getRoomsForWorld(req, res, world_id){
-        const rooms = await this.directus.items('Rooms').readByQuery({
-            limit: 10,
-            filterBy:{world:world_id}
-        })
+        let rooms = {};
+        this.world_selection = world_id;
+
+        try{
+            rooms = await this.directus.items('rooms').readByQuery({
+                limit: 10,
+                filterBy:{world:world_id}
+            })
+
+        }catch(e){
+            this.jsonError(500,e,res);
+            return;
+        }
         this.jsonResponse(rooms,res);
     }
 

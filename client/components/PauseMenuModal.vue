@@ -6,12 +6,12 @@
             <select v-model="world_selection" @change="onWorldSelectionChanged" >
                 <option :key="world.id" v-for="world in worlds" :value="world.id">{{world.name}}</option>
                 <!-- <option selected value="jakes-world-uuid">Jake's World</option> -->
-                <option value="new-world">New World</option>
+                <!-- <option value="new-world">New World</option> -->
             </select>
-            <div v-if="world_selection === 'new-world'">
+            <!-- <div v-if="world_selection === 'new-world'">
                 <label>pick a name for your new world</label>
                 <input type="text" placeholder="My New World Name" v-model="new_world_name">
-            </div>
+            </div> -->
 
             <hr/>
 
@@ -20,9 +20,9 @@
                  pointerEvents: world_selection ? 'all' : 'none'
             }">
                 <h3>Room</h3>
-                <select v-model="room_selection" :disabled="!world_selection">
-                    <option selected value="jakes-room">Jake's Room</option>
-                    <option value="new-room">New Room</option>
+                <select v-model="room_selection" :disabled="!world_selection" @change="onRoomSelectionChanged">
+                    <option :key="room.id" v-for="room in rooms" :value="room.id">{{room.name}}</option>
+                    <!-- <option value="new-room">New Room</option> -->
                 </select>
                 <div v-if="room_selection === 'new-room'">
                     <label>pick a name for your new room</label>
@@ -38,14 +38,15 @@
                 }">
                 <h3>Table / Game</h3>
                 <select v-model="game_selection" :disabled="!room_selection">
-                    <option selected value="jakes-game">Jake's Game</option>
-                    <option value="new-game">New Game</option>
+                    <option :key="game.id" v-for="game in games" :value="game.id">{{gameTypeName(game.game_type)}}</option>
+                    <!-- <option value="new-game">New Game</option> -->
                 </select>
                 <div v-if="game_selection === 'new-game'">
                     <label>what would you like to call your new game?</label>
                     <input type="text" placeholder="My New Game Name" v-model="new_game_name">
                     <br/>
                     <select v-model="new_game_mode">
+                        <!-- TODO loop game types -->
                         <option disabled selected value="">Select Game Mode</option>
                         <option value="memory">Memory Matching Game</option>
                         <option value="klondike">Klondike Solitaire</option>
@@ -62,7 +63,19 @@
 
 
             <button v-if="game_selection !== 'new-game' && isHostOfSelectedGame" @click.prevent="restart_game">Restart Game</button>
-            <button @click.prevent="submitModal" :disabled="!world_selection ||!room_selection || !game_selection">Continue</button>
+            <button
+            :style="{
+                opacity:
+                world_selection &&
+                room_selection &&
+                game_selection ? 1 : 0.5,
+
+                pointerEvents:
+                    world_selection &&
+                    room_selection &&
+                    game_selection ? 'all' : 'none'
+                }"
+            @click.prevent="submitModal" :disabled="!world_selection ||!room_selection || !game_selection">Continue</button>
         </div>
     </div>
 </template>
@@ -74,20 +87,32 @@ export default {
             type: Function,
             required: true
         },
-        getRoomsForWorld:{
-            type: Function,
-            required: true
-        },
+        // getRoomsForWorld:{
+        //     type: Function,
+        //     required: true
+        // },
+        // getGamesForRoom:{
+        //     type: Function,
+        //     required: true
+        // },
         worlds:{
-            type: Object,
+            type: Array,
             required: true
         },
         rooms:{
-            type: Object,
+            type: Array,
             required: true
         },
         games:{
-            type: Object,
+            type: Array,
+            required: true
+        },
+        game_types:{
+            type: Array,
+            required: true
+        },
+        gameTypeName:{
+            type: Function,
             required: true
         },
         world_selection:{
@@ -101,22 +126,31 @@ export default {
         game_selection:{
             type: String,
             required: false
-        }
+        },
+        isHostOfSelectedGame:{
+            type: Boolean,
+            required: true
+        },
     },
-    setup(){
-        return {
-            world_selection: null,
-            room_selection: null,
-            // table_selection: null,
-            game_selection: null,
-        }
-    },
+    // setup(){
+        // return {
+        //     world_selection: null,
+        //     room_selection: null,
+        //     // table_selection: null,
+        //     game_selection: null,
+        // }
+    // },
     methods: {
+        onRoomSelectionChanged($event){
+            // console.log($event);
+            this.$emit('roomSelectionChanged',$event.target.value);
+        },
         // todo: throttle
-        onWorldSelectionChanged(){
-            console.log("world selection changed",this.world_selection);
-            // save world selection to user's session on the server
-            this.getRoomsForWorld(this.world_selection);
+        onWorldSelectionChanged($event){
+            // console.log("world selection changed",this.world_selection,$event.target.value);
+            // // save world selection to user's session on the server
+            // this.getRoomsForWorld(this.world_selection);
+            this.$emit('worldSelectionChanged',$event.target.value);
         },
     }
 }

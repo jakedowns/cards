@@ -3,15 +3,24 @@
 
         <div class="modal-wrapper" v-if="show_modal">
             <LoginModal v-if="show_login_modal" @authenticated="onLoginAuthenticated" />
+
             <NameModal v-if="show_name_modal" @nameUpdated="onNameUpdated"/>
-            <PauseMenuModal v-if="show_pause_menu" :submitModal="submitModal"
-            :worlds="worlds"
-            :rooms="rooms"
-            :games="games"
-            :world_selection="world_selection"
-            :room_selection="room_selection"
-            :game_selection="game_selection"
-            :getRoomsForWorld="getRoomsForWorld" />
+
+            <PauseMenuModal
+
+                v-if="show_pause_menu"
+                :submitModal="submitModal"
+                :worlds="worlds"
+                :rooms="rooms"
+                :games="games"
+                :game_types="game_types"
+                :gameTypeName="gameTypeName"
+                :world_selection="world_selection"
+                :room_selection="room_selection"
+                :game_selection="game_selection"
+                @roomSelectionChanged="getGamesForRoom"
+                @worldSelectionChanged="getRoomsForWorld"           :isHostOfSelectedGame="isHostOfSelectedGame"
+            />
 
             <div class="game-in-progress-modal modal" v-if="show_game_in_progress_modal">
                 <div class="modal-content"><h2 class="mb-4">"Jake's Game" is already in progress</h2><button>Spectate</button><button>Request to Play</button></div>
@@ -28,148 +37,30 @@
             <div class="modal-underlay"></div>
         </div>
 
-        <div class="debug-inner">
-            <div>Online: {{state?.client_ids?.length}}</div>
-            <div>Round {{state?.round_number}}</div>
-            <div class="scores" v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: <span class="hit">{{state?.player_scores?.[id]?.[0] ?? 0}}</span> / <span class="miss">{{state?.player_scores?.[id]?.[1] ?? 0}}</span> </div>
+        <DebugOverlay
+            :calling="calling"
+            :state="state"
+            :game="game"
+            :round="round"
+            :im_game_host="im_game_host"
+            :its_my_turn="its_my_turn"
+            :messages="messages"
+            :show_end_call_button="show_end_call_button"
+            :show_debug_info="show_debug_info"
+            @toggleShowDebugInfo="toggleShowDebugInfo"
 
-            <div v-if="!calling"
-                @click.prevent="start_video_chat"
-                style="pointer-events:all;">
-                <button class="video-chat-call-start">Join Chat</button>
-            </div>
-            <div v-if="!show_end_call_button"
-                @click.prevent="end_video_chat"
-                style="pointer-events:all;">
-                <button class="video-chat-call-end">Leave Chat</button>
-            </div>
-            <br/>
-            <button @click="show=!show">{{show?'Hide':'Show Debug Info'}}</button>
-            <div class="inner" v-show="show">
-                <ul class="details">
-                    <li class="my_client_id">My Client ID:
-                        <span class="value">{{state?.my_client_id}}</span></li>
+        />
 
-                    <li class="room_id">Current Room ID:
-                        <span class="value">{{state?.room_id ?? 'server-lobby'}}</span></li>
+        <AVHud
 
-                    <li class="game_id">Current Game ID:
-                        <span class="value">{{state?.game_id ?? 'no-game'}}</span>
-                        &nbsp;
-                        <span class="value">{{game?.started ? 'started' : 'not-started'}}</span>
-                    </li>
+            :state="state"
+            :its_my_turn="its_my_turn"
+            :video_enabled="video_enabled"
+            :video_muted="video_muted"
+            :mic_muted="mic_muted"
+            :enableVideo="enableVideo"
 
-                    <li class="host_id">Current Host ID:
-                        <span class="value">{{state?.game_host ?? 'no-host'}}</span>
-                        &nbsp;
-                        <span :style="{color:im_game_host ? 'green' : 'red'}">You're {{im_game_host ? '' : 'NOT'}} the game host!</span>
-                    </li>
-
-                    <li class="round_id">Current Round ID:
-                        <span class="value">{{state?.round_id ?? 'no-round'}}</span>
-                        &nbsp;
-                        <span class="value">{{round?.started ? 'started' : 'not-started'}}</span></li>
-
-
-
-                    <li class="clients">Clients:
-                        <span class="value">{{JSON.stringify(state.client_ids) }}</span></li>
-
-                    <li>player turn id: {{state.player_turn}}
-
-                        <span :style="{color:its_my_turn ? 'green' : 'red'}">It's {{its_my_turn ? '' : 'NOT'}} Your Turn!</span>
-
-                    </li>
-
-                    <li>player type: {{state.player_type ?? 'connecting'}}</li>
-                    <li>player hands:
-                        <ul>
-                            <li v-for="player_id in state.client_ids" :key="player_id">
-                                <span v-if="!state.player_hands?.[player_id]?.length">Empty</span>
-                                {{JSON.stringify(state?.player_hands?.[player_id])}}
-                            </li>
-                        </ul>
-
-                    </li>
-
-                    <li>Flipped:
-                        {{JSON.stringify(state.flipped)}}
-                    </li>
-
-                    <!--
-                    <li v-if="!state?.room_id">
-                        <button class="new-room" @click.prevent="new_room">New Room</button>
-                    </li>
-
-                    <li v-if="state?.room_id && !state?.game_id"
-                        @click.prevent="new_game">
-                        <button class="new-game">New Game</button>
-                    </li> -->
-
-                    <li v-if="im_game_host"
-                        @click.prevent="restart_game">
-                        <button class="new-game">Restart Game</button>
-                    </li>
-
-
-
-                    <!-- <li v-if="state?.room_id && state?.game_id && !state?.game?.started"
-                        @click.prevent="start_game">
-                        <button class="start-game">Start Game</button>
-                    </li> -->
-
-                    <li>
-                        <div class="messages">
-                        <div class="message" v-for="(message,i) in messages" :key="i">
-                            <div class="message-text">{{message.type}}</div>
-                        </div>
-                    </div>
-                    </li>
-                </ul>
-                <div class="bg-blur"></div>
-            </div>
-        </div>
-
-        <div class="hud">
-            <div style="pointer-events:all;" class="game-modal-toggle-icon" @click.prevent="openPauseMenu">
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 48 48"><rect x="0" y="0" width="48" height="48" fill="none" stroke="none" /><mask id="svgIDa"><g fill="none" stroke="#fff" stroke-linejoin="round" stroke-width="4"><path fill="#fff" d="M28 28h16v16H28zM13 4l9 16H4l9-16Zm23 16a8 8 0 1 0 0-16a8 8 0 0 0 0 16Z"/><path stroke-linecap="round" d="m4 28l16 16m0-16L4 44"/></g></mask><path fill="currentColor" d="M0 0h48v48H0z" mask="url(#svgIDa)"/></svg>
-            </div>
-            <div class="av-controls">
-                 <!-- TOGGLE YOUR OWN VIDEO -->
-                <div style="pointer-events:all;" id="icon-video-enable" v-if="!video_enabled" @click.prevent="enableVideo()">
-                    <svg width="55" height="38" viewBox="0 0 55 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M43.3333 5.41667C43.3333 2.42938 40.904 0 37.9167 0H5.41667C2.42938 0 0 2.42938 0 5.41667V32.5C0 35.4873 2.42938 37.9167 5.41667 37.9167H37.9167C40.904 37.9167 43.3333 35.4873 43.3333 32.5V23.4731L54.1667 32.5V5.41667L43.3333 14.4435V5.41667Z" fill="white"/>
-                    </svg>
-                </div>
-                <div style="pointer-events:all;" id="icon-video-disable" v-if="video_enabled" @click.prevent="disableVideo()">
-                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 16 16"><rect x="0" y="0" width="16" height="16" fill="none" stroke="none" /><path fill="currentColor" fill-rule="evenodd" d="M10.961 12.365a1.99 1.99 0 0 0 .522-1.103l3.11 1.382A1 1 0 0 0 16 11.731V4.269a1 1 0 0 0-1.406-.913l-3.111 1.382A2 2 0 0 0 9.5 3H4.272l6.69 9.365zm-10.114-9A2.001 2.001 0 0 0 0 5v6a2 2 0 0 0 2 2h5.728L.847 3.366zm9.746 11.925l-10-14l.814-.58l10 14l-.814.58z"/></svg>
-                </div>
-                <!-- <button @click="toggle_mic_mute">{{mic_muted?'Un':''}}Mute Mic</button> -->
-                <!-- TODO: pick audio input -->
-                <!-- TODO: pick audio input settings -->
-                <!-- <button @click="toggle_vid_mute">{{video_muted?'Un':''}}Mute Video</button> -->
-                <!-- TODO: pick video input -->
-                <!-- TODO: video input settings -->
-            </div>
-            <div v-if="its_my_turn">Your Turn</div>
-            <div v-else>Opponent's Turn</div>
-        </div>
-        <div class="debug-video">
-            <audio id="sound_effects" src="./public/sounds/flip.mp3" />
-            <!-- players webcam feed -->
-            <video id="video" autoplay playsinline muted v-show="video_enabled"/>
-            <!-- opponent video streams -->
-            <div class="opponent_videos">
-            <video class="opponent_video"
-                autoplay
-                :ref="`opponent_video_${client_id}`"
-                playsinline
-                onclick="toggle_opponent_mute()"
-                v-for="client_id in (state?.client_ids ?? []).filter((id)=>{return id!==state.my_client_id})"
-                :key="client_id"
-                :data-client-id="client_id" />
-            </div>
-        </div>
+        />
     </div>
 </template>
 
@@ -177,12 +68,18 @@
 import LoginModal from './loginmodal.vue';
 import NameModal from './namemodal.vue'
 import PauseMenuModal from './PauseMenuModal.vue'
+import DebugOverlay from './DebugOverlay.vue'
+import AVHud from './AVHud.vue'
+
+
 export default {
 
     components:{
         LoginModal,
         NameModal,
-        PauseMenuModal
+        PauseMenuModal,
+        DebugOverlay,
+        AVHud
     },
 
     props:{
@@ -194,10 +91,13 @@ export default {
             // key ourselves in the users{}
             user: {},
             user_session: {},
-            worlds: {},
-            rooms: {},
-            games: {},
-            users: {},
+
+            // todo: key by id
+            worlds: [],
+            rooms: [],
+            games: [],
+            game_types: [],
+            users: [],
 
             selected_world_clients: [],
             selected_room_clients: [],
@@ -213,12 +113,13 @@ export default {
             show_spectator_joined_modal: false,
             show_game_in_progress_modal: false,
 
-            show: false,
+            show_debug_info: false,
             calling: false,
             show_end_call_button: false,
             messages: [],
             mic_muted: false,
             video_enabled: false,
+            video_muted: false,
 
             // modal data
             world_selection: '',
@@ -323,7 +224,9 @@ export default {
     },
 
     methods:{
-
+        toggleShowDebugInfo(){
+            this.show_debug_info = !this.show_debug_info;
+        },
         openPauseMenu(){
             this.getWorlds();
             this.show_modal = true;
@@ -448,17 +351,42 @@ export default {
                 console.error(err);
             })
         },
-
+        // worldSelectionChanged =>
         getRoomsForWorld(world_id){
+            this.world_selection = world_id;
+            // console.log('getRoomsForWorld',arguments)
             axios.get(`/api/world/${world_id}/rooms`).then((res)=>{
-                this.rooms = res.data;
+                this.rooms = res.data.data;
                 this.room_selection = null;
                 this.game_selection = null;
-            });
+            }).catch((err)=>{
+                console.error(err);
+            })
+        },
+        // roomSelectionChanged =>
+        getGamesForRoom(room_id){
+            // console.log('getGamesForRoom',$event.target.value);
+            this.room_selection = room_id;
+            axios.get(`/api/rooms/${this.room_selection}/games`).then((res)=>{
+                this.games = res.data.games;
+                this.game_types = res.data.game_types;
+                this.game_selection = null;
+            }).catch((err)=>{
+                console.error(err);
+            })
         }
     },
 
     computed:{
+        gameTypeName(){
+            return(game_type_id)=>{
+                return this.game_types.filter(
+                    (type)=>{
+                        return type.id === game_type_id
+                    }
+                )?.[0]?.Name
+            }
+        },
         // show_modal(){
         //     return true;
         // },
