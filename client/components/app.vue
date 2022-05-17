@@ -4,60 +4,14 @@
         <div class="modal-wrapper" v-if="show_modal">
             <LoginModal v-if="show_login_modal" @authenticated="onLoginAuthenticated" />
             <NameModal v-if="show_name_modal" @nameUpdated="onNameUpdated"/>
-            <div class="world-room-game-modal modal" v-if="show_pause_menu">
-                <div class="modal-content">
-                    logged in as {{user?.first_name}}
-                    <h2 class="mb-4">Menu</h2>
-                    <h3>World</h3>
-                    <select v-model="world_selection">
-                        <option selected value="jakes-world-uuid">Jake's World</option>
-                        <!-- <option value="new-world">New World</option> -->
-                    </select>
-                    <div v-if="world_selection === 'new-world'">
-                        <label>pick a name for your new world</label>
-                        <input type="text" placeholder="My New World Name" v-model="new_world_name">
-                    </div>
-
-                    <hr/>
-
-                    <h3>Room</h3>
-                    <select v-model="room_selection" :disabled="!world_selection">
-                        <option selected value="jakes-room">Jake's Room</option>
-                        <option value="new-room">New Room</option>
-                    </select>
-                    <div v-if="room_selection === 'new-room'">
-                        <label>pick a name for your new room</label>
-                        <input type="text" placeholder="My New Room Name" v-model="new_room_name">
-                    </div>
-
-                    <hr/>
-
-                    <h3>Game</h3>
-                    <select v-model="game_selection" :disabled="!room_selection">
-                        <option selected value="jakes-game">Jake's Game</option>
-                        <option value="new-game">New Game</option>
-                    </select>
-                    <div v-if="game_selection === 'new-game'">
-                        <label>what would you like to call your new game?</label>
-                        <input type="text" placeholder="My New Game Name" v-model="new_game_name">
-                        <br/>
-                        <select v-model="new_game_mode">
-                            <option disabled selected value="">Select Game Mode</option>
-                            <option value="memory">Memory Matching Game</option>
-                            <option value="klondike">Klondike Solitaire</option>
-                            <option value="new-game-mode">New Custom Game Mode...</option>
-                        </select>
-                        <div v-if="new_game_mode === 'new-game-mode'">
-                            <label>what would you like to call your new game?</label>
-                            <input type="text" placeholder="My New Game Mode Name" v-model="new_game_mode_name">
-                        </div>
-                    </div>
-
-                    <hr/>
-                    <button v-if="game_selection !== 'new-game' && isHostOfSelectedGame" @click.prevent="restart_game">Restart Game</button>
-                    <button @click.prevent="submitModal" :disabled="!world_selection ||!room_selection || !game_selection">Continue</button>
-                </div>
-            </div>
+            <PauseMenuModal v-if="show_pause_menu" :submitModal="submitModal"
+            :worlds="worlds"
+            :rooms="rooms"
+            :games="games"
+            :world_selection="world_selection"
+            :room_selection="room_selection"
+            :game_selection="game_selection"
+            :getRoomsForWorld="getRoomsForWorld" />
 
             <div class="game-in-progress-modal modal" v-if="show_game_in_progress_modal">
                 <div class="modal-content"><h2 class="mb-4">"Jake's Game" is already in progress</h2><button>Spectate</button><button>Request to Play</button></div>
@@ -177,7 +131,7 @@
         </div>
 
         <div class="hud">
-            <div style="pointer-events:all;" class="game-modal-toggle-icon" @click.prevent="openGameModal">
+            <div style="pointer-events:all;" class="game-modal-toggle-icon" @click.prevent="openPauseMenu">
                 <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 48 48"><rect x="0" y="0" width="48" height="48" fill="none" stroke="none" /><mask id="svgIDa"><g fill="none" stroke="#fff" stroke-linejoin="round" stroke-width="4"><path fill="#fff" d="M28 28h16v16H28zM13 4l9 16H4l9-16Zm23 16a8 8 0 1 0 0-16a8 8 0 0 0 0 16Z"/><path stroke-linecap="round" d="m4 28l16 16m0-16L4 44"/></g></mask><path fill="currentColor" d="M0 0h48v48H0z" mask="url(#svgIDa)"/></svg>
             </div>
             <div class="av-controls">
@@ -222,11 +176,13 @@
 <script>
 import LoginModal from './loginmodal.vue';
 import NameModal from './namemodal.vue'
+import PauseMenuModal from './PauseMenuModal.vue'
 export default {
 
     components:{
         LoginModal,
-        NameModal
+        NameModal,
+        PauseMenuModal
     },
 
     props:{
@@ -235,7 +191,18 @@ export default {
 
     setup(){
         return {
+            // key ourselves in the users{}
             user: {},
+            user_session: {},
+            worlds: {},
+            rooms: {},
+            games: {},
+            users: {},
+
+            selected_world_clients: [],
+            selected_room_clients: [],
+            selected_game_clients: [],
+
             directus_loaded: false,
 
             show_modal: true,
@@ -254,11 +221,11 @@ export default {
             video_enabled: false,
 
             // modal data
-            world_selection: 'jakes-world-uuid', // todo: use a uuid
+            world_selection: '',
                 new_world_name: '',
-            room_selection: 'jakes-room-uuid',
+            room_selection: '',
                 new_room_name: '',
-            game_selection: 'jakes-game-uuid',
+            game_selection: '',
                 new_game_name: '',
                 new_game_mode: '',
                     new_game_mode_name: '',
@@ -356,24 +323,52 @@ export default {
     },
 
     methods:{
-        onNameUpdated(){
-            this.show_name_modal = false;
-            this.show_pause_menu = true;
-        },
-        async onLoginAuthenticated(){
-            this.show_login_modal = false;
-            console.warn('TODO: if user has no name set, show name modal');
-            this.user = await t.server.directus.users.me.read({fields:['first_name']})
-            if(!this.user?.first_name?.length){
-                this.show_name_modal = true;
-            }else{
-                this.show_pause_menu = true;
-            }
-        },
-        openGameModal(){
+
+        openPauseMenu(){
+            this.getWorlds();
             this.show_modal = true;
             this.show_pause_menu = true;
             t.client_ignore_clicks = true;
+        },
+        onNameUpdated(){
+            this.show_name_modal = false;
+            this.openPauseMenu()
+        },
+        async onLoginAuthenticated(){
+
+            console.warn('TODO: if user has no name set, show name modal');
+
+            this.user = await t.server.directus.users.me.read({fields:['first_name','id','fkid']})
+
+            this.user_session = await t.server.directus.items('Sessions').readByQuery({
+                limit: 1,
+
+                filter: {
+                    user: this.user.id
+                }
+            });
+
+            console.log('this.user_session',this.user_session);
+
+            // if the user does not have a session, created one
+            if(!this.user_session){
+                this.user_session = {}
+                await t.server.directus.items('Sessions').createOne({
+                    user: this.user.id,
+                }).then(res => {
+                    console.log('user session create',res);
+                    // this.user_session = res;
+                }).catch((e)=>{
+                    console.error('error creating user session on server',e);
+                });
+            }
+
+            this.show_login_modal = false;
+            if(!this.user?.first_name?.length){
+                this.show_name_modal = true;
+            }else{
+                this.openPauseMenu();
+            }
         },
         closePauseMenu(){
             this.show_modal = false;
@@ -444,6 +439,22 @@ export default {
                 type: 'RESTART_GAME',
                 //game_id: this.state.game_id // server should know based on client id
             })
+        },
+
+        getWorlds(){
+            axios.get('/api/worlds').then(res=>{
+                this.worlds = res.data.data;
+            }).catch(err=>{
+                console.error(err);
+            })
+        },
+
+        getRoomsForWorld(world_id){
+            axios.get(`/api/world/${world_id}/rooms`).then((res)=>{
+                this.rooms = res.data;
+                this.room_selection = null;
+                this.game_selection = null;
+            });
         }
     },
 
@@ -453,7 +464,7 @@ export default {
         // },
         gameHostByGameId(){
             return(game_id)=>{
-
+                return '';
             }
         },
         isHostOfSelectedGame(){

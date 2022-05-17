@@ -137,7 +137,7 @@ export default {
                 password:this.password
             })
             .then(() => {
-                this.submitting = false;
+                // this.submitting = false;
 				this.authenticated = true;
                 this.$emit('authenticated');
 			})

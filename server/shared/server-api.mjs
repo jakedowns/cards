@@ -7,6 +7,7 @@ import PlayerState from '../2d-client/player-states/4_26_2022_10_11_am_pst.mjs';
 
 // TODO: mysql or directus?
 import StartDirectus from '../../client/directus.mjs'
+import { createReturnStatement } from '@vue/compiler-core';
 
 class ServerAPI {
 
@@ -22,6 +23,16 @@ class ServerAPI {
             this.getGame(req,res);
             return;
         }
+        if(req.url.startsWith('/api/world/')){
+            // do we have access to a pathnname here?
+            // -
+            // debugger;
+            let segments = req.url.split('/');
+            if(segments?.[4] === 'rooms'){
+                this.getRoomsForWorld(req,res,segments[3]);
+                return;
+            }
+        }
         switch(req.url){
             case '/api/state':
                 this.getState(req, res);
@@ -31,6 +42,9 @@ class ServerAPI {
                 break;
             case '/api/user/reset-pw':
                 this.requestPWReset(req,res);
+                break;
+            case '/api/worlds':
+                this.getWorlds(req,res);
                 break;
         }
     }
@@ -59,6 +73,22 @@ class ServerAPI {
                 resolve(data??body);
             });
         });
+    }
+
+    async getWorlds(req, res){
+        // todo: just get authorized worlds
+        const worlds = await this.directus.items('Worlds').readByQuery({
+            limit: 10,
+        });
+        this.jsonResponse(worlds,res);
+    }
+
+    async getRoomsForWorld(req, res, world_id){
+        const rooms = await this.directus.items('Rooms').readByQuery({
+            limit: 10,
+            filterBy:{world:world_id}
+        })
+        this.jsonResponse(rooms,res);
     }
 
     async inviteUser(request, res){

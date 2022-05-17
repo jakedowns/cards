@@ -36,3 +36,9 @@
 
 - api
     - flat file(s)? mysql? firebase? laravel livewire?
+
+
+- game switching
+- side-by side or quad split view games
+- notifications for games you're not viewing
+- change world ids to be uuid

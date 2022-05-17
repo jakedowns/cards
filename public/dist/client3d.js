@@ -16854,6 +16854,72 @@ const getGlobalThis = () => {
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=script&lang=js":
+/*!**************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=script&lang=js ***!
+  \**************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  props: {
+    submitModal: {
+      type: Function,
+      required: true
+    },
+    getRoomsForWorld: {
+      type: Function,
+      required: true
+    },
+    worlds: {
+      type: Object,
+      required: true
+    },
+    rooms: {
+      type: Object,
+      required: true
+    },
+    games: {
+      type: Object,
+      required: true
+    },
+    world_selection: {
+      type: String,
+      required: false
+    },
+    room_selection: {
+      type: String,
+      required: false
+    },
+    game_selection: {
+      type: String,
+      required: false
+    }
+  },
+  setup: function setup() {
+    return {
+      world_selection: null,
+      room_selection: null,
+      // table_selection: null,
+      game_selection: null
+    };
+  },
+  methods: {
+    // todo: throttle
+    onWorldSelectionChanged: function onWorldSelectionChanged() {
+      console.log("world selection changed", this.world_selection); // save world selection to user's session on the server
+
+      this.getRoomsForWorld(this.world_selection);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=script&lang=js":
 /*!***************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/app.vue?vue&type=script&lang=js ***!
@@ -16869,6 +16935,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _loginmodal_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./loginmodal.vue */ "./client/components/loginmodal.vue");
 /* harmony import */ var _namemodal_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./namemodal.vue */ "./client/components/namemodal.vue");
+/* harmony import */ var _PauseMenuModal_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./PauseMenuModal.vue */ "./client/components/PauseMenuModal.vue");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -16877,10 +16944,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
     LoginModal: _loginmodal_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
-    NameModal: _namemodal_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
+    NameModal: _namemodal_vue__WEBPACK_IMPORTED_MODULE_2__["default"],
+    PauseMenuModal: _PauseMenuModal_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
   props: {
     state: {
@@ -16890,7 +16959,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   setup: function setup() {
     return {
+      // key ourselves in the users{}
       user: {},
+      user_session: {},
+      worlds: {},
+      rooms: {},
+      games: {},
+      users: {},
+      selected_world_clients: [],
+      selected_room_clients: [],
+      selected_game_clients: [],
       directus_loaded: false,
       show_modal: true,
       show_login_modal: true,
@@ -16906,12 +16984,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       mic_muted: false,
       video_enabled: false,
       // modal data
-      world_selection: 'jakes-world-uuid',
-      // todo: use a uuid
+      world_selection: '',
       new_world_name: '',
-      room_selection: 'jakes-room-uuid',
+      room_selection: '',
       new_room_name: '',
-      game_selection: 'jakes-game-uuid',
+      game_selection: '',
       new_game_name: '',
       new_game_mode: '',
       new_game_mode_name: ''
@@ -17008,9 +17085,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
   },
   methods: {
+    openPauseMenu: function openPauseMenu() {
+      this.getWorlds();
+      this.show_modal = true;
+      this.show_pause_menu = true;
+      t.client_ignore_clicks = true;
+    },
     onNameUpdated: function onNameUpdated() {
       this.show_name_modal = false;
-      this.show_pause_menu = true;
+      this.openPauseMenu();
     },
     onLoginAuthenticated: function onLoginAuthenticated() {
       var _this2 = this;
@@ -17022,34 +17105,57 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _this2.show_login_modal = false;
                 console.warn('TODO: if user has no name set, show name modal');
-                _context.next = 4;
+                _context.next = 3;
                 return t.server.directus.users.me.read({
-                  fields: ['first_name']
+                  fields: ['first_name', 'id', 'fkid']
                 });
 
-              case 4:
+              case 3:
                 _this2.user = _context.sent;
+                _context.next = 6;
+                return t.server.directus.items('Sessions').readByQuery({
+                  limit: 1,
+                  filter: {
+                    user: _this2.user.id
+                  }
+                });
+
+              case 6:
+                _this2.user_session = _context.sent;
+                console.log('this.user_session', _this2.user_session); // if the user does not have a session, created one
+
+                if (_this2.user_session) {
+                  _context.next = 12;
+                  break;
+                }
+
+                _this2.user_session = {};
+                _context.next = 12;
+                return t.server.directus.items('Sessions').createOne({
+                  user: _this2.user.id
+                }).then(function (res) {
+                  console.log('user session create', res); // this.user_session = res;
+                })["catch"](function (e) {
+                  console.error('error creating user session on server', e);
+                });
+
+              case 12:
+                _this2.show_login_modal = false;
 
                 if (!((_this2$user = _this2.user) !== null && _this2$user !== void 0 && (_this2$user$first_nam = _this2$user.first_name) !== null && _this2$user$first_nam !== void 0 && _this2$user$first_nam.length)) {
                   _this2.show_name_modal = true;
                 } else {
-                  _this2.show_pause_menu = true;
+                  _this2.openPauseMenu();
                 }
 
-              case 6:
+              case 14:
               case "end":
                 return _context.stop();
             }
           }
         }, _callee);
       }))();
-    },
-    openGameModal: function openGameModal() {
-      this.show_modal = true;
-      this.show_pause_menu = true;
-      t.client_ignore_clicks = true;
     },
     closePauseMenu: function closePauseMenu() {
       this.show_modal = false;
@@ -17124,6 +17230,24 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         type: 'RESTART_GAME' //game_id: this.state.game_id // server should know based on client id
 
       });
+    },
+    getWorlds: function getWorlds() {
+      var _this3 = this;
+
+      axios.get('/api/worlds').then(function (res) {
+        _this3.worlds = res.data.data;
+      })["catch"](function (err) {
+        console.error(err);
+      });
+    },
+    getRoomsForWorld: function getRoomsForWorld(world_id) {
+      var _this4 = this;
+
+      axios.get("/api/world/".concat(world_id, "/rooms")).then(function (res) {
+        _this4.rooms = res.data;
+        _this4.room_selection = null;
+        _this4.game_selection = null;
+      });
     }
   },
   computed: {
@@ -17131,7 +17255,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     //     return true;
     // },
     gameHostByGameId: function gameHostByGameId() {
-      return function (game_id) {};
+      return function (game_id) {
+        return '';
+      };
     },
     isHostOfSelectedGame: function isHostOfSelectedGame() {
       return this.gameHostByGameId(this.game_selection) === this.state.my_client_id;
@@ -17278,7 +17404,7 @@ var __default__ = {
                   email: _this4.email,
                   password: _this4.password
                 }).then(function () {
-                  _this4.submitting = false;
+                  // this.submitting = false;
                   _this4.authenticated = true;
 
                   _this4.$emit('authenticated');
@@ -17453,6 +17579,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   fields: ['last_access']
                 }).then(function (res) {
                   _this.$emit('nameUpdated');
+
+                  t.root.user.first_name = _this.first_name;
                 })["catch"](function (err) {
                   _this.error = err.message;
                   _this.submitting = false;
@@ -17471,6 +17599,262 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     }
   }
 });
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b":
+/*!******************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+var _hoisted_1 = {
+  "class": "world-room-game-modal modal"
+};
+var _hoisted_2 = {
+  "class": "modal-content"
+};
+
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  "class": "mb-4"
+}, "Pause Menu", -1
+/* HOISTED */
+);
+
+var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, "World", -1
+/* HOISTED */
+);
+
+var _hoisted_5 = ["value"];
+
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "new-world"
+}, "New World", -1
+/* HOISTED */
+);
+
+var _hoisted_7 = {
+  key: 0
+};
+
+var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "pick a name for your new world", -1
+/* HOISTED */
+);
+
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, "Room", -1
+/* HOISTED */
+);
+
+var _hoisted_11 = ["disabled"];
+
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  selected: "",
+  value: "jakes-room"
+}, "Jake's Room", -1
+/* HOISTED */
+);
+
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "new-room"
+}, "New Room", -1
+/* HOISTED */
+);
+
+var _hoisted_14 = [_hoisted_12, _hoisted_13];
+var _hoisted_15 = {
+  key: 0
+};
+
+var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "pick a name for your new room", -1
+/* HOISTED */
+);
+
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, "Table / Game", -1
+/* HOISTED */
+);
+
+var _hoisted_19 = ["disabled"];
+
+var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  selected: "",
+  value: "jakes-game"
+}, "Jake's Game", -1
+/* HOISTED */
+);
+
+var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "new-game"
+}, "New Game", -1
+/* HOISTED */
+);
+
+var _hoisted_22 = [_hoisted_20, _hoisted_21];
+var _hoisted_23 = {
+  key: 0
+};
+
+var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "what would you like to call your new game?", -1
+/* HOISTED */
+);
+
+var _hoisted_25 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  disabled: "",
+  selected: "",
+  value: ""
+}, "Select Game Mode", -1
+/* HOISTED */
+);
+
+var _hoisted_27 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "memory"
+}, "Memory Matching Game", -1
+/* HOISTED */
+);
+
+var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "klondike"
+}, "Klondike Solitaire", -1
+/* HOISTED */
+);
+
+var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+  value: "new-game-mode"
+}, "New Custom Game Mode...", -1
+/* HOISTED */
+);
+
+var _hoisted_30 = [_hoisted_26, _hoisted_27, _hoisted_28, _hoisted_29];
+var _hoisted_31 = {
+  key: 0
+};
+
+var _hoisted_32 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "what would you like to call your new game?", -1
+/* HOISTED */
+);
+
+var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_34 = ["disabled"];
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [_hoisted_3, _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
+      return $setup.world_selection = $event;
+    }),
+    onChange: _cache[1] || (_cache[1] = function () {
+      return $options.onWorldSelectionChanged && $options.onWorldSelectionChanged.apply($options, arguments);
+    })
+  }, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.worlds, function (world) {
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("option", {
+      key: world.id,
+      value: world.id
+    }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(world.name), 9
+    /* TEXT, PROPS */
+    , _hoisted_5);
+  }), 128
+  /* KEYED_FRAGMENT */
+  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <option selected value=\"jakes-world-uuid\">Jake's World</option> "), _hoisted_6], 544
+  /* HYDRATE_EVENTS, NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.world_selection]]), $setup.world_selection === 'new-world' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, [_hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    placeholder: "My New World Name",
+    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
+      return _ctx.new_world_name = $event;
+    })
+  }, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.new_world_name]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
+      opacity: $setup.world_selection ? 1 : 0.5,
+      pointerEvents: $setup.world_selection ? 'all' : 'none'
+    })
+  }, [_hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
+      return $setup.room_selection = $event;
+    }),
+    disabled: !$setup.world_selection
+  }, _hoisted_14, 8
+  /* PROPS */
+  , _hoisted_11), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.room_selection]]), $setup.room_selection === 'new-room' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    placeholder: "My New Room Name",
+    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+      return _ctx.new_room_name = $event;
+    })
+  }, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.new_room_name]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 4
+  /* STYLE */
+  ), _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
+      opacity: $setup.world_selection && $setup.room_selection ? 1 : 0.5,
+      pointerEvents: $setup.world_selection && $setup.room_selection ? 'all' : 'none'
+    })
+  }, [_hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
+      return $setup.game_selection = $event;
+    }),
+    disabled: !$setup.room_selection
+  }, _hoisted_22, 8
+  /* PROPS */
+  , _hoisted_19), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.game_selection]]), $setup.game_selection === 'new-game' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_23, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    placeholder: "My New Game Name",
+    "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
+      return _ctx.new_game_name = $event;
+    })
+  }, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.new_game_name]]), _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
+      return _ctx.new_game_mode = $event;
+    })
+  }, _hoisted_30, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, _ctx.new_game_mode]]), _ctx.new_game_mode === 'new-game-mode' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_31, [_hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    placeholder: "My New Game Mode Name",
+    "onUpdate:modelValue": _cache[8] || (_cache[8] = function ($event) {
+      return _ctx.new_game_mode_name = $event;
+    })
+  }, null, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.new_game_mode_name]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 4
+  /* STYLE */
+  ), _hoisted_33, $setup.game_selection !== 'new-game' && _ctx.isHostOfSelectedGame ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
+    key: 1,
+    onClick: _cache[9] || (_cache[9] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return _ctx.restart_game && _ctx.restart_game.apply(_ctx, arguments);
+    }, ["prevent"]))
+  }, "Restart Game")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[10] || (_cache[10] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $props.submitModal && $props.submitModal.apply($props, arguments);
+    }, ["prevent"])),
+    disabled: !$setup.world_selection || !$setup.room_selection || !$setup.game_selection
+  }, "Continue", 8
+  /* PROPS */
+  , _hoisted_34)])]);
+}
 
 /***/ }),
 
@@ -17495,152 +17879,11 @@ var _hoisted_2 = {
   "class": "modal-wrapper"
 };
 var _hoisted_3 = {
-  key: 2,
-  "class": "world-room-game-modal modal"
-};
-var _hoisted_4 = {
-  "class": "modal-content"
-};
-
-var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
-  "class": "mb-4"
-}, "Menu", -1
-/* HOISTED */
-);
-
-var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, "World", -1
-/* HOISTED */
-);
-
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
-  selected: "",
-  value: "jakes-world-uuid"
-}, "Jake's World", -1
-/* HOISTED */
-);
-
-var _hoisted_8 = {
-  key: 0
-};
-
-var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "pick a name for your new world", -1
-/* HOISTED */
-);
-
-var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
-/* HOISTED */
-);
-
-var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, "Room", -1
-/* HOISTED */
-);
-
-var _hoisted_12 = ["disabled"];
-
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
-  selected: "",
-  value: "jakes-room"
-}, "Jake's Room", -1
-/* HOISTED */
-);
-
-var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
-  value: "new-room"
-}, "New Room", -1
-/* HOISTED */
-);
-
-var _hoisted_15 = [_hoisted_13, _hoisted_14];
-var _hoisted_16 = {
-  key: 1
-};
-
-var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "pick a name for your new room", -1
-/* HOISTED */
-);
-
-var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
-/* HOISTED */
-);
-
-var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, "Game", -1
-/* HOISTED */
-);
-
-var _hoisted_20 = ["disabled"];
-
-var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
-  selected: "",
-  value: "jakes-game"
-}, "Jake's Game", -1
-/* HOISTED */
-);
-
-var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
-  value: "new-game"
-}, "New Game", -1
-/* HOISTED */
-);
-
-var _hoisted_23 = [_hoisted_21, _hoisted_22];
-var _hoisted_24 = {
-  key: 2
-};
-
-var _hoisted_25 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "what would you like to call your new game?", -1
-/* HOISTED */
-);
-
-var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
-/* HOISTED */
-);
-
-var _hoisted_27 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
-  disabled: "",
-  selected: "",
-  value: ""
-}, "Select Game Mode", -1
-/* HOISTED */
-);
-
-var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
-  value: "memory"
-}, "Memory Matching Game", -1
-/* HOISTED */
-);
-
-var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
-  value: "klondike"
-}, "Klondike Solitaire", -1
-/* HOISTED */
-);
-
-var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
-  value: "new-game-mode"
-}, "New Custom Game Mode...", -1
-/* HOISTED */
-);
-
-var _hoisted_31 = [_hoisted_27, _hoisted_28, _hoisted_29, _hoisted_30];
-var _hoisted_32 = {
-  key: 0
-};
-
-var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "what would you like to call your new game?", -1
-/* HOISTED */
-);
-
-var _hoisted_34 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
-/* HOISTED */
-);
-
-var _hoisted_35 = ["disabled"];
-var _hoisted_36 = {
   key: 3,
   "class": "game-in-progress-modal modal"
 };
 
-var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-content"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
@@ -17648,13 +17891,13 @@ var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_38 = [_hoisted_37];
-var _hoisted_39 = {
+var _hoisted_5 = [_hoisted_4];
+var _hoisted_6 = {
   key: 4,
   "class": "player-request-modal modal"
 };
 
-var _hoisted_40 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-content"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
@@ -17662,13 +17905,13 @@ var _hoisted_40 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_41 = [_hoisted_40];
-var _hoisted_42 = {
+var _hoisted_8 = [_hoisted_7];
+var _hoisted_9 = {
   key: 5,
   "class": "spectator-joined-modal modal"
 };
 
-var _hoisted_43 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-content"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
@@ -17676,154 +17919,154 @@ var _hoisted_43 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_44 = [_hoisted_43];
+var _hoisted_11 = [_hoisted_10];
 
-var _hoisted_45 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-underlay"
 }, null, -1
 /* HOISTED */
 );
 
-var _hoisted_46 = {
+var _hoisted_13 = {
   "class": "debug-inner"
 };
-var _hoisted_47 = {
+var _hoisted_14 = {
   "class": "hit"
 };
 
-var _hoisted_48 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" / ");
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" / ");
 
-var _hoisted_49 = {
+var _hoisted_16 = {
   "class": "miss"
 };
 
-var _hoisted_50 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "video-chat-call-start"
 }, "Join Chat", -1
 /* HOISTED */
 );
 
-var _hoisted_51 = [_hoisted_50];
+var _hoisted_18 = [_hoisted_17];
 
-var _hoisted_52 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "video-chat-call-end"
 }, "Leave Chat", -1
 /* HOISTED */
 );
 
-var _hoisted_53 = [_hoisted_52];
+var _hoisted_20 = [_hoisted_19];
 
-var _hoisted_54 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_55 = {
+var _hoisted_22 = {
   "class": "inner"
 };
-var _hoisted_56 = {
+var _hoisted_23 = {
   "class": "details"
 };
-var _hoisted_57 = {
+var _hoisted_24 = {
   "class": "my_client_id"
 };
 
-var _hoisted_58 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
+var _hoisted_25 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
 
-var _hoisted_59 = {
+var _hoisted_26 = {
   "class": "value"
 };
-var _hoisted_60 = {
+var _hoisted_27 = {
   "class": "room_id"
 };
 
-var _hoisted_61 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
+var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
 
-var _hoisted_62 = {
+var _hoisted_29 = {
   "class": "value"
 };
-var _hoisted_63 = {
+var _hoisted_30 = {
   "class": "game_id"
 };
 
-var _hoisted_64 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
+var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
 
-var _hoisted_65 = {
+var _hoisted_32 = {
   "class": "value"
 };
 
-var _hoisted_66 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
-var _hoisted_67 = {
+var _hoisted_34 = {
   "class": "value"
 };
-var _hoisted_68 = {
+var _hoisted_35 = {
   "class": "host_id"
 };
 
-var _hoisted_69 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
+var _hoisted_36 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
 
-var _hoisted_70 = {
+var _hoisted_37 = {
   "class": "value"
 };
 
-var _hoisted_71 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
-var _hoisted_72 = {
+var _hoisted_39 = {
   "class": "round_id"
 };
 
-var _hoisted_73 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
+var _hoisted_40 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
 
-var _hoisted_74 = {
+var _hoisted_41 = {
   "class": "value"
 };
 
-var _hoisted_75 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_42 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
-var _hoisted_76 = {
+var _hoisted_43 = {
   "class": "value"
 };
-var _hoisted_77 = {
+var _hoisted_44 = {
   "class": "clients"
 };
 
-var _hoisted_78 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
+var _hoisted_45 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
 
-var _hoisted_79 = {
+var _hoisted_46 = {
   "class": "value"
 };
 
-var _hoisted_80 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
+var _hoisted_47 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
 
-var _hoisted_81 = {
+var _hoisted_48 = {
   key: 0
 };
 
-var _hoisted_82 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_49 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "new-game"
 }, "Restart Game", -1
 /* HOISTED */
 );
 
-var _hoisted_83 = [_hoisted_82];
-var _hoisted_84 = {
+var _hoisted_50 = [_hoisted_49];
+var _hoisted_51 = {
   "class": "messages"
 };
-var _hoisted_85 = {
+var _hoisted_52 = {
   "class": "message-text"
 };
 
-var _hoisted_86 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_53 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "bg-blur"
 }, null, -1
 /* HOISTED */
 );
 
-var _hoisted_87 = {
+var _hoisted_54 = {
   "class": "hud"
 };
 
-var _hoisted_88 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_55 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   "aria-hidden": "true",
   role: "img",
@@ -17859,12 +18102,12 @@ var _hoisted_88 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_89 = [_hoisted_88];
-var _hoisted_90 = {
+var _hoisted_56 = [_hoisted_55];
+var _hoisted_57 = {
   "class": "av-controls"
 };
 
-var _hoisted_91 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_58 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   width: "55",
   height: "38",
   viewBox: "0 0 55 38",
@@ -17877,9 +18120,9 @@ var _hoisted_91 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_92 = [_hoisted_91];
+var _hoisted_59 = [_hoisted_58];
 
-var _hoisted_93 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_60 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   "aria-hidden": "true",
   role: "img",
@@ -17902,40 +18145,42 @@ var _hoisted_93 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_94 = [_hoisted_93];
-var _hoisted_95 = {
+var _hoisted_61 = [_hoisted_60];
+var _hoisted_62 = {
   key: 0
 };
-var _hoisted_96 = {
+var _hoisted_63 = {
   key: 1
 };
-var _hoisted_97 = {
+var _hoisted_64 = {
   "class": "debug-video"
 };
 
-var _hoisted_98 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
+var _hoisted_65 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
   id: "sound_effects",
   src: "./public/sounds/flip.mp3"
 }, null, -1
 /* HOISTED */
 );
 
-var _hoisted_99 = {
+var _hoisted_66 = {
   id: "video",
   autoplay: "",
   playsinline: "",
   muted: ""
 };
-var _hoisted_100 = {
+var _hoisted_67 = {
   "class": "opponent_videos"
 };
-var _hoisted_101 = ["data-client-id"];
+var _hoisted_68 = ["data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$setup$user, _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state7, _$props$state$room_id, _$props$state8, _$props$state$game_id, _$props$state9, _$options$game, _$props$state$game_ho, _$props$state10, _$props$state$round_i, _$props$state11, _$options$round, _$props$state$player_4, _$props$state$client_2, _$props$state13;
+  var _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state7, _$props$state$room_id, _$props$state8, _$props$state$game_id, _$props$state9, _$options$game, _$props$state$game_ho, _$props$state10, _$props$state$round_i, _$props$state11, _$options$round, _$props$state$player_4, _$props$state$client_2, _$props$state13;
 
   var _component_LoginModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("LoginModal");
 
   var _component_NameModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("NameModal");
+
+  var _component_PauseMenuModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("PauseMenuModal");
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [$setup.show_login_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LoginModal, {
     key: 0,
@@ -17947,79 +18192,19 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onNameUpdated: $options.onNameUpdated
   }, null, 8
   /* PROPS */
-  , ["onNameUpdated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_pause_menu ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" logged in as " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$setup$user = $setup.user) === null || _$setup$user === void 0 ? void 0 : _$setup$user.first_name) + " ", 1
-  /* TEXT */
-  ), _hoisted_5, _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
-    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
-      return $setup.world_selection = $event;
-    })
-  }, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <option value=\"new-world\">New World</option> ")], 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.world_selection]]), $setup.world_selection === 'new-world' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_8, [_hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    type: "text",
-    placeholder: "My New World Name",
-    "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
-      return $setup.new_world_name = $event;
-    })
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.new_world_name]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_10, _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
-    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
-      return $setup.room_selection = $event;
-    }),
-    disabled: !$setup.world_selection
-  }, _hoisted_15, 8
+  , ["onNameUpdated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_pause_menu ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_PauseMenuModal, {
+    key: 2,
+    submitModal: $options.submitModal,
+    worlds: $setup.worlds,
+    rooms: $setup.rooms,
+    games: $setup.games,
+    world_selection: $setup.world_selection,
+    room_selection: $setup.room_selection,
+    game_selection: $setup.game_selection,
+    getRoomsForWorld: $options.getRoomsForWorld
+  }, null, 8
   /* PROPS */
-  , _hoisted_12), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.room_selection]]), $setup.room_selection === 'new-room' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_16, [_hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    type: "text",
-    placeholder: "My New Room Name",
-    "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
-      return $setup.new_room_name = $event;
-    })
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.new_room_name]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_18, _hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
-    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
-      return $setup.game_selection = $event;
-    }),
-    disabled: !$setup.room_selection
-  }, _hoisted_23, 8
-  /* PROPS */
-  , _hoisted_20), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.game_selection]]), $setup.game_selection === 'new-game' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_24, [_hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    type: "text",
-    placeholder: "My New Game Name",
-    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
-      return $setup.new_game_name = $event;
-    })
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.new_game_name]]), _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
-    "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
-      return $setup.new_game_mode = $event;
-    })
-  }, _hoisted_31, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $setup.new_game_mode]]), $setup.new_game_mode === 'new-game-mode' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_32, [_hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    type: "text",
-    placeholder: "My New Game Mode Name",
-    "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
-      return $setup.new_game_mode_name = $event;
-    })
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.new_game_mode_name]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_34, $setup.game_selection !== 'new-game' && $options.isHostOfSelectedGame ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
-    key: 3,
-    onClick: _cache[8] || (_cache[8] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
-      return $options.restart_game && $options.restart_game.apply($options, arguments);
-    }, ["prevent"]))
-  }, "Restart Game")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[9] || (_cache[9] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
-      return $options.submitModal && $options.submitModal.apply($options, arguments);
-    }, ["prevent"])),
-    disabled: !$setup.world_selection || !$setup.room_selection || !$setup.game_selection
-  }, "Continue", 8
-  /* PROPS */
-  , _hoisted_35)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_36, _hoisted_38)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_39, _hoisted_41)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_42, _hoisted_44)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_45])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_46, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length), 1
+  , ["submitModal", "worlds", "rooms", "games", "world_selection", "room_selection", "game_selection", "getRoomsForWorld"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, _hoisted_5)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, _hoisted_11)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_12])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length), 1
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.round_number), 1
   /* TEXT */
@@ -18031,56 +18216,56 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       key: id
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$player = _$props$state4.player_names) === null || _$props$state4$player === void 0 ? void 0 : _$props$state4$player[id]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'player') + ": ", 1
     /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_47, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
     /* TEXT */
-    ), _hoisted_48, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_49, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_3 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_3 !== void 0 ? _$props$state$player_3 : 0), 1
+    ), _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_3 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_3 !== void 0 ? _$props$state$player_3 : 0), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
   )), !$setup.calling ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
-    onClick: _cache[10] || (_cache[10] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.start_video_chat && $options.start_video_chat.apply($options, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_51)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_18)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
-    onClick: _cache[11] || (_cache[11] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.end_video_chat && $options.end_video_chat.apply($options, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_53)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_54, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[12] || (_cache[12] = function ($event) {
+  }, _hoisted_20)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[2] || (_cache[2] = function ($event) {
       return $setup.show = !$setup.show;
     })
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.show ? 'Hide' : 'Show Debug Info'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_55, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_56, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_57, [_hoisted_58, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_59, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.my_client_id), 1
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_24, [_hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.my_client_id), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_60, [_hoisted_61, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_62, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state8 = $props.state) === null || _$props$state8 === void 0 ? void 0 : _$props$state8.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_27, [_hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state8 = $props.state) === null || _$props$state8 === void 0 ? void 0 : _$props$state8.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_63, [_hoisted_64, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_65, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state9 = $props.state) === null || _$props$state9 === void 0 ? void 0 : _$props$state9.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_30, [_hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state9 = $props.state) === null || _$props$state9 === void 0 ? void 0 : _$props$state9.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
   /* TEXT */
-  ), _hoisted_66, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_67, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$game = $options.game) !== null && _$options$game !== void 0 && _$options$game.started ? 'started' : 'not-started'), 1
+  ), _hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$game = $options.game) !== null && _$options$game !== void 0 && _$options$game.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_68, [_hoisted_69, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_70, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state10 = $props.state) === null || _$props$state10 === void 0 ? void 0 : _$props$state10.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_35, [_hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_37, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state10 = $props.state) === null || _$props$state10 === void 0 ? void 0 : _$props$state10.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
   /* TEXT */
-  ), _hoisted_71, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  ), _hoisted_38, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
       color: $options.im_game_host ? 'green' : 'red'
     })
   }, "You're " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.im_game_host ? '' : 'NOT') + " the game host!", 5
   /* TEXT, STYLE */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_72, [_hoisted_73, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_74, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state11 = $props.state) === null || _$props$state11 === void 0 ? void 0 : _$props$state11.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_39, [_hoisted_40, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_41, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state11 = $props.state) === null || _$props$state11 === void 0 ? void 0 : _$props$state11.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
   /* TEXT */
-  ), _hoisted_75, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_76, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$round = $options.round) !== null && _$options$round !== void 0 && _$options$round.started ? 'started' : 'not-started'), 1
+  ), _hoisted_42, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_43, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$options$round = $options.round) !== null && _$options$round !== void 0 && _$options$round.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_77, [_hoisted_78, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_79, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_44, [_hoisted_45, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_46, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
   /* TEXT */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player turn id: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.state.player_turn) + " ", 1
   /* TEXT */
@@ -18092,12 +18277,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT, STYLE */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_4 = $props.state.player_type) !== null && _$props$state$player_4 !== void 0 ? _$props$state$player_4 : 'connecting'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_80, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_47, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
     var _$props$state$player_5, _$props$state$player_6, _$props$state12, _$props$state12$playe;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
       key: player_id
-    }, [!((_$props$state$player_5 = $props.state.player_hands) !== null && _$props$state$player_5 !== void 0 && (_$props$state$player_6 = _$props$state$player_5[player_id]) !== null && _$props$state$player_6 !== void 0 && _$props$state$player_6.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_81, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state12 = $props.state) === null || _$props$state12 === void 0 ? void 0 : (_$props$state12$playe = _$props$state12.player_hands) === null || _$props$state12$playe === void 0 ? void 0 : _$props$state12$playe[player_id])), 1
+    }, [!((_$props$state$player_5 = $props.state.player_hands) !== null && _$props$state$player_5 !== void 0 && (_$props$state$player_6 = _$props$state$player_5[player_id]) !== null && _$props$state$player_6 !== void 0 && _$props$state$player_6.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_48, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state12 = $props.state) === null || _$props$state12 === void 0 ? void 0 : (_$props$state12$playe = _$props$state12.player_hands) === null || _$props$state12$playe === void 0 ? void 0 : _$props$state12$playe[player_id])), 1
     /* TEXT */
     )]);
   }), 128
@@ -18106,49 +18291,49 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                    <li v-if=\"!state?.room_id\">\n                        <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                    </li>\n\n                    <li v-if=\"state?.room_id && !state?.game_id\"\n                        @click.prevent=\"new_game\">\n                        <button class=\"new-game\">New Game</button>\n                    </li> "), $options.im_game_host ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
     key: 0,
-    onClick: _cache[13] || (_cache[13] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.restart_game && $options.restart_game.apply($options, arguments);
     }, ["prevent"]))
-  }, _hoisted_83)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                        @click.prevent=\"start_game\">\n                        <button class=\"start-game\">Start Game</button>\n                    </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_84, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.messages, function (message, i) {
+  }, _hoisted_50)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                        @click.prevent=\"start_game\">\n                        <button class=\"start-game\">Start Game</button>\n                    </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_51, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.messages, function (message, i) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "message",
       key: i
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_85, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_52, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])])]), _hoisted_86], 512
+  ))])])]), _hoisted_53], 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.show]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_87, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.show]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_54, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     style: {
       "pointer-events": "all"
     },
     "class": "game-modal-toggle-icon",
-    onClick: _cache[14] || (_cache[14] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
-      return $options.openGameModal && $options.openGameModal.apply($options, arguments);
+    onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.openPauseMenu && $options.openPauseMenu.apply($options, arguments);
     }, ["prevent"]))
-  }, _hoisted_89), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_90, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_56), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_57, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
     style: {
       "pointer-events": "all"
     },
     id: "icon-video-enable",
-    onClick: _cache[15] || (_cache[15] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+    onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $options.enableVideo();
     }, ["prevent"]))
-  }, _hoisted_92)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_59)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
     style: {
       "pointer-events": "all"
     },
     id: "icon-video-disable",
-    onClick: _cache[16] || (_cache[16] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+    onClick: _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $options.disableVideo();
     }, ["prevent"]))
-  }, _hoisted_94)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $options.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_95, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_96, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_97, [_hoisted_98, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_99, null, 512
+  }, _hoisted_61)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $options.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_62, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_63, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_64, [_hoisted_65, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_66, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_100, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_2 = (_$props$state13 = $props.state) === null || _$props$state13 === void 0 ? void 0 : _$props$state13.client_ids) !== null && _$props$state$client_2 !== void 0 ? _$props$state$client_2 : []).filter(function (id) {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_67, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_2 = (_$props$state13 = $props.state) === null || _$props$state13 === void 0 ? void 0 : _$props$state13.client_ids) !== null && _$props$state$client_2 !== void 0 ? _$props$state$client_2 : []).filter(function (id) {
     return id !== $props.state.my_client_id;
   }), function (client_id) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("video", {
@@ -18162,7 +18347,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "data-client-id": client_id
     }, null, 8
     /* PROPS */
-    , _hoisted_101);
+    , _hoisted_68);
   }), 128
   /* KEYED_FRAGMENT */
   ))])])]);
@@ -19011,6 +19196,34 @@ exports["default"] = (sfc, props) => {
 
 /***/ }),
 
+/***/ "./client/components/PauseMenuModal.vue":
+/*!**********************************************!*\
+  !*** ./client/components/PauseMenuModal.vue ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _PauseMenuModal_vue_vue_type_template_id_4d7d1f3b__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PauseMenuModal.vue?vue&type=template&id=4d7d1f3b */ "./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b");
+/* harmony import */ var _PauseMenuModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PauseMenuModal.vue?vue&type=script&lang=js */ "./client/components/PauseMenuModal.vue?vue&type=script&lang=js");
+/* harmony import */ var _root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+
+
+
+
+;
+const __exports__ = /*#__PURE__*/(0,_root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_PauseMenuModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_PauseMenuModal_vue_vue_type_template_id_4d7d1f3b__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"client/components/PauseMenuModal.vue"]])
+/* hot reload */
+if (false) {}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__exports__);
+
+/***/ }),
+
 /***/ "./client/components/app.vue":
 /*!***********************************!*\
   !*** ./client/components/app.vue ***!
@@ -19098,6 +19311,22 @@ if (false) {}
 
 /***/ }),
 
+/***/ "./client/components/PauseMenuModal.vue?vue&type=script&lang=js":
+/*!**********************************************************************!*\
+  !*** ./client/components/PauseMenuModal.vue?vue&type=script&lang=js ***!
+  \**********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./PauseMenuModal.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=script&lang=js");
+ 
+
+/***/ }),
+
 /***/ "./client/components/app.vue?vue&type=script&lang=js":
 /*!***********************************************************!*\
   !*** ./client/components/app.vue?vue&type=script&lang=js ***!
@@ -19143,6 +19372,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_namemodal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./namemodal.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/namemodal.vue?vue&type=script&lang=js");
  
+
+/***/ }),
+
+/***/ "./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b":
+/*!****************************************************************************!*\
+  !*** ./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b ***!
+  \****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_template_id_4d7d1f3b__WEBPACK_IMPORTED_MODULE_0__.render)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_template_id_4d7d1f3b__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./PauseMenuModal.vue?vue&type=template&id=4d7d1f3b */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b");
+
 
 /***/ }),
 
