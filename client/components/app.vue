@@ -2,10 +2,13 @@
     <div id="debug" >
 
         <div class="modal-wrapper" v-if="show_modal">
-            <LoginModal v-if="show_login_modal"
-            :authenticated="authenticated"
-            :show_loading="show_login_loading"
-            @authenticated="onLoginAuthenticated" />
+            <LoginModal
+
+                v-if="show_login_modal"
+                @notAuthenticated="onLoginNotAuthenticated"
+                :authenticated="authenticated"
+                :show_loading="show_login_loading"
+                @authenticated="onLoginAuthenticated" />
 
             <NameModal v-if="show_name_modal" @nameUpdated="onNameUpdated"/>
 
@@ -137,12 +140,19 @@ export default {
 
             // modal data
             world_selection: '',
+
                 new_world_name: '',
+
             room_selection: '',
+
                 new_room_name: '',
+
             game_selection: '',
+
                 new_game_name: '',
+
                 new_game_mode: '',
+
                     new_game_mode_name: '',
         }
     },
@@ -263,11 +273,16 @@ export default {
             this.show_name_modal = false;
             this.openPauseMenu()
         },
+        async onLoginNotAuthenticated(){
+            this.show_login_loading = false;
+        },
         async onLoginAuthenticated(){
 
             console.warn('TODO: if user has no name set, show name modal');
 
-            this.user = await t.server.directus.users.me.read({fields:['first_name','id','fkid']}).catch(e=>{
+            this.user = await t.server.directus.users.me.read({
+                fields:['first_name','id','fkid']
+            }).catch(e=>{
                 console.error('error getting user',e);
             });
 

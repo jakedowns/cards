@@ -17205,19 +17205,37 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.show_name_modal = false;
       this.openPauseMenu();
     },
-    onLoginAuthenticated: function onLoginAuthenticated() {
+    onLoginNotAuthenticated: function onLoginNotAuthenticated() {
       var _this2 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var _result$data, _this2$user_session, _this2$user_session$c, _this2$user_session2, _this2$user_session3, _this2$user, _this2$user$first_nam;
-
-        var result;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                _this2.show_login_loading = false;
+
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
+    onLoginAuthenticated: function onLoginAuthenticated() {
+      var _this3 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
+        var _result$data, _this3$user_session, _this3$user_session$c, _this3$user_session2, _this3$user_session3, _this3$user, _this3$user$first_nam;
+
+        var result;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
                 console.warn('TODO: if user has no name set, show name modal');
-                _context.next = 3;
+                _context2.next = 3;
                 return t.server.directus.users.me.read({
                   fields: ['first_name', 'id', 'fkid']
                 })["catch"](function (e) {
@@ -17225,42 +17243,42 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 3:
-                _this2.user = _context.sent;
+                _this3.user = _context2.sent;
 
-                if (_this2.user) {
-                  _context.next = 7;
+                if (_this3.user) {
+                  _context2.next = 7;
                   break;
                 }
 
-                _this2.show_login_loading = false;
-                return _context.abrupt("return");
+                _this3.show_login_loading = false;
+                return _context2.abrupt("return");
 
               case 7:
-                console.log('this user?', _this2.user);
-                _context.next = 10;
+                console.log('this user?', _this3.user);
+                _context2.next = 10;
                 return t.server.directus.items('Sessions').readByQuery({
                   limit: 1,
                   filter: {
-                    user: _this2.user.id
+                    user: _this3.user.id
                   }
                 });
 
               case 10:
-                result = _context.sent;
-                _this2.user_session = null; // reset
+                result = _context2.sent;
+                _this3.user_session = null; // reset
 
                 if (result !== null && result !== void 0 && (_result$data = result.data) !== null && _result$data !== void 0 && _result$data.length) {
-                  _this2.user_session = result.data[0];
+                  _this3.user_session = result.data[0];
                 }
 
-                console.log('servers user_session:', _this2.user_session); // if the user does not have a session, created one
+                console.log('servers user_session:', _this3.user_session); // if the user does not have a session, created one
 
-                if (_this2.user_session) {
-                  _context.next = 18;
+                if (_this3.user_session) {
+                  _context2.next = 18;
                   break;
                 }
 
-                _this2.user_session = {
+                _this3.user_session = {
                   current_world: 2,
                   // todo: use uuid // jakes world by default
                   current_room: 'bbce1345-0718-4faf-812d-e8c9040e1341',
@@ -17268,14 +17286,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   current_game: 'f9222054-ea60-436f-9199-75b97781ec53' // food memory by default
 
                 };
-                _context.next = 18;
+                _context2.next = 18;
                 return t.server.directus.items('Sessions').createOne({
                   user: {
-                    id: _this2.user.id
+                    id: _this3.user.id
                   },
-                  current_world: _this2.user_session.current_world,
-                  current_room: _this2.user_session.current_room,
-                  current_game: _this2.user_session.current_game
+                  current_world: _this3.user_session.current_world,
+                  current_room: _this3.user_session.current_room,
+                  current_game: _this3.user_session.current_game
                 }).then(function (res) {
                   console.log('user session created', res); // this.user_session = res;
                 })["catch"](function (e) {
@@ -17283,38 +17301,38 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 18:
-                _this2.world_selection = (_this2$user_session = _this2.user_session) === null || _this2$user_session === void 0 ? void 0 : (_this2$user_session$c = _this2$user_session.current_world) === null || _this2$user_session$c === void 0 ? void 0 : _this2$user_session$c.toString();
-                _this2.room_selection = (_this2$user_session2 = _this2.user_session) === null || _this2$user_session2 === void 0 ? void 0 : _this2$user_session2.current_room;
-                _this2.game_selection = (_this2$user_session3 = _this2.user_session) === null || _this2$user_session3 === void 0 ? void 0 : _this2$user_session3.current_game; // TODO: make game->room->world a single query
+                _this3.world_selection = (_this3$user_session = _this3.user_session) === null || _this3$user_session === void 0 ? void 0 : (_this3$user_session$c = _this3$user_session.current_world) === null || _this3$user_session$c === void 0 ? void 0 : _this3$user_session$c.toString();
+                _this3.room_selection = (_this3$user_session2 = _this3.user_session) === null || _this3$user_session2 === void 0 ? void 0 : _this3$user_session2.current_room;
+                _this3.game_selection = (_this3$user_session3 = _this3.user_session) === null || _this3$user_session3 === void 0 ? void 0 : _this3$user_session3.current_game; // TODO: make game->room->world a single query
 
-                if (_this2.game_selection) {
-                  _this2.getGamesForRoom(_this2.room_selection);
+                if (_this3.game_selection) {
+                  _this3.getGamesForRoom(_this3.room_selection);
 
-                  _this2.getRoomsForWorld(_this2.world_selection);
-                } else if (_this2.room_selection) {
-                  _this2.getRoomsForWorld(_this2.world_selection);
+                  _this3.getRoomsForWorld(_this3.world_selection);
+                } else if (_this3.room_selection) {
+                  _this3.getRoomsForWorld(_this3.world_selection);
                 }
 
-                _this2.show_login_modal = false;
+                _this3.show_login_modal = false;
 
-                if (!((_this2$user = _this2.user) !== null && _this2$user !== void 0 && (_this2$user$first_nam = _this2$user.first_name) !== null && _this2$user$first_nam !== void 0 && _this2$user$first_nam.length)) {
+                if (!((_this3$user = _this3.user) !== null && _this3$user !== void 0 && (_this3$user$first_nam = _this3$user.first_name) !== null && _this3$user$first_nam !== void 0 && _this3$user$first_nam.length)) {
                   // give us a name!
-                  _this2.show_name_modal = true;
+                  _this3.show_name_modal = true;
                 } else {
-                  if (!_this2.game_selection) {
+                  if (!_this3.game_selection) {
                     // need to pick a game
-                    _this2.openPauseMenu();
+                    _this3.openPauseMenu();
                   } else {
-                    _this2.closePauseMenu();
+                    _this3.closePauseMenu();
                   }
                 }
 
               case 24:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee);
+        }, _callee2);
       }))();
     },
     closePauseMenu: function closePauseMenu() {
@@ -17393,39 +17411,39 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       });
     },
     getWorlds: function getWorlds() {
-      var _this3 = this;
+      var _this4 = this;
 
       axios.get('/api/worlds').then(function (res) {
-        _this3.worlds = res.data.data;
+        _this4.worlds = res.data.data;
       })["catch"](function (err) {
         console.error(err);
       });
     },
     updateSessionOnServer: function updateSessionOnServer() {
-      var _this4 = this;
+      var _this5 = this;
 
-      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
-        var _this4$user_session, _this4$user_session2;
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
+        var _this5$user_session, _this5$user_session2;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                if ((_this4$user_session = _this4.user_session) !== null && _this4$user_session !== void 0 && _this4$user_session.id) {
-                  _context2.next = 3;
+                if ((_this5$user_session = _this5.user_session) !== null && _this5$user_session !== void 0 && _this5$user_session.id) {
+                  _context3.next = 3;
                   break;
                 }
 
                 console.error('user has no session. create one?');
-                return _context2.abrupt("return");
+                return _context3.abrupt("return");
 
               case 3:
-                _context2.next = 5;
-                return t.server.directus.items('Sessions').updateOne((_this4$user_session2 = _this4.user_session) === null || _this4$user_session2 === void 0 ? void 0 : _this4$user_session2.id, {
+                _context3.next = 5;
+                return t.server.directus.items('Sessions').updateOne((_this5$user_session2 = _this5.user_session) === null || _this5$user_session2 === void 0 ? void 0 : _this5$user_session2.id, {
                   // user: {id:this.user.id},
-                  current_world: _this4.user_session.current_world,
-                  current_room: _this4.user_session.current_room,
-                  current_game: _this4.user_session.current_game
+                  current_world: _this5.user_session.current_world,
+                  current_room: _this5.user_session.current_room,
+                  current_game: _this5.user_session.current_game
                 }).then(function (res) {
                   console.log('user session updated', res); // this.user_session = res;
                 })["catch"](function (e) {
@@ -17434,10 +17452,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 5:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2);
+        }, _callee3);
       }))();
     },
     onGameSelectionChanged: function onGameSelectionChanged(game_id) {
@@ -17448,13 +17466,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     // },
     // worldSelectionChanged =>
     getRoomsForWorld: function getRoomsForWorld(world_id) {
-      var _this5 = this;
+      var _this6 = this;
 
       this.world_selection = world_id.toString();
       this.updateSessionOnServer(); // console.log('getRoomsForWorld',arguments)
 
       axios.get("/api/world/".concat(world_id, "/rooms")).then(function (res) {
-        _this5.rooms = res.data.data; // this.room_selection = null;
+        _this6.rooms = res.data.data; // this.room_selection = null;
         // this.game_selection = null;
       })["catch"](function (err) {
         console.error(err);
@@ -17462,14 +17480,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
     // roomSelectionChanged =>
     getGamesForRoom: function getGamesForRoom(room_id) {
-      var _this6 = this;
+      var _this7 = this;
 
       // console.log('getGamesForRoom',$event.target.value);
       this.room_selection = room_id;
       this.updateSessionOnServer();
       axios.get("/api/rooms/".concat(this.room_selection, "/games")).then(function (res) {
-        _this6.games = res.data.games;
-        _this6.game_types = res.data.game_types; // this.game_selection = null;
+        _this7.games = res.data.games;
+        _this7.game_types = res.data.game_types; // this.game_selection = null;
       })["catch"](function (err) {
         console.error(err);
       });
@@ -17477,14 +17495,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   computed: {
     gameTypeName: function gameTypeName() {
-      var _this7 = this;
+      var _this8 = this;
 
       return function (game_type_id) {
-        var _this7$game_types$fil, _this7$game_types$fil2;
+        var _this8$game_types$fil, _this8$game_types$fil2;
 
-        return (_this7$game_types$fil = _this7.game_types.filter(function (type) {
+        return (_this8$game_types$fil = _this8.game_types.filter(function (type) {
           return type.id === game_type_id;
-        })) === null || _this7$game_types$fil === void 0 ? void 0 : (_this7$game_types$fil2 = _this7$game_types$fil[0]) === null || _this7$game_types$fil2 === void 0 ? void 0 : _this7$game_types$fil2.Name;
+        })) === null || _this8$game_types$fil === void 0 ? void 0 : (_this8$game_types$fil2 = _this8$game_types$fil[0]) === null || _this8$game_types$fil2 === void 0 ? void 0 : _this8$game_types$fil2.Name;
       };
     },
     // show_modal(){
@@ -17608,6 +17626,8 @@ var __default__ = {
                   _this2.$emit('authenticated');
                 })["catch"](function (error) {
                   console.warn('not authenticated', error);
+
+                  _this2.$emit('notAuthenticated');
                 });
 
               case 3:
@@ -18633,12 +18653,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [$setup.show_login_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LoginModal, {
     key: 0,
+    onNotAuthenticated: $options.onLoginNotAuthenticated,
     authenticated: $setup.authenticated,
     show_loading: $setup.show_login_loading,
     onAuthenticated: $options.onLoginAuthenticated
   }, null, 8
   /* PROPS */
-  , ["authenticated", "show_loading", "onAuthenticated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_name_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_NameModal, {
+  , ["onNotAuthenticated", "authenticated", "show_loading", "onAuthenticated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_name_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_NameModal, {
     key: 1,
     onNameUpdated: $options.onNameUpdated
   }, null, 8

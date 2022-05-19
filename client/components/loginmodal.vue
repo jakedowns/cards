@@ -132,6 +132,7 @@ export default {
                 })
                 .catch((error) => {
                     console.warn('not authenticated',error);
+                    this.$emit('notAuthenticated');
                 });
         },
         focusInput(){
