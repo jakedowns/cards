@@ -245,6 +245,23 @@ class SoundsManager{
   }
 }
 
+class Cameraman {
+    constructor(player_id){
+      this.views = {
+        'overhead': {
+          pos: [0.5073927993672119, 22.50219689922749, -5.4534143171434 ],
+          rot: [-1.9037729632057634, -0.0009611380083970662, -3.1388136341032102]
+        }
+      }
+    }
+    goToView(view_name){
+      t.camera.position.set(...this.views[view_name].pos);
+      t.camera.rotation.x = this.views[view_name].rot[0];
+      t.camera.rotation.y = this.views[view_name].rot[1];
+      t.camera.rotation.z = this.views[view_name].rot[2];
+    }
+}
+
 // Playfield?
 class Tabletop{
     // enable/disable the debug inspector
@@ -252,6 +269,9 @@ class Tabletop{
       this.debug_inspect_objects = !this.debug_inspect_objects;
     }
     constructor(){
+        // t.cameraman
+        this.cameraman = new Cameraman();
+        // this.cameraman.goToView('overhead');
 
         this.debug_inspect_objects = false;
         this.debug_inspector_selected_object = null;
@@ -1237,7 +1257,8 @@ class Deck{
         for(let j in t.app.state.cards){
           let c = t.app.state.cards[j];
           if(c.zone == i){
-            card = t.cards[j];
+            card = t.cards[j]; // our LOCAL card (not the server-managed representation)
+            card.zone = i;
             break;
           }
         }
@@ -1429,7 +1450,7 @@ class Game_PVPMemory{
         __card.tweening = true;
         // todo if already tweening cancel it
         t.sounds.play('flip'); // todo: put this in the tween
-        __card.current_tween = getFlipTween(_card,'faceup');
+        __card.current_tween = getFlipTween(__card,'faceup');
         __card.current_tween.start();
       }else if(!face_up && !__card.tweenedToFaceDown && __card.face_up){
         __card.face_up = false;
@@ -1438,7 +1459,7 @@ class Game_PVPMemory{
         __card.tweening = true;
         // todo if already tweening cancel it
         t.sounds.play('flip'); // todo: put this in the tween
-        __card.current_tween = getFlipTween(_card,'facedown')
+        __card.current_tween = getFlipTween(__card,'facedown')
         __card.current_tween.start();
       }
     }
@@ -1676,7 +1697,8 @@ function initLights(){
 }
 
 function getFlipTween(card, direction){
-  const initPos = card.position;
+  console.log('card?',card)
+  const initPos = t.game.layout.zones[card.zone].origin;
   var zAxis = new THREE.Vector3( 0, 0, 1 );
   var qInitial = new THREE.Quaternion().setFromAxisAngle( zAxis, direction === 'facedown' ? Math.PI : 0 );
   var qFinal = new THREE.Quaternion().setFromAxisAngle( zAxis, direction === 'faceup' ? Math.PI : 0 );
@@ -1691,8 +1713,8 @@ function getFlipTween(card, direction){
     rw: qInitial.w
   };
   function posUpdate(){
-    card.position.set(pos.x,pos.y,pos.z)
-    card.quaternion.set(pos.rx,pos.ry,pos.rz,pos.rw)
+    card.mesh.position.set(pos.x,pos.y,pos.z)
+    card.mesh.quaternion.set(pos.rx,pos.ry,pos.rz,pos.rw)
   }
   const flipTweenStart = new TWEEN.Tween(pos)
   .to({
@@ -1834,10 +1856,10 @@ function initRoomMeshes(){
 				} );
 
   t.wallMaterial = new THREE.MeshStandardMaterial({
+    color: '#244275',
     metalness: 0,
     roughness: 1,
-    color: '#4B0076',
-    side: THREE.DoubleSide,
+    side: THREE.FrontSide,// THREE.DoubleSide,
   })
 
   t.northWall = new THREE.Mesh(
@@ -1846,6 +1868,7 @@ function initRoomMeshes(){
   )
   t.northWall.name="northWall"
   t.northWall.position.set(0, 25, 50);
+  t.northWall.rotation.y = THREE.MathUtils.degToRad(180);
   t.northWall.castShadow = true;
   t.northWall.receiveShadow = true;
   scene.add(t.northWall);
@@ -1853,9 +1876,41 @@ function initRoomMeshes(){
   t.westWall =t.northWall.clone();
   t.westWall.name = "westWall"
   scene.add(t.westWall)
+  t.westWall.material = new THREE.MeshBasicMaterial({
+    color: '#662475',
+    metalness: 0,
+    roughness: 1,
+    side: THREE.FrontSide,// THREE.DoubleSide,
+  })
   t.westWall.rotation.y = THREE.MathUtils.degToRad(90);
   t.westWall.position.x = -50;
   t.westWall.position.z = 0;
+
+  t.eastWall = t.westWall.clone();
+  t.eastWall.name = "eastWall"
+  scene.add(t.eastWall);
+  t.eastWall.material = new THREE.MeshBasicMaterial({
+    color: '#247575',
+    metalness: 0,
+    roughness: 1,
+    side: THREE.FrontSide,// THREE.DoubleSide,
+  })
+  t.eastWall.rotation.y = THREE.MathUtils.degToRad(-90);
+  t.eastWall.position.x = 50;
+  t.eastWall.position.z = 0;
+
+  t.southWall = t.westWall.clone();
+  t.southWall.name = "southWall"
+  scene.add(t.southWall);
+  t.southWall.material = new THREE.MeshBasicMaterial({
+    color: '#242775',
+    metalness: 0,
+    roughness: 1,
+    side: THREE.FrontSide,// THREE.DoubleSide,
+  })
+  t.southWall.rotation.y = 0;
+  t.southWall.position.x = 0;
+  t.southWall.position.z = -50;
 
   t.floor = new THREE.Mesh(
     new THREE.PlaneBufferGeometry( 100, 100 ),
@@ -1863,7 +1918,7 @@ function initRoomMeshes(){
       metalness: 0,
       roughness: 1,
       // side: THREE.DoubleSide,
-      color: '#5C2890'
+      color: '#362475'
     })
   )
   t.floor.castShadow = true;

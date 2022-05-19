@@ -16901,7 +16901,10 @@ __webpack_require__.r(__webpack_exports__);
     messages: Array,
     show_end_call_button: Boolean,
     show_debug_info: Boolean,
-    calling: Boolean
+    calling: Boolean,
+    camera_locked: Boolean,
+    resetCamera: Function,
+    toggleCameraLock: Function
   }
 });
 
@@ -17070,6 +17073,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       show_debug_info: false,
       calling: false,
       show_end_call_button: false,
+      camera_locked: false,
       messages: [],
       mic_muted: false,
       video_enabled: false,
@@ -17176,6 +17180,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
   },
   methods: {
+    resetCamera: function resetCamera() {
+      t.cameraman.goToView('overhead');
+    },
+    toggleCameraLock: function toggleCameraLock() {
+      this.camera_locked = !this.camera_locked;
+      t.controls.enabled = !this.camera_locked;
+    },
     toggleShowDebugInfo: function toggleShowDebugInfo() {
       this.show_debug_info = !this.show_debug_info;
     },
@@ -18065,107 +18076,118 @@ var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 
 var _hoisted_8 = [_hoisted_7];
 
-var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": ""
+}, "Reset Camera", -1
 /* HOISTED */
 );
 
-var _hoisted_10 = {
+var _hoisted_10 = [_hoisted_9];
+var _hoisted_11 = {
+  "class": ""
+};
+
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_13 = {
   "class": "inner"
 };
-var _hoisted_11 = {
+var _hoisted_14 = {
   "class": "details"
 };
-var _hoisted_12 = {
+var _hoisted_15 = {
   "class": "my_client_id"
 };
 
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
-
-var _hoisted_14 = {
-  "class": "value"
-};
-var _hoisted_15 = {
-  "class": "room_id"
-};
-
-var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
+var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
 
 var _hoisted_17 = {
   "class": "value"
 };
 var _hoisted_18 = {
-  "class": "game_id"
+  "class": "room_id"
 };
 
-var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
+var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
 
 var _hoisted_20 = {
   "class": "value"
 };
+var _hoisted_21 = {
+  "class": "game_id"
+};
 
-var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
 
-var _hoisted_22 = {
+var _hoisted_23 = {
   "class": "value"
 };
-var _hoisted_23 = {
-  "class": "host_id"
-};
 
-var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
+var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
 var _hoisted_25 = {
   "class": "value"
 };
+var _hoisted_26 = {
+  "class": "host_id"
+};
 
-var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_27 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
 
-var _hoisted_27 = {
+var _hoisted_28 = {
+  "class": "value"
+};
+
+var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+
+var _hoisted_30 = {
   "class": "round_id"
 };
 
-var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
+var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
 
-var _hoisted_29 = {
-  "class": "value"
-};
-
-var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
-
-var _hoisted_31 = {
-  "class": "value"
-};
 var _hoisted_32 = {
-  "class": "clients"
+  "class": "value"
 };
 
-var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
+var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
 var _hoisted_34 = {
   "class": "value"
 };
+var _hoisted_35 = {
+  "class": "clients"
+};
 
-var _hoisted_35 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
+var _hoisted_36 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
 
-var _hoisted_36 = {
+var _hoisted_37 = {
+  "class": "value"
+};
+
+var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
+
+var _hoisted_39 = {
   key: 0
 };
 
-var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_40 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "new-game"
 }, "Restart Game", -1
 /* HOISTED */
 );
 
-var _hoisted_38 = [_hoisted_37];
-var _hoisted_39 = {
+var _hoisted_41 = [_hoisted_40];
+var _hoisted_42 = {
   "class": "messages"
 };
-var _hoisted_40 = {
+var _hoisted_43 = {
   "class": "message-text"
 };
 
-var _hoisted_41 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_44 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "bg-blur"
 }, null, -1
 /* HOISTED */
@@ -18209,33 +18231,49 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[2] || (_cache[2] = function ($event) {
+  }, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    onClick: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $props.resetCamera && $props.resetCamera.apply($props, arguments);
+    }, ["prevent"])),
+    style: {
+      "pointer-events": "all"
+    }
+  }, _hoisted_10), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $props.toggleCameraLock && $props.toggleCameraLock.apply($props, arguments);
+    }, ["prevent"])),
+    style: {
+      "pointer-events": "all"
+    }
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.camera_locked ? 'Unlock' : 'Lock') + " Camera", 1
+  /* TEXT */
+  )]), _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[4] || (_cache[4] = function ($event) {
       return _ctx.$emit('toggleShowDebugInfo');
     })
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.show_debug_info ? 'Hide' : 'Show Debug Info'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_12, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.my_client_id), 1
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.my_client_id), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state8 = $props.state) === null || _$props$state8 === void 0 ? void 0 : _$props$state8.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state8 = $props.state) === null || _$props$state8 === void 0 ? void 0 : _$props$state8.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state9 = $props.state) === null || _$props$state9 === void 0 ? void 0 : _$props$state9.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_21, [_hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state9 = $props.state) === null || _$props$state9 === void 0 ? void 0 : _$props$state9.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
   /* TEXT */
-  ), _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$game = $props.game) !== null && _$props$game !== void 0 && _$props$game.started ? 'started' : 'not-started'), 1
+  ), _hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$game = $props.game) !== null && _$props$game !== void 0 && _$props$game.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_23, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state10 = $props.state) === null || _$props$state10 === void 0 ? void 0 : _$props$state10.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_26, [_hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state10 = $props.state) === null || _$props$state10 === void 0 ? void 0 : _$props$state10.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
   /* TEXT */
-  ), _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  ), _hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
       color: $props.im_game_host ? 'green' : 'red'
     })
   }, "You're " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.im_game_host ? '' : 'NOT') + " the game host!", 5
   /* TEXT, STYLE */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_27, [_hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state11 = $props.state) === null || _$props$state11 === void 0 ? void 0 : _$props$state11.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_30, [_hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state11 = $props.state) === null || _$props$state11 === void 0 ? void 0 : _$props$state11.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
   /* TEXT */
-  ), _hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$round = $props.round) !== null && _$props$round !== void 0 && _$props$round.started ? 'started' : 'not-started'), 1
+  ), _hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$round = $props.round) !== null && _$props$round !== void 0 && _$props$round.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_32, [_hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_35, [_hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_37, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
   /* TEXT */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player turn id: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.state.player_turn) + " ", 1
   /* TEXT */
@@ -18247,12 +18285,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT, STYLE */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_4 = $props.state.player_type) !== null && _$props$state$player_4 !== void 0 ? _$props$state$player_4 : 'connecting'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_38, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
     var _$props$state$player_5, _$props$state$player_6, _$props$state12, _$props$state12$playe;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
       key: player_id
-    }, [!((_$props$state$player_5 = $props.state.player_hands) !== null && _$props$state$player_5 !== void 0 && (_$props$state$player_6 = _$props$state$player_5[player_id]) !== null && _$props$state$player_6 !== void 0 && _$props$state$player_6.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_36, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state12 = $props.state) === null || _$props$state12 === void 0 ? void 0 : (_$props$state12$playe = _$props$state12.player_hands) === null || _$props$state12$playe === void 0 ? void 0 : _$props$state12$playe[player_id])), 1
+    }, [!((_$props$state$player_5 = $props.state.player_hands) !== null && _$props$state$player_5 !== void 0 && (_$props$state$player_6 = _$props$state$player_5[player_id]) !== null && _$props$state$player_6 !== void 0 && _$props$state$player_6.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_39, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state12 = $props.state) === null || _$props$state12 === void 0 ? void 0 : (_$props$state12$playe = _$props$state12.player_hands) === null || _$props$state12$playe === void 0 ? void 0 : _$props$state12$playe[player_id])), 1
     /* TEXT */
     )]);
   }), 128
@@ -18261,19 +18299,19 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                <li v-if=\"!state?.room_id\">\n                    <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                </li>\n\n                <li v-if=\"state?.room_id && !state?.game_id\"\n                    @click.prevent=\"new_game\">\n                    <button class=\"new-game\">New Game</button>\n                </li> "), $props.im_game_host ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
     key: 0,
-    onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return _ctx.restart_game && _ctx.restart_game.apply(_ctx, arguments);
     }, ["prevent"]))
-  }, _hoisted_38)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                    @click.prevent=\"start_game\">\n                    <button class=\"start-game\">Start Game</button>\n                </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_39, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.messages, function (message, i) {
+  }, _hoisted_41)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                    @click.prevent=\"start_game\">\n                    <button class=\"start-game\">Start Game</button>\n                </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.messages, function (message, i) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "message",
       key: i
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])])]), _hoisted_41], 512
+  ))])])]), _hoisted_44], 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.show_debug_info]])]);
 }
@@ -18632,10 +18670,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     messages: $setup.messages,
     show_end_call_button: $setup.show_end_call_button,
     show_debug_info: $setup.show_debug_info,
-    onToggleShowDebugInfo: $options.toggleShowDebugInfo
+    onToggleShowDebugInfo: $options.toggleShowDebugInfo,
+    camera_locked: $setup.camera_locked,
+    resetCamera: $options.resetCamera,
+    toggleCameraLock: $options.toggleCameraLock
   }, null, 8
   /* PROPS */
-  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_end_call_button", "show_debug_info", "onToggleShowDebugInfo"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
+  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_end_call_button", "show_debug_info", "onToggleShowDebugInfo", "camera_locked", "resetCamera", "toggleCameraLock"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
     state: $props.state,
     its_my_turn: $options.its_my_turn,
     video_enabled: $setup.video_enabled,
@@ -26422,13 +26463,21 @@ function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArra
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
 function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 
 
@@ -26753,12 +26802,43 @@ var SoundsManager = /*#__PURE__*/function () {
   }]);
 
   return SoundsManager;
+}();
+
+var Cameraman = /*#__PURE__*/function () {
+  function Cameraman(player_id) {
+    _classCallCheck(this, Cameraman);
+
+    this.views = {
+      'overhead': {
+        pos: [0.5073927993672119, 22.50219689922749, -5.4534143171434],
+        rot: [-1.9037729632057634, -0.0009611380083970662, -3.1388136341032102]
+      }
+    };
+  }
+
+  _createClass(Cameraman, [{
+    key: "goToView",
+    value: function goToView(view_name) {
+      var _t$camera$position;
+
+      (_t$camera$position = t.camera.position).set.apply(_t$camera$position, _toConsumableArray(this.views[view_name].pos));
+
+      t.camera.rotation.x = this.views[view_name].rot[0];
+      t.camera.rotation.y = this.views[view_name].rot[1];
+      t.camera.rotation.z = this.views[view_name].rot[2];
+    }
+  }]);
+
+  return Cameraman;
 }(); // Playfield?
 
 
 var Tabletop = /*#__PURE__*/function () {
   function Tabletop() {
     _classCallCheck(this, Tabletop);
+
+    // t.cameraman
+    this.cameraman = new Cameraman(); // this.cameraman.goToView('overhead');
 
     this.debug_inspect_objects = false;
     this.debug_inspector_selected_object = null;
@@ -28063,7 +28143,7 @@ var Deck = /*#__PURE__*/function () {
 
               case 1:
                 if ((_context11.t1 = _context11.t0()).done) {
-                  _context11.next = 20;
+                  _context11.next = 21;
                   break;
                 }
 
@@ -28075,7 +28155,7 @@ var Deck = /*#__PURE__*/function () {
 
               case 6:
                 if ((_context11.t3 = _context11.t2()).done) {
-                  _context11.next = 14;
+                  _context11.next = 15;
                   break;
                 }
 
@@ -28083,18 +28163,20 @@ var Deck = /*#__PURE__*/function () {
                 c = t.app.state.cards[j];
 
                 if (!(c.zone == i)) {
-                  _context11.next = 12;
+                  _context11.next = 13;
                   break;
                 }
 
-                card = t.cards[j];
-                return _context11.abrupt("break", 14);
+                card = t.cards[j]; // our LOCAL card (not the server-managed representation)
 
-              case 12:
+                card.zone = i;
+                return _context11.abrupt("break", 15);
+
+              case 13:
                 _context11.next = 6;
                 break;
 
-              case 14:
+              case 15:
                 // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
                 if (!((_card2 = card) !== null && _card2 !== void 0 && _card2.mesh)) {
                   console.error('failed to tween card to zone', i, card);
@@ -28110,14 +28192,14 @@ var Deck = /*#__PURE__*/function () {
                 }, {
                   duration: 1000
                 });
-                _context11.next = 18;
+                _context11.next = 19;
                 return delay(150);
 
-              case 18:
+              case 19:
                 _context11.next = 1;
                 break;
 
-              case 20:
+              case 21:
               case "end":
                 return _context11.stop();
             }
@@ -28334,7 +28416,7 @@ var Game_PVPMemory = /*#__PURE__*/function () {
 
         t.sounds.play('flip'); // todo: put this in the tween
 
-        __card.current_tween = getFlipTween(_card, 'faceup');
+        __card.current_tween = getFlipTween(__card, 'faceup');
 
         __card.current_tween.start();
       } else if (!face_up && !__card.tweenedToFaceDown && __card.face_up) {
@@ -28345,7 +28427,7 @@ var Game_PVPMemory = /*#__PURE__*/function () {
 
         t.sounds.play('flip'); // todo: put this in the tween
 
-        __card.current_tween = getFlipTween(_card, 'facedown');
+        __card.current_tween = getFlipTween(__card, 'facedown');
 
         __card.current_tween.start();
       }
@@ -28600,7 +28682,8 @@ function initLights() {
 }
 
 function getFlipTween(card, direction) {
-  var initPos = card.position;
+  console.log('card?', card);
+  var initPos = t.game.layout.zones[card.zone].origin;
   var zAxis = new THREE.Vector3(0, 0, 1);
   var qInitial = new THREE.Quaternion().setFromAxisAngle(zAxis, direction === 'facedown' ? Math.PI : 0);
   var qFinal = new THREE.Quaternion().setFromAxisAngle(zAxis, direction === 'faceup' ? Math.PI : 0);
@@ -28615,8 +28698,8 @@ function getFlipTween(card, direction) {
   };
 
   function posUpdate() {
-    card.position.set(pos.x, pos.y, pos.z);
-    card.quaternion.set(pos.rx, pos.ry, pos.rz, pos.rw);
+    card.mesh.position.set(pos.x, pos.y, pos.z);
+    card.mesh.quaternion.set(pos.rx, pos.ry, pos.rz, pos.rw);
   }
 
   var flipTweenStart = new TWEEN.Tween(pos).to({
@@ -28723,28 +28806,63 @@ function initRoomMeshes() {
     scene.add(object);
   });
   t.wallMaterial = new THREE.MeshStandardMaterial({
+    color: '#244275',
     metalness: 0,
     roughness: 1,
-    color: '#4B0076',
-    side: THREE.DoubleSide
+    side: THREE.FrontSide // THREE.DoubleSide,
+
   });
   t.northWall = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 50), t.wallMaterial);
   t.northWall.name = "northWall";
   t.northWall.position.set(0, 25, 50);
+  t.northWall.rotation.y = THREE.MathUtils.degToRad(180);
   t.northWall.castShadow = true;
   t.northWall.receiveShadow = true;
   scene.add(t.northWall);
   t.westWall = t.northWall.clone();
   t.westWall.name = "westWall";
   scene.add(t.westWall);
+  t.westWall.material = new THREE.MeshBasicMaterial({
+    color: '#662475',
+    metalness: 0,
+    roughness: 1,
+    side: THREE.FrontSide // THREE.DoubleSide,
+
+  });
   t.westWall.rotation.y = THREE.MathUtils.degToRad(90);
   t.westWall.position.x = -50;
   t.westWall.position.z = 0;
+  t.eastWall = t.westWall.clone();
+  t.eastWall.name = "eastWall";
+  scene.add(t.eastWall);
+  t.eastWall.material = new THREE.MeshBasicMaterial({
+    color: '#247575',
+    metalness: 0,
+    roughness: 1,
+    side: THREE.FrontSide // THREE.DoubleSide,
+
+  });
+  t.eastWall.rotation.y = THREE.MathUtils.degToRad(-90);
+  t.eastWall.position.x = 50;
+  t.eastWall.position.z = 0;
+  t.southWall = t.westWall.clone();
+  t.southWall.name = "southWall";
+  scene.add(t.southWall);
+  t.southWall.material = new THREE.MeshBasicMaterial({
+    color: '#242775',
+    metalness: 0,
+    roughness: 1,
+    side: THREE.FrontSide // THREE.DoubleSide,
+
+  });
+  t.southWall.rotation.y = 0;
+  t.southWall.position.x = 0;
+  t.southWall.position.z = -50;
   t.floor = new THREE.Mesh(new THREE.PlaneBufferGeometry(100, 100), new THREE.MeshStandardMaterial({
     metalness: 0,
     roughness: 1,
     // side: THREE.DoubleSide,
-    color: '#5C2890'
+    color: '#362475'
   }));
   t.floor.castShadow = true;
   t.floor.receiveShadow = true;

@@ -55,6 +55,10 @@
             :show_debug_info="show_debug_info"
             @toggleShowDebugInfo="toggleShowDebugInfo"
 
+            :camera_locked="camera_locked"
+            :resetCamera="resetCamera"
+            :toggleCameraLock="toggleCameraLock"
+
         />
 
         <AVHud
@@ -125,6 +129,7 @@ export default {
             show_debug_info: false,
             calling: false,
             show_end_call_button: false,
+            camera_locked: false,
             messages: [],
             mic_muted: false,
             video_enabled: false,
@@ -233,6 +238,13 @@ export default {
     },
 
     methods:{
+        resetCamera(){
+            t.cameraman.goToView('overhead');
+        },
+        toggleCameraLock(){
+            this.camera_locked = !this.camera_locked;
+            t.controls.enabled = !this.camera_locked;
+        },
         toggleShowDebugInfo(){
             this.show_debug_info = !this.show_debug_info;
         },

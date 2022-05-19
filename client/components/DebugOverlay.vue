@@ -14,6 +14,18 @@
             style="pointer-events:all;">
             <button class="video-chat-call-end">Leave Chat</button>
         </div>
+
+        <div
+            @click.prevent="resetCamera"
+            style="pointer-events:all;">
+            <button class="">Reset Camera</button>
+        </div>
+        <div
+            @click.prevent="toggleCameraLock"
+            style="pointer-events:all;">
+            <button class="">{{camera_locked ? 'Unlock' : 'Lock'}} Camera</button>
+        </div>
+
         <br/>
         <button @click="$emit('toggleShowDebugInfo')">{{show_debug_info?'Hide':'Show Debug Info'}}</button>
         <div class="inner" v-show="show_debug_info">
@@ -114,6 +126,9 @@ export default {
         show_end_call_button:Boolean,
         show_debug_info:Boolean,
         calling:Boolean,
+        camera_locked:Boolean,
+        resetCamera:Function,
+        toggleCameraLock:Function,
     }
 }
 </script>
