@@ -53,6 +53,7 @@ export default {
         video_muted:Boolean,
         mic_muted:Boolean,
         enableVideo:Function,
+        openPauseMenu:Function
     }
 }
 </script>

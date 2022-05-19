@@ -1539,7 +1539,8 @@ function init(){
   checkReady(()=>{
     t.server.directus = new Directus("https://u2ijwrng.directus.app",{
       auth:{
-        mode:'cookie',
+        mode:'json',
+        // autoRefresh: true,
       }
     })
     // alert('mounting vue');

@@ -1,57 +1,61 @@
 <template>
     <div class="login-modal modal">
         <div class="modal-content">
-            <h2 class="mb-4">Hi, who are you?</h2>
+            <div v-if="show_loading" class="loading">Loading...</div>
 
-            <form @submit.prevent="formSubmit">
+            <div v-else>
+                <h2 class="mb-4">Hi, who are you?</h2>
 
-                <span v-if="error" class="modal-error">{{error}}</span>
+                <form @submit.prevent="formSubmit">
 
-                <h3 v-if="!register && !show_forgot_password">Login</h3>
-                <h3 v-if="register && !show_forgot_password">Register</h3>
+                    <span v-if="error" class="modal-error">{{error}}</span>
+
+                    <h3 v-if="!register && !show_forgot_password">Login</h3>
+                    <h3 v-if="register && !show_forgot_password">Register</h3>
 
 
-                <div v-if="submitting">loading...</div>
-                <!-- <input style="display:none;" type="checkbox" v-model="register" /> -->
+                    <div v-if="submitting">loading...</div>
+                    <!-- <input style="display:none;" type="checkbox" v-model="register" /> -->
 
-                <input type="text" ref="email_field" v-model="email" name="email" v-if="!submitting && !show_check_email" placeholder="email" required />
+                    <input type="text" ref="email_field" v-model="email" name="email" v-if="!submitting && !show_check_email" placeholder="email" required />
 
-                <br/>
-
-                <!-- <input type="text" v-show="register" v-model="name" placeholder="name (public)" /> -->
-
-                <span v-if="show_check_email">Please check your email to finish registration.</span>
-
-                <input type="password" name="password" v-if="!show_forgot_password && !register && !submitting && !show_check_email" v-model="password" required placeholder="password" />
-
-                <br/>
-
-                <span v-if="!submitting">
-
-                    <button @click.prevent="onClickLogin" v-if="!register && !show_forgot_password">Login</button>
-
-                    <div v-if="show_forgot_password && !show_check_email">
-                        <label>Request Password Reset Link</label>
-                        <button @click.prevent="onClickRequestPWReset">Submit</button>
-                    </div>
-
-                    <button @click.prevent="onClickRegister" v-if="register">Register</button>
                     <br/>
-                    <a href="#" @click.prevent="show_forgot_password = true" v-if="!submitting && !show_forgot_password && !register">forgot password?</a>
+
+                    <!-- <input type="text" v-show="register" v-model="name" placeholder="name (public)" /> -->
+
+                    <span v-if="show_check_email">Please check your email to finish registration.</span>
+
+                    <input type="password" name="password" v-if="!show_forgot_password && !register && !submitting && !show_check_email" v-model="password" required placeholder="password" />
+
+                    <br/>
+
+                    <span v-if="!submitting">
+
+                        <button @click.prevent="onClickLogin" v-if="!register && !show_forgot_password">Login</button>
+
+                        <div v-if="show_forgot_password && !show_check_email">
+                            <label>Request Password Reset Link</label>
+                            <button @click.prevent="onClickRequestPWReset">Submit</button>
+                        </div>
+
+                        <button @click.prevent="onClickRegister" v-if="register">Register</button>
+                        <br/>
+                        <a href="#" @click.prevent="show_forgot_password = true" v-if="!submitting && !show_forgot_password && !register">forgot password?</a>
 
 
-                    <!-- <button @click.prevent="onClickGuest">Continue as Guest</button> -->
-                </span>
+                        <!-- <button @click.prevent="onClickGuest">Continue as Guest</button> -->
+                    </span>
 
-                    <hr/>
-                <!-- <hr/> -->
-                <p v-if="!submitting && (register || show_forgot_password)">
-                    <a href="#" @click.prevent="toggleRegister(false);show_forgot_password = false;">Login</a>
-                </p>
+                        <hr/>
+                    <!-- <hr/> -->
+                    <p v-if="!submitting && (register || show_forgot_password)">
+                        <a href="#" @click.prevent="toggleRegister(false);show_forgot_password = false;">Login</a>
+                    </p>
 
-                <span v-if="!register && !submitting && !show_forgot_password"> No Account? <a href="#" @click.prevent="toggleRegister(true)">Register</a></span>
-                <br/>
-            </form>
+                    <span v-if="!register && !submitting && !show_forgot_password"> No Account? <a href="#" @click.prevent="toggleRegister(true)">Register</a></span>
+                    <br/>
+                </form>
+            </div>
         </div>
     </div>
 </template>
@@ -88,6 +92,12 @@ function toggleRegister(value){
 // import TextField from './TextField.vue'
 
 export default {
+    props: {
+        show_loading: {
+            type: Boolean,
+            default: true
+        }
+    },
     components:{
         // TextField
     },
@@ -105,9 +115,18 @@ export default {
             this.authenticated = false;
 
             // Try to authenticate with token if exists
-            await t.server.directus.auth
-                .refresh()
-                .then(() => {
+            // await t.server.directus.auth
+            //     .refresh()
+            //     .then(() => {
+            //         this.authenticated = true;
+            //         this.$emit('authenticated');
+            //     })
+            //     .catch((error) => {
+            //         console.warn('not authenticated',error);
+            //     });
+            await t.server.directus.users.me.read()
+                .then((res) => {
+                    console.log('me',res);
                     this.authenticated = true;
                     this.$emit('authenticated');
                 })

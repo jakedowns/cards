@@ -16873,7 +16873,8 @@ __webpack_require__.r(__webpack_exports__);
     video_enabled: Boolean,
     video_muted: Boolean,
     mic_muted: Boolean,
-    enableVideo: Function
+    enableVideo: Function,
+    openPauseMenu: Function
   }
 });
 
@@ -16987,6 +16988,12 @@ __webpack_require__.r(__webpack_exports__);
       // // save world selection to user's session on the server
       // this.getRoomsForWorld(this.world_selection);
       this.$emit('worldSelectionChanged', $event.target.value);
+    },
+    onGameSelectionChanged: function onGameSelectionChanged($event) {
+      // console.log("world selection changed",this.world_selection,$event.target.value);
+      // // save world selection to user's session on the server
+      // this.getRoomsForWorld(this.world_selection);
+      this.$emit('gameSelectionChanged', $event.target.value);
     }
   }
 });
@@ -17038,9 +17045,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   setup: function setup() {
     return {
+      authenticated: false,
+      show_login_loading: true,
       // key ourselves in the users{}
       user: {},
-      user_session: {},
+      user_session: null,
       // todo: key by id
       worlds: [],
       rooms: [],
@@ -17175,6 +17184,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.show_modal = true;
       this.show_pause_menu = true;
       t.client_ignore_clicks = true;
+      t.controls.enabled = true;
+    },
+    closeModal: function closeModal() {
+      this.show_modal = false;
+      t.client_ignore_clicks = false;
     },
     onNameUpdated: function onNameUpdated() {
       this.show_name_modal = false;
@@ -17184,8 +17198,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this2 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var _this2$user, _this2$user$first_nam;
+        var _result$data, _this2$user_session, _this2$user_session$c, _this2$user_session2, _this2$user_session3, _this2$user, _this2$user$first_nam;
 
+        var result;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -17194,11 +17209,24 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 _context.next = 3;
                 return t.server.directus.users.me.read({
                   fields: ['first_name', 'id', 'fkid']
+                })["catch"](function (e) {
+                  console.error('error getting user', e);
                 });
 
               case 3:
                 _this2.user = _context.sent;
-                _context.next = 6;
+
+                if (_this2.user) {
+                  _context.next = 7;
+                  break;
+                }
+
+                _this2.show_login_loading = false;
+                return _context.abrupt("return");
+
+              case 7:
+                console.log('this user?', _this2.user);
+                _context.next = 10;
                 return t.server.directus.items('Sessions').readByQuery({
                   limit: 1,
                   filter: {
@@ -17206,35 +17234,71 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   }
                 });
 
-              case 6:
-                _this2.user_session = _context.sent;
-                console.log('this.user_session', _this2.user_session); // if the user does not have a session, created one
+              case 10:
+                result = _context.sent;
+                _this2.user_session = null; // reset
+
+                if (result !== null && result !== void 0 && (_result$data = result.data) !== null && _result$data !== void 0 && _result$data.length) {
+                  _this2.user_session = result.data[0];
+                }
+
+                console.log('servers user_session:', _this2.user_session); // if the user does not have a session, created one
 
                 if (_this2.user_session) {
-                  _context.next = 12;
+                  _context.next = 18;
                   break;
                 }
 
-                _this2.user_session = {};
-                _context.next = 12;
+                _this2.user_session = {
+                  current_world: 2,
+                  // todo: use uuid // jakes world by default
+                  current_room: 'bbce1345-0718-4faf-812d-e8c9040e1341',
+                  // jakes room by default
+                  current_game: 'f9222054-ea60-436f-9199-75b97781ec53' // food memory by default
+
+                };
+                _context.next = 18;
                 return t.server.directus.items('Sessions').createOne({
-                  user: _this2.user.id
+                  user: {
+                    id: _this2.user.id
+                  },
+                  current_world: _this2.user_session.current_world,
+                  current_room: _this2.user_session.current_room,
+                  current_game: _this2.user_session.current_game
                 }).then(function (res) {
-                  console.log('user session create', res); // this.user_session = res;
+                  console.log('user session created', res); // this.user_session = res;
                 })["catch"](function (e) {
                   console.error('error creating user session on server', e);
                 });
 
-              case 12:
+              case 18:
+                _this2.world_selection = (_this2$user_session = _this2.user_session) === null || _this2$user_session === void 0 ? void 0 : (_this2$user_session$c = _this2$user_session.current_world) === null || _this2$user_session$c === void 0 ? void 0 : _this2$user_session$c.toString();
+                _this2.room_selection = (_this2$user_session2 = _this2.user_session) === null || _this2$user_session2 === void 0 ? void 0 : _this2$user_session2.current_room;
+                _this2.game_selection = (_this2$user_session3 = _this2.user_session) === null || _this2$user_session3 === void 0 ? void 0 : _this2$user_session3.current_game; // TODO: make game->room->world a single query
+
+                if (_this2.game_selection) {
+                  _this2.getGamesForRoom(_this2.room_selection);
+
+                  _this2.getRoomsForWorld(_this2.world_selection);
+                } else if (_this2.room_selection) {
+                  _this2.getRoomsForWorld(_this2.world_selection);
+                }
+
                 _this2.show_login_modal = false;
 
                 if (!((_this2$user = _this2.user) !== null && _this2$user !== void 0 && (_this2$user$first_nam = _this2$user.first_name) !== null && _this2$user$first_nam !== void 0 && _this2$user$first_nam.length)) {
+                  // give us a name!
                   _this2.show_name_modal = true;
                 } else {
-                  _this2.openPauseMenu();
+                  if (!_this2.game_selection) {
+                    // need to pick a game
+                    _this2.openPauseMenu();
+                  } else {
+                    _this2.closePauseMenu();
+                  }
                 }
 
-              case 14:
+              case 24:
               case "end":
                 return _context.stop();
             }
@@ -17246,6 +17310,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.show_modal = false;
       this.show_pause_menu = false;
       t.client_ignore_clicks = false;
+      t.controls.enabled = true;
     },
     submitModal: function submitModal() {
       console.log('submit modal');
@@ -17325,30 +17390,75 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         console.error(err);
       });
     },
-    // worldSelectionChanged =>
-    getRoomsForWorld: function getRoomsForWorld(world_id) {
+    updateSessionOnServer: function updateSessionOnServer() {
       var _this4 = this;
 
-      this.world_selection = world_id; // console.log('getRoomsForWorld',arguments)
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
+        var _this4$user_session, _this4$user_session2;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if ((_this4$user_session = _this4.user_session) !== null && _this4$user_session !== void 0 && _this4$user_session.id) {
+                  _context2.next = 3;
+                  break;
+                }
+
+                console.error('user has no session. create one?');
+                return _context2.abrupt("return");
+
+              case 3:
+                _context2.next = 5;
+                return t.server.directus.items('Sessions').updateOne((_this4$user_session2 = _this4.user_session) === null || _this4$user_session2 === void 0 ? void 0 : _this4$user_session2.id, {
+                  // user: {id:this.user.id},
+                  current_world: _this4.user_session.current_world,
+                  current_room: _this4.user_session.current_room,
+                  current_game: _this4.user_session.current_game
+                }).then(function (res) {
+                  console.log('user session updated', res); // this.user_session = res;
+                })["catch"](function (e) {
+                  console.error('error updating user session on server', e);
+                });
+
+              case 5:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }))();
+    },
+    onGameSelectionChanged: function onGameSelectionChanged(game_id) {
+      this.game_selection = game_id;
+      this.updateSessionOnServer();
+    },
+    // getGameRoomWorldData(){
+    // },
+    // worldSelectionChanged =>
+    getRoomsForWorld: function getRoomsForWorld(world_id) {
+      var _this5 = this;
+
+      this.world_selection = world_id.toString();
+      this.updateSessionOnServer(); // console.log('getRoomsForWorld',arguments)
 
       axios.get("/api/world/".concat(world_id, "/rooms")).then(function (res) {
-        _this4.rooms = res.data.data;
-        _this4.room_selection = null;
-        _this4.game_selection = null;
+        _this5.rooms = res.data.data; // this.room_selection = null;
+        // this.game_selection = null;
       })["catch"](function (err) {
         console.error(err);
       });
     },
     // roomSelectionChanged =>
     getGamesForRoom: function getGamesForRoom(room_id) {
-      var _this5 = this;
+      var _this6 = this;
 
       // console.log('getGamesForRoom',$event.target.value);
       this.room_selection = room_id;
+      this.updateSessionOnServer();
       axios.get("/api/rooms/".concat(this.room_selection, "/games")).then(function (res) {
-        _this5.games = res.data.games;
-        _this5.game_types = res.data.game_types;
-        _this5.game_selection = null;
+        _this6.games = res.data.games;
+        _this6.game_types = res.data.game_types; // this.game_selection = null;
       })["catch"](function (err) {
         console.error(err);
       });
@@ -17356,14 +17466,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   computed: {
     gameTypeName: function gameTypeName() {
-      var _this6 = this;
+      var _this7 = this;
 
       return function (game_type_id) {
-        var _this6$game_types$fil, _this6$game_types$fil2;
+        var _this7$game_types$fil, _this7$game_types$fil2;
 
-        return (_this6$game_types$fil = _this6.game_types.filter(function (type) {
+        return (_this7$game_types$fil = _this7.game_types.filter(function (type) {
           return type.id === game_type_id;
-        })) === null || _this6$game_types$fil === void 0 ? void 0 : (_this6$game_types$fil2 = _this6$game_types$fil[0]) === null || _this6$game_types$fil2 === void 0 ? void 0 : _this6$game_types$fil2.Name;
+        })) === null || _this7$game_types$fil === void 0 ? void 0 : (_this7$game_types$fil2 = _this7$game_types$fil[0]) === null || _this7$game_types$fil2 === void 0 ? void 0 : _this7$game_types$fil2.Name;
       };
     },
     // show_modal(){
@@ -17425,6 +17535,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 // import TextField from './TextField.vue'
 var __default__ = {
+  props: {
+    show_loading: {
+      type: Boolean,
+      "default": true
+    }
+  },
   components: {// TextField
   },
   mounted: function mounted() {
@@ -17463,9 +17579,19 @@ var __default__ = {
               case 0:
                 // But, we need to authenticate if data is private
                 _this2.authenticated = false; // Try to authenticate with token if exists
+                // await t.server.directus.auth
+                //     .refresh()
+                //     .then(() => {
+                //         this.authenticated = true;
+                //         this.$emit('authenticated');
+                //     })
+                //     .catch((error) => {
+                //         console.warn('not authenticated',error);
+                //     });
 
                 _context2.next = 3;
-                return t.server.directus.auth.refresh().then(function () {
+                return t.server.directus.users.me.read().then(function (res) {
+                  console.log('me', res);
                   _this2.authenticated = true;
 
                   _this2.$emit('authenticated');
@@ -17853,7 +17979,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     },
     "class": "game-modal-toggle-icon",
     onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
-      return _ctx.openPauseMenu && _ctx.openPauseMenu.apply(_ctx, arguments);
+      return $props.openPauseMenu && $props.openPauseMenu.apply($props, arguments);
     }, ["prevent"]))
   }, _hoisted_4), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$props.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
@@ -18327,7 +18453,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
       return $props.game_selection = $event;
     }),
-    disabled: !$props.room_selection
+    disabled: !$props.room_selection,
+    onChange: _cache[6] || (_cache[6] = function () {
+      return $options.onRoomSelectionChanged && $options.onRoomSelectionChanged.apply($options, arguments);
+    })
   }, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.games, function (game) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("option", {
       key: game.id,
@@ -18337,18 +18466,18 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     , _hoisted_15);
   }), 128
   /* KEYED_FRAGMENT */
-  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <option value=\"new-game\">New Game</option> ")], 8
-  /* PROPS */
+  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <option value=\"new-game\">New Game</option> ")], 40
+  /* PROPS, HYDRATE_EVENTS */
   , _hoisted_14), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $props.game_selection]]), $props.game_selection === 'new-game' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_16, [_hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "text",
     placeholder: "My New Game Name",
-    "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
+    "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
       return _ctx.new_game_name = $event;
     })
   }, null, 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.new_game_name]]), _hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
-    "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
+    "onUpdate:modelValue": _cache[8] || (_cache[8] = function ($event) {
       return _ctx.new_game_mode = $event;
     })
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO loop game types "), _hoisted_19, _hoisted_20, _hoisted_21, _hoisted_22], 512
@@ -18356,7 +18485,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, _ctx.new_game_mode]]), _ctx.new_game_mode === 'new-game-mode' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_23, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "text",
     placeholder: "My New Game Mode Name",
-    "onUpdate:modelValue": _cache[8] || (_cache[8] = function ($event) {
+    "onUpdate:modelValue": _cache[9] || (_cache[9] = function ($event) {
       return _ctx.new_game_mode_name = $event;
     })
   }, null, 512
@@ -18365,7 +18494,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* STYLE */
   ), _hoisted_25, $props.game_selection !== 'new-game' && $props.isHostOfSelectedGame ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
     key: 0,
-    onClick: _cache[9] || (_cache[9] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[10] || (_cache[10] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return _ctx.restart_game && _ctx.restart_game.apply(_ctx, arguments);
     }, ["prevent"]))
   }, "Restart Game")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
@@ -18373,7 +18502,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       opacity: $props.world_selection && $props.room_selection && $props.game_selection ? 1 : 0.5,
       pointerEvents: $props.world_selection && $props.room_selection && $props.game_selection ? 'all' : 'none'
     }),
-    onClick: _cache[10] || (_cache[10] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[11] || (_cache[11] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.submitModal && $props.submitModal.apply($props, arguments);
     }, ["prevent"])),
     disabled: !$props.world_selection || !$props.room_selection || !$props.game_selection
@@ -18466,10 +18595,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [$setup.show_login_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LoginModal, {
     key: 0,
+    authenticated: $setup.authenticated,
+    show_loading: $setup.show_login_loading,
     onAuthenticated: $options.onLoginAuthenticated
   }, null, 8
   /* PROPS */
-  , ["onAuthenticated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_name_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_NameModal, {
+  , ["authenticated", "show_loading", "onAuthenticated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_name_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_NameModal, {
     key: 1,
     onNameUpdated: $options.onNameUpdated
   }, null, 8
@@ -18487,10 +18618,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     game_selection: $setup.game_selection,
     onRoomSelectionChanged: $options.getGamesForRoom,
     onWorldSelectionChanged: $options.getRoomsForWorld,
+    onGameSelectionChanged: $options.onGameSelectionChanged,
     isHostOfSelectedGame: $options.isHostOfSelectedGame
   }, null, 8
   /* PROPS */
-  , ["submitModal", "worlds", "rooms", "games", "game_types", "gameTypeName", "world_selection", "room_selection", "game_selection", "onRoomSelectionChanged", "onWorldSelectionChanged", "isHostOfSelectedGame"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, _hoisted_5)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, _hoisted_11)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_12])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DebugOverlay, {
+  , ["submitModal", "worlds", "rooms", "games", "game_types", "gameTypeName", "world_selection", "room_selection", "game_selection", "onRoomSelectionChanged", "onWorldSelectionChanged", "onGameSelectionChanged", "isHostOfSelectedGame"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, _hoisted_5)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, _hoisted_11)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_12])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DebugOverlay, {
     calling: $setup.calling,
     state: $props.state,
     game: $options.game,
@@ -18509,10 +18641,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     video_enabled: $setup.video_enabled,
     video_muted: $setup.video_muted,
     mic_muted: $setup.mic_muted,
-    enableVideo: $options.enableVideo
+    enableVideo: $options.enableVideo,
+    openPauseMenu: $options.openPauseMenu
   }, null, 8
   /* PROPS */
-  , ["state", "its_my_turn", "video_enabled", "video_muted", "mic_muted", "enableVideo"])]);
+  , ["state", "its_my_turn", "video_enabled", "video_muted", "mic_muted", "enableVideo", "openPauseMenu"])]);
 }
 
 /***/ }),
@@ -18536,33 +18669,32 @@ var _hoisted_1 = {
 var _hoisted_2 = {
   "class": "modal-content"
 };
+var _hoisted_3 = {
+  key: 0,
+  "class": "loading"
+};
+var _hoisted_4 = {
+  key: 1
+};
 
-var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
 }, "Hi, who are you?", -1
 /* HOISTED */
 );
 
-var _hoisted_4 = {
+var _hoisted_6 = {
   key: 0,
   "class": "modal-error"
 };
-var _hoisted_5 = {
+var _hoisted_7 = {
   key: 1
 };
-var _hoisted_6 = {
+var _hoisted_8 = {
   key: 2
 };
-var _hoisted_7 = {
-  key: 3
-};
-
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
-/* HOISTED */
-);
-
 var _hoisted_9 = {
-  key: 5
+  key: 3
 };
 
 var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
@@ -18570,45 +18702,53 @@ var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 );
 
 var _hoisted_11 = {
+  key: 5
+};
+
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_13 = {
   key: 7
 };
-var _hoisted_12 = {
+var _hoisted_14 = {
   key: 1
 };
 
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Request Password Reset Link", -1
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Request Password Reset Link", -1
 /* HOISTED */
 );
 
-var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_16 = {
+var _hoisted_18 = {
   key: 8
 };
-var _hoisted_17 = {
+var _hoisted_19 = {
   key: 9
 };
 
-var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" No Account? ");
+var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" No Account? ");
 
-var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
 /* HOISTED */
 );
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [$props.show_loading ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, "Loading...")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
     onSubmit: _cache[8] || (_cache[8] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return _ctx.formSubmit && _ctx.formSubmit.apply(_ctx, arguments);
     }, ["prevent"]))
-  }, [$setup.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.error), 1
+  }, [$setup.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.error), 1
   /* TEXT */
-  )) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.register && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h3", _hoisted_5, "Login")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.register && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h3", _hoisted_6, "Register")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.submitting ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, "loading...")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <input style=\"display:none;\" type=\"checkbox\" v-model=\"register\" /> "), !$setup.submitting && !$setup.show_check_email ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("input", {
+  )) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.register && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h3", _hoisted_7, "Login")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.register && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h3", _hoisted_8, "Register")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.submitting ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, "loading...")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <input style=\"display:none;\" type=\"checkbox\" v-model=\"register\" /> "), !$setup.submitting && !$setup.show_check_email ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("input", {
     key: 4,
     type: "text",
     ref: "email_field",
@@ -18620,7 +18760,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     required: ""
   }, null, 512
   /* NEED_PATCH */
-  )), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.email]]) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <input type=\"text\" v-show=\"register\" v-model=\"name\" placeholder=\"name (public)\" /> "), $setup.show_check_email ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_9, "Please check your email to finish registration.")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.show_forgot_password && !$setup.register && !$setup.submitting && !$setup.show_check_email ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("input", {
+  )), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.email]]) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <input type=\"text\" v-show=\"register\" v-model=\"name\" placeholder=\"name (public)\" /> "), $setup.show_check_email ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_11, "Please check your email to finish registration.")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.show_forgot_password && !$setup.register && !$setup.submitting && !$setup.show_check_email ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("input", {
     key: 6,
     type: "password",
     name: "password",
@@ -18631,12 +18771,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     placeholder: "password"
   }, null, 512
   /* NEED_PATCH */
-  )), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.password]]) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_10, !$setup.submitting ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_11, [!$setup.register && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
+  )), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.password]]) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_12, !$setup.submitting ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_13, [!$setup.register && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
     key: 0,
     onClick: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.onClickLogin && $options.onClickLogin.apply($options, arguments);
     }, ["prevent"]))
-  }, "Login")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_forgot_password && !$setup.show_check_email ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  }, "Login")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_forgot_password && !$setup.show_check_email ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_14, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.onClickRequestPWReset && $options.onClickRequestPWReset.apply($options, arguments);
     }, ["prevent"]))
@@ -18645,26 +18785,26 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.onClickRegister && $options.onClickRegister.apply($options, arguments);
     }, ["prevent"]))
-  }, "Register")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_14, !$setup.submitting && !$setup.show_forgot_password && !$setup.register ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("a", {
+  }, "Register")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_16, !$setup.submitting && !$setup.show_forgot_password && !$setup.register ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("a", {
     key: 3,
     href: "#",
     onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $setup.show_forgot_password = true;
     }, ["prevent"]))
-  }, "forgot password?")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click.prevent=\"onClickGuest\">Continue as Guest</button> ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <hr/> "), !$setup.submitting && ($setup.register || $setup.show_forgot_password) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+  }, "forgot password?")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click.prevent=\"onClickGuest\">Continue as Guest</button> ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <hr/> "), !$setup.submitting && ($setup.register || $setup.show_forgot_password) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
     href: "#",
     onClick: _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       $setup.toggleRegister(false);
       $setup.show_forgot_password = false;
     }, ["prevent"]))
-  }, "Login")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.register && !$setup.submitting && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_17, [_hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+  }, "Login")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$setup.register && !$setup.submitting && !$setup.show_forgot_password ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_19, [_hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
     href: "#",
     onClick: _cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $setup.toggleRegister(true);
     }, ["prevent"]))
-  }, "Register")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_19], 32
+  }, "Register")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_21], 32
   /* HYDRATE_EVENTS */
-  )])]);
+  )]))])]);
 }
 
 /***/ }),
@@ -28332,7 +28472,8 @@ function init() {
   checkReady(function () {
     t.server.directus = new _directus_sdk__WEBPACK_IMPORTED_MODULE_3__.Directus("https://u2ijwrng.directus.app", {
       auth: {
-        mode: 'cookie'
+        mode: 'json' // autoRefresh: true,
+
       }
     }); // alert('mounting vue');
 

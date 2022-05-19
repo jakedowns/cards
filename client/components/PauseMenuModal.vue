@@ -37,7 +37,7 @@
                  pointerEvents: world_selection && room_selection ? 'all' : 'none'
                 }">
                 <h3>Table / Game</h3>
-                <select v-model="game_selection" :disabled="!room_selection">
+                <select v-model="game_selection" :disabled="!room_selection" @change="onRoomSelectionChanged">
                     <option :key="game.id" v-for="game in games" :value="game.id">{{gameTypeName(game.game_type)}}</option>
                     <!-- <option value="new-game">New Game</option> -->
                 </select>
@@ -151,6 +151,12 @@ export default {
             // // save world selection to user's session on the server
             // this.getRoomsForWorld(this.world_selection);
             this.$emit('worldSelectionChanged',$event.target.value);
+        },
+        onGameSelectionChanged($event){
+            // console.log("world selection changed",this.world_selection,$event.target.value);
+            // // save world selection to user's session on the server
+            // this.getRoomsForWorld(this.world_selection);
+            this.$emit('gameSelectionChanged',$event.target.value);
         },
     }
 }

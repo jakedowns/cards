@@ -2,7 +2,10 @@
     <div id="debug" >
 
         <div class="modal-wrapper" v-if="show_modal">
-            <LoginModal v-if="show_login_modal" @authenticated="onLoginAuthenticated" />
+            <LoginModal v-if="show_login_modal"
+            :authenticated="authenticated"
+            :show_loading="show_login_loading"
+            @authenticated="onLoginAuthenticated" />
 
             <NameModal v-if="show_name_modal" @nameUpdated="onNameUpdated"/>
 
@@ -19,7 +22,10 @@
                 :room_selection="room_selection"
                 :game_selection="game_selection"
                 @roomSelectionChanged="getGamesForRoom"
-                @worldSelectionChanged="getRoomsForWorld"           :isHostOfSelectedGame="isHostOfSelectedGame"
+                @worldSelectionChanged="getRoomsForWorld"
+                @gameSelectionChanged="onGameSelectionChanged"
+                :isHostOfSelectedGame="isHostOfSelectedGame"
+
             />
 
             <div class="game-in-progress-modal modal" v-if="show_game_in_progress_modal">
@@ -59,6 +65,7 @@
             :video_muted="video_muted"
             :mic_muted="mic_muted"
             :enableVideo="enableVideo"
+            :openPauseMenu="openPauseMenu"
 
         />
     </div>
@@ -88,9 +95,11 @@ export default {
 
     setup(){
         return {
+            authenticated: false,
+            show_login_loading: true,
             // key ourselves in the users{}
             user: {},
-            user_session: {},
+            user_session: null,
 
             // todo: key by id
             worlds: [],
@@ -232,6 +241,11 @@ export default {
             this.show_modal = true;
             this.show_pause_menu = true;
             t.client_ignore_clicks = true;
+            t.controls.enabled = true;
+        },
+        closeModal(){
+            this.show_modal = false;
+            t.client_ignore_clicks = false;
         },
         onNameUpdated(){
             this.show_name_modal = false;
@@ -241,9 +255,18 @@ export default {
 
             console.warn('TODO: if user has no name set, show name modal');
 
-            this.user = await t.server.directus.users.me.read({fields:['first_name','id','fkid']})
+            this.user = await t.server.directus.users.me.read({fields:['first_name','id','fkid']}).catch(e=>{
+                console.error('error getting user',e);
+            });
 
-            this.user_session = await t.server.directus.items('Sessions').readByQuery({
+            if(!this.user){
+                this.show_login_loading = false;
+                return;
+            }
+
+            console.log('this user?', this.user);
+
+            const result = await t.server.directus.items('Sessions').readByQuery({
                 limit: 1,
 
                 filter: {
@@ -251,32 +274,63 @@ export default {
                 }
             });
 
-            console.log('this.user_session',this.user_session);
+            this.user_session = null; // reset
+            if(result?.data?.length){
+                this.user_session = result.data[0];
+            }
+
+            console.log('servers user_session:',this.user_session);
 
             // if the user does not have a session, created one
             if(!this.user_session){
-                this.user_session = {}
+                this.user_session = {
+                    current_world: 2, // todo: use uuid // jakes world by default
+                    current_room: 'bbce1345-0718-4faf-812d-e8c9040e1341', // jakes room by default
+                    current_game: 'f9222054-ea60-436f-9199-75b97781ec53' // food memory by default
+                }
                 await t.server.directus.items('Sessions').createOne({
-                    user: this.user.id,
+                    user: {id:this.user.id},
+                    current_world: this.user_session.current_world,
+                    current_room: this.user_session.current_room,
+                    current_game: this.user_session.current_game,
                 }).then(res => {
-                    console.log('user session create',res);
+                    console.log('user session created',res);
                     // this.user_session = res;
                 }).catch((e)=>{
                     console.error('error creating user session on server',e);
                 });
             }
 
+            this.world_selection = this.user_session?.current_world?.toString()
+            this.room_selection = this.user_session?.current_room
+            this.game_selection = this.user_session?.current_game
+
+            // TODO: make game->room->world a single query
+            if(this.game_selection){
+                this.getGamesForRoom(this.room_selection)
+                this.getRoomsForWorld(this.world_selection);
+            }else if(this.room_selection){
+                this.getRoomsForWorld(this.world_selection);
+            }
+
             this.show_login_modal = false;
             if(!this.user?.first_name?.length){
+                // give us a name!
                 this.show_name_modal = true;
             }else{
-                this.openPauseMenu();
+                if(!this.game_selection){
+                    // need to pick a game
+                    this.openPauseMenu();
+                }else{
+                    this.closePauseMenu()
+                }
             }
         },
         closePauseMenu(){
             this.show_modal = false;
             this.show_pause_menu = false;
             t.client_ignore_clicks = false;
+            t.controls.enabled = true;
         },
         submitModal(){
             console.log('submit modal');
@@ -351,14 +405,44 @@ export default {
                 console.error(err);
             })
         },
+        async updateSessionOnServer(){
+            // axios.post('/api/session').then(res=>{
+            //     console.log('session updated',res);
+            // }).catch(err=>{
+            //     console.error(err);
+            // })
+            if(!this.user_session?.id){
+                console.error('user has no session. create one?');
+                return;
+            }
+            await t.server.directus.items('Sessions').updateOne(this.user_session?.id,{
+                    // user: {id:this.user.id},
+                    current_world: this.user_session.current_world,
+                    current_room: this.user_session.current_room,
+                    current_game: this.user_session.current_game,
+                }).then(res => {
+                    console.log('user session updated',res);
+                    // this.user_session = res;
+                }).catch((e)=>{
+                    console.error('error updating user session on server',e);
+                });
+        },
+        onGameSelectionChanged(game_id){
+            this.game_selection = game_id;
+            this.updateSessionOnServer();
+        },
+        // getGameRoomWorldData(){
+
+        // },
         // worldSelectionChanged =>
         getRoomsForWorld(world_id){
-            this.world_selection = world_id;
+            this.world_selection = world_id.toString();
+            this.updateSessionOnServer();
             // console.log('getRoomsForWorld',arguments)
             axios.get(`/api/world/${world_id}/rooms`).then((res)=>{
                 this.rooms = res.data.data;
-                this.room_selection = null;
-                this.game_selection = null;
+                // this.room_selection = null;
+                // this.game_selection = null;
             }).catch((err)=>{
                 console.error(err);
             })
@@ -367,10 +451,11 @@ export default {
         getGamesForRoom(room_id){
             // console.log('getGamesForRoom',$event.target.value);
             this.room_selection = room_id;
+            this.updateSessionOnServer();
             axios.get(`/api/rooms/${this.room_selection}/games`).then((res)=>{
                 this.games = res.data.games;
                 this.game_types = res.data.game_types;
-                this.game_selection = null;
+                // this.game_selection = null;
             }).catch((err)=>{
                 console.error(err);
             })
