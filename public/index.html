@@ -45,17 +45,6 @@
                 border: 1px solid red;
             }
         </style>
-        <script>
-            function toggle_opponent_mute(){
-                var video = document.getElementById('opponent_video');
-                if (video.muted) {
-                    video.muted = false;
-                } else {
-                    video.muted = true;
-                }
-                video.classList.toggle('muted',video.muted)
-            }
-        </script>
     </head>
     <body>
         <div id="vue-layer"></div>

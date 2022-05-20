@@ -16878,6 +16878,30 @@ __webpack_require__.r(__webpack_exports__);
     openPauseMenu: Function,
     toggleMute: Function,
     audio_muted: Boolean
+  },
+  setup: function setup() {
+    return {
+      client_mute_states: {}
+    };
+  },
+  watch: {
+    client_ids: function client_ids(next, prev) {
+      var _this = this;
+
+      next.forEach(function (client_id) {
+        var _this$client_mute_sta;
+
+        if (!((_this$client_mute_sta = _this.client_mute_states) !== null && _this$client_mute_sta !== void 0 && _this$client_mute_sta[client_id])) {
+          _this.client_mute_states[client_id] = false;
+        }
+      });
+    }
+  },
+  methods: {
+    toggleOpponentMute: function toggleOpponentMute(client_id) {
+      // this.$refs[`opponent_video_${client_id}`].muted = !this.$refs[`opponent_video_${client_id}`].muted
+      this.client_mute_states[client_id] = !this.client_mute_states[client_id];
+    }
   }
 });
 
@@ -17376,7 +17400,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       t.controls.enabled = true;
     },
     enableVideo: function enableVideo() {
-      this.video_enabled = true;
       this.$nextTick(function () {
         window.t.setupVideoStream();
       });
@@ -17392,8 +17415,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     //     this.video_muted = !this.video_muted;
     // },
     startVideoChat: function startVideoChat() {
-      this.calling = true; // this.video_enabled = true;
-
+      this.calling = true;
       window.t.setupVideoStream();
       window.t.call();
     },
@@ -18090,7 +18112,7 @@ var _hoisted_20 = {
 var _hoisted_21 = {
   "class": "opponent_videos"
 };
-var _hoisted_22 = ["data-client-id"];
+var _hoisted_22 = ["onClick", "muted", "data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _$props$state$client_, _$props$state;
 
@@ -18130,17 +18152,24 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_ = (_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.client_ids) !== null && _$props$state$client_ !== void 0 ? _$props$state$client_ : []).filter(function (id) {
     return id !== $props.state.my_client_id;
   }), function (client_id) {
+    var _$setup$client_mute_s, _$setup$client_mute_s2;
+
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("video", {
-      "class": "opponent_video",
+      "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["opponent_video", {
+        'muted': $setup.client_mute_states[client_id]
+      }]),
       autoplay: "",
       ref_for: true,
       ref: "opponent_video_".concat(client_id),
       playsinline: "",
-      onclick: "toggle_opponent_mute()",
+      onClick: function onClick($event) {
+        return $options.toggleOpponentMute(client_id);
+      },
       key: client_id,
+      muted: (_$setup$client_mute_s = (_$setup$client_mute_s2 = $setup.client_mute_states) === null || _$setup$client_mute_s2 === void 0 ? void 0 : _$setup$client_mute_s2[client_id]) !== null && _$setup$client_mute_s !== void 0 ? _$setup$client_mute_s : false,
       "data-client-id": client_id
-    }, null, 8
-    /* PROPS */
+    }, null, 10
+    /* CLASS, PROPS */
     , _hoisted_22);
   }), 128
   /* KEYED_FRAGMENT */
@@ -18687,11 +18716,14 @@ var _hoisted_2 = {
   "class": "modal-wrapper"
 };
 var _hoisted_3 = {
+  "class": "modal-inner"
+};
+var _hoisted_4 = {
   key: 3,
   "class": "game-in-progress-modal modal"
 };
 
-var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-content"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
@@ -18699,13 +18731,13 @@ var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 /* HOISTED */
 );
 
-var _hoisted_5 = [_hoisted_4];
-var _hoisted_6 = {
+var _hoisted_6 = [_hoisted_5];
+var _hoisted_7 = {
   key: 4,
   "class": "player-request-modal modal"
 };
 
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-content"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
@@ -18713,13 +18745,13 @@ var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 /* HOISTED */
 );
 
-var _hoisted_8 = [_hoisted_7];
-var _hoisted_9 = {
+var _hoisted_9 = [_hoisted_8];
+var _hoisted_10 = {
   key: 5,
   "class": "spectator-joined-modal modal"
 };
 
-var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-content"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
@@ -18727,9 +18759,9 @@ var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_11 = [_hoisted_10];
+var _hoisted_12 = [_hoisted_11];
 
-var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-underlay"
 }, null, -1
 /* HOISTED */
@@ -18746,7 +18778,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   var _component_AVHud = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("AVHud");
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [$setup.show_login_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LoginModal, {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [$setup.show_login_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LoginModal, {
     key: 0,
     onNotAuthenticated: $options.onLoginNotAuthenticated,
     authenticated: $setup.authenticated,
@@ -18776,7 +18808,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     isHostOfSelectedGame: $options.isHostOfSelectedGame
   }, null, 8
   /* PROPS */
-  , ["submitModal", "worlds", "rooms", "games", "game_types", "gameTypeName", "world_selection", "room_selection", "game_selection", "onRoomSelectionChanged", "onWorldSelectionChanged", "onGameSelectionChanged", "isHostOfSelectedGame"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, _hoisted_5)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, _hoisted_11)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_12])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DebugOverlay, {
+  , ["submitModal", "worlds", "rooms", "games", "game_types", "gameTypeName", "world_selection", "room_selection", "game_selection", "onRoomSelectionChanged", "onWorldSelectionChanged", "onGameSelectionChanged", "isHostOfSelectedGame"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, _hoisted_9)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_10, _hoisted_12)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _hoisted_13])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DebugOverlay, {
     calling: $setup.calling,
     state: $props.state,
     game: $options.game,
@@ -19054,7 +19086,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 103px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n  cursor: pointer;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal {\n  pointer-events: all;\n  top: 60px;\n  position: absolute;\n  width: 320px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  left: 50%;\n  transform: translateX(-16.5vw);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n  pointer-events: all;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 103px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n  cursor: pointer;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal-wrapper {\n  width: 100%;\n}\n.modal-wrapper .modal-inner {\n  width: 320px;\n  margin: 0 auto;\n  position: relative;\n}\n.modal {\n  position: relative;\n  pointer-events: all;\n  top: 60px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n  pointer-events: all;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -27533,6 +27565,7 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "setupVideoStream",
     value: function setupVideoStream() {
+      t.root.video_enabled = true;
       return new Promise(function (resolve, reject) {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           // todo add camera flip (self)
@@ -27922,7 +27955,7 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
 
       this.video_texture.format = THREE.RGBAFormat;
       this.video_material = new THREE.MeshBasicMaterial({
-        color: 0x800080,
+        // color: 0x800080,
         // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
         // wireframe: true,
         // transparent: this.player_is_me ? true : false,
@@ -27936,11 +27969,11 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
     value: function setupMesh() {
       this.mesh = new THREE.Mesh( // new THREE.SphereGeometry(4.0,8,8),
       new THREE.PlaneGeometry(16, 16), new THREE.MeshBasicMaterial({
-        color: 0x800080,
+        color: 0x000000,
         // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
         // wireframe: true,
-        transparent: this.player_is_me ? true : false,
-        opacity: this.player_is_me ? 0.0 : 1.0 // map: this.video_texture,
+        transparent: false,
+        opacity: 1.0 // map: this.video_texture,
 
       }));
       this.mesh.lookAt(camera.position); // this.mesh.scale.setScalar(.5)
@@ -28879,6 +28912,7 @@ function init() {
   t.camera.rotation.z = 3.134952666963505;
   t.controls = controls;
   t.controls.enabled = false;
+  t.controls.maxPolarAngle = Math.PI / 3.2;
   t.controls.target.x = 0;
   t.controls.target.y = 0;
   t.controls.target.z = 0;

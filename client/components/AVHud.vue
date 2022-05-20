@@ -39,12 +39,14 @@
             <!-- opponent video streams -->
             <div class="opponent_videos">
             <video class="opponent_video"
+                :class="{'muted':client_mute_states[client_id]}"
                 autoplay
                 :ref="`opponent_video_${client_id}`"
                 playsinline
-                onclick="toggle_opponent_mute()"
+                @click="toggleOpponentMute(client_id)"
                 v-for="client_id in (state?.client_ids ?? []).filter((id)=>{return id!==state.my_client_id})"
                 :key="client_id"
+                :muted="client_mute_states?.[client_id] ?? false"
                 :data-client-id="client_id" />
             </div>
         </div>
@@ -65,6 +67,26 @@ export default {
         openPauseMenu:Function,
         toggleMute:Function,
         audio_muted:Boolean
+    },
+    setup(){
+        return {
+            client_mute_states:{}
+        }
+    },
+    watch:{
+        client_ids(next,prev){
+            next.forEach(client_id=>{
+                if(!this.client_mute_states?.[client_id]){
+                    this.client_mute_states[client_id] = false
+                }
+            })
+        }
+    },
+    methods:{
+        toggleOpponentMute(client_id){
+            // this.$refs[`opponent_video_${client_id}`].muted = !this.$refs[`opponent_video_${client_id}`].muted
+            this.client_mute_states[client_id] = !this.client_mute_states[client_id]
+        }
     }
 }
 </script>

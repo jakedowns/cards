@@ -2,45 +2,47 @@
     <div id="debug" >
 
         <div class="modal-wrapper" v-if="show_modal">
-            <LoginModal
+            <div class="modal-inner">
+                <LoginModal
 
-                v-if="show_login_modal"
-                @notAuthenticated="onLoginNotAuthenticated"
-                :authenticated="authenticated"
-                :show_loading="show_login_loading"
-                @authenticated="onLoginAuthenticated" />
+                    v-if="show_login_modal"
+                    @notAuthenticated="onLoginNotAuthenticated"
+                    :authenticated="authenticated"
+                    :show_loading="show_login_loading"
+                    @authenticated="onLoginAuthenticated" />
 
-            <NameModal v-if="show_name_modal" @nameUpdated="onNameUpdated"/>
+                <NameModal v-if="show_name_modal" @nameUpdated="onNameUpdated"/>
 
-            <PauseMenuModal
+                <PauseMenuModal
 
-                v-if="show_pause_menu"
-                :submitModal="submitModal"
-                :worlds="worlds"
-                :rooms="rooms"
-                :games="games"
-                :game_types="game_types"
-                :gameTypeName="gameTypeName"
-                :world_selection="world_selection"
-                :room_selection="room_selection"
-                :game_selection="game_selection"
-                @roomSelectionChanged="getGamesForRoom"
-                @worldSelectionChanged="getRoomsForWorld"
-                @gameSelectionChanged="onGameSelectionChanged"
-                :isHostOfSelectedGame="isHostOfSelectedGame"
+                    v-if="show_pause_menu"
+                    :submitModal="submitModal"
+                    :worlds="worlds"
+                    :rooms="rooms"
+                    :games="games"
+                    :game_types="game_types"
+                    :gameTypeName="gameTypeName"
+                    :world_selection="world_selection"
+                    :room_selection="room_selection"
+                    :game_selection="game_selection"
+                    @roomSelectionChanged="getGamesForRoom"
+                    @worldSelectionChanged="getRoomsForWorld"
+                    @gameSelectionChanged="onGameSelectionChanged"
+                    :isHostOfSelectedGame="isHostOfSelectedGame"
 
-            />
+                />
 
-            <div class="game-in-progress-modal modal" v-if="show_game_in_progress_modal">
-                <div class="modal-content"><h2 class="mb-4">"Jake's Game" is already in progress</h2><button>Spectate</button><button>Request to Play</button></div>
-            </div>
+                <div class="game-in-progress-modal modal" v-if="show_game_in_progress_modal">
+                    <div class="modal-content"><h2 class="mb-4">"Jake's Game" is already in progress</h2><button>Spectate</button><button>Request to Play</button></div>
+                </div>
 
-            <div class="player-request-modal modal" v-if="show_player_request_modal">
-                <div class="modal-content"><h2 class="mb-4">"Brent" wants to join your game!</h2><button>Allow (Continue)</button><button>Allow (New)</button><button>Ignore</button></div>
-            </div>
+                <div class="player-request-modal modal" v-if="show_player_request_modal">
+                    <div class="modal-content"><h2 class="mb-4">"Brent" wants to join your game!</h2><button>Allow (Continue)</button><button>Allow (New)</button><button>Ignore</button></div>
+                </div>
 
-            <div class="spectator-joined-modal modal" v-if="show_spectator_joined_modal">
-                <div class="modal-content"><h2 class="mb-4">"Brent" joined as a spectator</h2><button>Invite to play</button></div>
+                <div class="spectator-joined-modal modal" v-if="show_spectator_joined_modal">
+                    <div class="modal-content"><h2 class="mb-4">"Brent" joined as a spectator</h2><button>Invite to play</button></div>
+                </div>
             </div>
 
             <div class="modal-underlay"></div>
@@ -396,7 +398,6 @@ export default {
             t.controls.enabled = true;
         },
         enableVideo(){
-            this.video_enabled = true;
             this.$nextTick(()=>{
                 window.t.setupVideoStream()
             })
@@ -413,7 +414,6 @@ export default {
         // },
         startVideoChat(){
             this.calling = true;
-            // this.video_enabled = true;
             window.t.setupVideoStream();
             window.t.call()
         },
@@ -621,6 +621,14 @@ button {
 .debug-inner {
     pointer-events: all;
 }
+.modal-wrapper {
+    width: 100%;
+    .modal-inner {
+        width: 320px;
+        margin: 0 auto;
+        position: relative;
+    }
+}
 .modal {
     h2 {
         text-align: center;
@@ -629,17 +637,18 @@ button {
         margin-top: 5px;
         margin-bottom: 10px;
     }
+    position: relative;
     pointer-events: all;
     top: 60px;
-    position: absolute;
-    width: 320px;
+    // position: absolute;
     background-color: rgba(0,0,0,0.8);
     padding: 20px;
     border-radius: 20px;
     box-shadow: 0 0 10px rgb(0 0 0 / 90%);
     backdrop-filter: blur(10px);
-    left: 50%;
-    transform: translateX( calc( ( -33vw ) / 2) );
+    // left: 50%;
+    // transform: translateX( calc( ( -33vw ) / 2) );
+
     box-sizing: border-box;
     // pointer-events: none;
     input, select, label {
