@@ -58,21 +58,34 @@
             :show_debug_info="show_debug_info"
             @toggleShowDebugInfo="toggleShowDebugInfo"
 
+            :mic_muted="mic_muted"
+            :video_enabled="video_enabled"
+            :video_muted="video_muted"
+
+            :startVideoChat="startVideoChat"
+
             :camera_locked="camera_locked"
             :resetCamera="resetCamera"
             :toggleCameraLock="toggleCameraLock"
+            :restartGame="restartGame"
 
         />
 
         <AVHud
+
+            ref="AVHud"
 
             :state="state"
             :its_my_turn="its_my_turn"
             :video_enabled="video_enabled"
             :video_muted="video_muted"
             :mic_muted="mic_muted"
+            :audio_muted="audio_muted"
+
             :enableVideo="enableVideo"
+            :disableVideo="disableVideo"
             :openPauseMenu="openPauseMenu"
+            :toggleMute="toggleMute"
 
         />
     </div>
@@ -134,9 +147,10 @@ export default {
             show_end_call_button: false,
             camera_locked: false,
             messages: [],
-            mic_muted: false,
+            mic_muted: true,
             video_enabled: false,
             video_muted: false,
+            audio_muted: true, // mute by default
 
             // modal data
             world_selection: '',
@@ -176,16 +190,28 @@ export default {
             handler(new_state,old_state){
 
                 // if we have an active webrtc connection, give user option to end it
-                this.show_end_call_button = t?.peer?.connectionState === 'connected';
+                this.show_end_call_button = false;
+                // at least one active peer?
+                Object.values(t?.peers?.remote_peers??{})?.forEach((conn)=>{
+                    if(conn.connectionState === 'connected'){
+                        this.show_end_call_button = true;
+                    }
+                })
+
+                // if(new_state?.client_ids?.length > old_state?.client_ids?.length){
+                //     t.setupRTCPeerConnections();
+                // }
 
                 if(new_state?.game?.started && !old_state?.game?.started){
                     t.startGame();
                 }
+
+                // TODO constantly tween towards Zones, remove the need to explictly detect zone changes and manually trigger tweens
                 // console.log('last dealt?',new_state?.last_dealt,old_state?.last_dealt);
                 if(new_state?.shuffling && !old_state?.shuffling){
                     t.deck.tweenCardsToDeck();
                 }
-                if(new_state?.last_dealt !== old_state?.last_dealt){
+                else if(new_state?.last_dealt !== old_state?.last_dealt){
                     t.deck.tweenCardsToZones();
                 }
 
@@ -353,6 +379,10 @@ export default {
                 }
             }
         },
+        toggleMute(){
+            this.audio_muted = !this.audio_muted;
+
+        },
         closePauseMenu(){
             this.show_modal = false;
             this.show_pause_menu = false;
@@ -381,16 +411,25 @@ export default {
         // toggle_vid_mute(){
         //     this.video_muted = !this.video_muted;
         // },
-        start_video_chat(){
+        startVideoChat(){
             this.calling = true;
+            // this.video_enabled = true;
+            window.t.setupVideoStream();
             window.t.call()
         },
         end_video_chat(){
-            window.t?.peer?.close();
-            if(window.t.peer){
-                window.t.peer = null;
-            }
-            window.t.setupOpponentPeer();
+            // window.t?.peer?.close();
+            // if(window.t.peer){
+            //     window.t.peer = null;
+            // }
+            window.t.peers.closeAll();
+            /*
+            window.t.webrtc_peer_connections.forEach((conn)=>{
+                conn.close();
+            })
+            window.t.webrtc_peer_connections = {};
+            window.t.peers.setupRTCPeerConnections();
+            */
             this.show_end_call_button = false;
             this.calling = false;
         },
@@ -417,7 +456,7 @@ export default {
                 //game_id: this.state.game_id, // server should know based on client id
             })
         },
-        restart_game(){
+        restartGame(){
             this.closePauseMenu()
             window.t.server.send({
                 type: 'RESTART_GAME',
@@ -532,6 +571,19 @@ export default {
 </script>
 
 <style lang="scss">
+.mute-video {
+    position: absolute;
+    width: 40px;
+    bottom: 103px;
+    left: 30px;
+    pointer-events: all;
+
+    svg {
+        cursor: pointer;
+        width: 100%;
+        height: auto;
+    }
+}
 .game-modal-toggle-icon {
     cursor: pointer;
     pointer-events: all;
@@ -546,15 +598,16 @@ export default {
 }
 #icon-video-enable, #icon-video-disable{
     position: absolute;
-    bottom: 60px;
+    bottom: 103px;
     right: 20px;
 }
 #icon-video-enable svg {
     width: 35px;
+    cursor: pointer;
 }
 #icon-video-disable {
     right: 21px;
-    bottom: 63px;
+    bottom: 103px;
 }
 select {
     background: #000;
@@ -579,7 +632,7 @@ button {
     pointer-events: all;
     top: 60px;
     position: absolute;
-    width: calc(33vw - 40px);
+    width: 320px;
     background-color: rgba(0,0,0,0.8);
     padding: 20px;
     border-radius: 20px;
@@ -697,6 +750,7 @@ input[type=text],input[type=password]{
     border: 1px solid yellow;
     position: relative;
     display: inline-block;
+    background: black;
 }
 .modal-error {
     color: red;

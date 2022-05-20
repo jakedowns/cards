@@ -1,3 +1,5 @@
+import PeerConnections from './PeerConnections.mjs';
+
 // This example uses THREE.CatmullRomCurve3 to create a path for a custom Keyframe Track position animation.
 // AnimationClip creation function on line 136
 
@@ -107,21 +109,30 @@ class SocketConnection{
       }catch(e){
           console.error(e,event.data)
       }
-      if(decoded?.type !== 'PING'){
+      if(
+        decoded?.type !== 'PING'
+        && decoded?.type !== 'remotePeerIceCandidate'
+        && decoded?.type !== 'mediaAnswer'
+        && decoded?.type !== 'iceCandidate'
+      ){
           console.log('socket message:',decoded);
           t.app.$refs.app.messages.push(decoded);
       }
       // todo: switch on type not message
       switch(decoded?.type){
+
           case 'mediaOffer':
-            t.onMediaOffer(decoded);
+            t.peers.onMediaOffer(decoded);
             break;
+
           case 'mediaAnswer':
-            t.onMediaAnswer(decoded);
+            t.peers.onMediaAnswer(decoded);
             break;
+
           case 'remotePeerIceCandidate':
-            t.onRemotePeerIceCandidate(decoded);
+            t.peers.onRemotePeerIceCandidate(decoded);
             break;
+
           case 'PING':
               // document.querySelector('.clients .value').textContent = JSON.stringify(decoded.server_client_ids);
               //todo: remove manual linkage:
@@ -235,6 +246,9 @@ class SoundsManager{
 
   }
   async play(sound_name){
+    if(t.root.audio_muted){
+      return;
+    }
     this.element = document.getElementById('sound_effects')
     console.trace('play sound',this.muted,sound_name,this.sound_map)
     if(!this.muted && this.sound_map?.[sound_name]){
@@ -285,14 +299,17 @@ class Tabletop{
         // t.sounds =
         this.sounds = new SoundsManager();
 
-        this.webrtc_peer_connections = {};
-        this.webrtc_peer_streams = {};
-        this.webrtc_peer_video_settings = {};
+        this.peers = new PeerConnections();
+
+        // this.webrtc_peer_connections = {};
+        // this.webrtc_peer_streams = {};
+        // this.webrtc_peer_video_settings = {};
 
         this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
         this.deckgroup = new THREE.Group();
-        this.deckgroup.position.y = 10;
+        this.deckgroup.position.y = 5;
+        this.deckgroup.position.z = -5;
         scene.add(this.deckgroup);
 
         // playfield cards (intersection group)
@@ -325,28 +342,21 @@ class Tabletop{
         this.game.startRound();
     }
 
-    setupOpponentPeer(client_id){
-      // oponent stream
-      const createPeerConnection = () => {
-        return new RTCPeerConnection({
-          iceServers: [
-            {
-              urls: "stun:stun.stunprotocol.org"
-            }
-          ]
-        });
-      };
+    // call -> setupRTCPeerConnections -> offerStreamToPeer -> setupRTCPeerConnection
 
-      t.webrtc_peer_connections[client_id] = createPeerConnection();
-      t.webrtc_peer_connections[client_id].onicecandidate = t.onIceCandidateEvent;
-      const gotRemoteStream = event => {
-        const [stream] = event.streams;
-        t.webrtc_peer_streams[client_id] = stream;
-        t.root.$refs[`opponent_video_${client_id}`].srcObject = stream;
-      };
+    // todo: do this each time a new client joins?
+    // setupRTCPeerConnections(){
+    //   for(var i = 0; i<t.app.state.client_ids.length; i++){
+    //     let client_id = t.app.state.client_ids[i];
+    //     if(client_id !== t.app.state.my_client_id){
+    //       if(!t.webrtc_peer_connections[client_id]){
+    //         t.offerStreamToPeer(client_id);
+    //       }
+    //     }
+    //   }
+    // }
 
-      t.webrtc_peer_connections[client_id].addEventListener('track', gotRemoteStream);
-    }
+
 
     closeVideoStream(){
       // t?.stream?.getTracks()?.forEach(function(track){
@@ -356,77 +366,65 @@ class Tabletop{
         track.stop();
       })
     }
+
     closeAudioStream(){
       t?.stream?.getAudioTracks()?.forEach(function(track){
         track.stop();
       })
     }
 
+    // loop through ALL peers and send them the stream
+    // TODO: max peers
+    async call(){
+      await t.peers.setupRTCPeerConnections();
+    }
+
     setupVideoStream(){
-      if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
-        // todo add camera flip (self)
-        // add video mute (self/other)
-        // add audio mute (self/other)
-        const constraints = {
-          audio: true,
-          video: {
-            exposureMode: {ideal:'continuous'},
-            exposureCompensation: {ideal:0},
-            width: {ideal:1280},
-            height: {ideal:720},
-            facingMode: 'user'
-          }
-        };
+      return new Promise((resolve,reject)=>{
+        if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
+          // todo add camera flip (self)
+          // add video mute (self/other)
+          // add audio mute (self/other)
+          const constraints = {
+            audio: true,
+            video: {
+              exposureMode: {ideal:'continuous'},
+              exposureCompensation: {ideal:0},
+              width: {ideal:1280},
+              height: {ideal:720},
+              facingMode: 'user'
+            }
+          };
 
-        navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
+          navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
 
-          // NOTE: t.stream === the current client's outbound stream
-          // apply the stream to the video element used in the texture
-          t.stream = stream;
+            // NOTE: t.stream === the current client's outbound stream
+            // apply the stream to the video element used in the texture
+            t.stream = stream;
 
-          t.video.srcObject = stream;
-          t.video.play();
+            t.video.srcObject = stream;
+            t.video.play();
 
-        } ).catch( function ( error ) {
+            resolve();
 
-          console.error( 'Unable to access the camera/webcam.', error );
+          } ).catch( function ( error ) {
 
-        } );
+            console.error( 'Unable to access the camera/webcam.', error );
 
-      } else {
+            reject();
 
-        console.error( 'MediaDevices interface not available.' );
+          } );
 
-      }
+        } else {
 
-      // loop through ALL peers and send them the stream
-      // TODO: max peers
-      t.call = async()=>{
-        t.opponentIDs.forEach((id)=>{
-          t.setupOpponentPeer(id);
-          t.offerStreamToPeer(id);
-        })
-      }
+          console.error( 'MediaDevices interface not available.' );
+
+          reject();
+
+        }
+      });
     }
-    async offerStreamToPeer(peer_id){
-      const peer = t.webrtc_peer_connections[peer_id];
-      if(!peer){
-        console.error('no peer connection for',peer_id);
-        return;
-      }
-      // offer our audio, video tracks to the peer connection
-      t.stream.getTracks().forEach(track => peer.addTrack(track, t.stream));
-      const localPeerOffer = await peer.createOffer();
-      await peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
-      //const opponent_id = getOpponentID()
-      t.server.send({
-        type:'mediaOffer',
-        offer: localPeerOffer,
-        stream_settings: t.stream.getVideoTracks()[0].getSettings(),
-        from: t.app.state.my_client_id,
-        to: peer_id
-      })
-    }
+
     // animate the cards within the hand to maintain spacing
     // also handles animating cards from playfield to hand after a match is validated by the server
     updateCardsInHand(){
@@ -597,96 +595,9 @@ class Tabletop{
         return this.deck.cards;
     }
 
-    async onMediaOffer(decoded){
-      console.log('todo: if we already have a peer, do we keep or destroy that connection to respond to the new offer?')
-      console.log('onMediaOffer',decoded);
-        try {
-          const FROM_PEER_ID = decoded.from;
-          const PEER = t.webrtc_peer_connections[FROM_PEER_ID];
-          if(!PEER){
-            t.setupOpponentPeer(FROM_PEER_ID);
-            // t.offerStreamToPeer(FROM_PEER_ID);
-            // console.error('no peer for',FROM_PEER_ID);
-            // return;
-          }
-          await PEER.setRemoteDescription(new RTCSessionDescription(decoded.offer));
-          const peerAnswer = await PEER.createAnswer();
-          await PEER.setLocalDescription(new RTCSessionDescription(peerAnswer));
-          // save call initiators stream settings
-          t.webrtc_peer_video_settings[FROM_PEER_ID] = decoded.stream_settings;
-          if(t.webrtc_peer_video_settings[FROM_PEER_ID]){
-            let ovss = t.webrtc_peer_video_settings[FROM_PEER_ID];
-            let aspect_ratio = ovss.width / ovss.height;
-            // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
-            t?.players?.[FROM_PEER_ID]?.head.mesh.scale.set(aspect_ratio,1,1);
-            // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
-          }
-          t.server.send({
-            type:'mediaAnswer',
-            answer: peerAnswer,
-            from: t.app.state.my_client_id,
-            to: FROM_PEER_ID,
-            stream_settings: t.stream.getVideoTracks()[0].getSettings()
-          });
-        } catch (error) {
-          console.error('onMediaOffer',error);
-        }
-    }
 
-    async onMediaAnswer(decoded){
-      console.log('onMediaAnswer',decoded)
-      await t.peer.setRemoteDescription(new RTCSessionDescription(decoded.answer));
-      // save call recipients stream settings
-      t.opponent_video_stream_settings = decoded.stream_settings;
 
-      // update opponent's "head" shape to match their video aspect ratio
-      console.log('opponent stream ar',
-      //stream.getVideoTracks()[0].getSettings()
-      t.opponent_video_stream_settings);
 
-      if(t.opponent_video_stream_settings){
-        let ovss = t.opponent_video_stream_settings;
-        let aspect_ratio = ovss.width / ovss.height; // mobiel safari did not send .aspectRatio so calculate it
-        // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
-        t?.players?.[getOpponentID()]?.head.mesh.scale.set(aspect_ratio,1,1);
-        // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
-      }
-    }
-
-    onIceCandidateEvent(event) {
-      const ids = t.app.state.client_ids.slice();
-      // if(ids.length<2){
-      //   console.error('no one to call');
-      // }else if(ids.length > 2){
-      //   console.error('need to figure out multipeer connections');
-      // }else{
-        let my_index = ids.indexOf(t.app.state.my_client_id);
-        ids.splice(my_index,1);
-        console.warn('attempting media offer to peer:',ids);
-      // }
-      t.server.send({
-        type:'iceCandidate',
-        to: ids[0],
-        candidate: event.candidate
-      });
-    };
-
-    async onRemotePeerIceCandidate(data) {
-      try {
-        const candidate = new RTCIceCandidate(data.candidate);
-        console.log('onRemotePeerIceCandidate',data);
-        const PEER_CONNECTION = t.webrtc_peer_connections?.[data.client_id];
-        console.log('PEER_CONNECTION',PEER_CONNECTION);
-        if(!PEER_CONNECTION){
-          console.error('no peer connection for',data.client_id);
-          return;
-        }
-        await PEER_CONNECTION.addIceCandidate(candidate);
-      } catch (error) {
-        // Handle error // some shit occurred
-        console.error('onRemotePeerIceCandidate',error);
-      }
-    };
 }
 
 class TweenableMesh{
@@ -986,18 +897,26 @@ class Card {
         // The Card
         // 'https://images-na.ssl-images-amazon.com/images/I/61YXNhfzlzL._SL1012_.jpg'
         this.faceUpTexture = txtLoader.load(this.front_image);
-        this.faceDownTexture = txtLoader.load('https://vignette3.wikia.nocookie.net/yugioh/images/9/94/Back-Anime-2.png/revision/latest?cb=20110624090942');
+        // back image
+        // this.faceDownTexture = txtLoader.load('https://vignette3.wikia.nocookie.net/yugioh/images/9/94/Back-Anime-2.png/revision/latest?cb=20110624090942');
+        // this.faceDownTexture = txtLoader.load('./public/images/default-back.jpg');
+        this.faceDownTexture = txtLoader.load('./public/images/decks/fruits/BACK.jpg');
         // faceUpTexture.flipY = false;
-        this.darkMaterial = new THREE.MeshPhongMaterial({ color: 0x111111 });
-        this.faceUpMaterial = new THREE.MeshPhongMaterial({
+        this.darkMaterial = new THREE.MeshBasicMaterial({
+          color: 0x111111,
+          side: THREE.FrontSide
+        });
+        this.faceUpMaterial = new THREE.MeshBasicMaterial({
             color: colorDark,
             map: this.faceUpTexture,
-            shininess: 40
+            shininess: 40,
+            side: THREE.FrontSide
         });
-        this.faceDownMaterial = new THREE.MeshPhongMaterial({
+        this.faceDownMaterial = new THREE.MeshBasicMaterial({
             color: colorDark,
             map: this.faceDownTexture,
-            shininess: 40
+            shininess: 40,
+            side: THREE.FrontSide
         });
     }
 
@@ -1245,7 +1164,7 @@ class Deck{
             duration: 1000,
           });
         }else{
-          console.error('failed to tween card to deck',i)
+          // console.error('failed to tween card to deck',i)
         }
       }
     }
@@ -1264,7 +1183,7 @@ class Deck{
         }
         // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
         if(!card?.mesh){
-          console.error('failed to tween card to zone',i,card)
+          // console.error('failed to tween card to zone',i,card)
         }else{
           t.zonegroup.attach(card.mesh);
         }
@@ -1389,8 +1308,8 @@ class Layout{
                     card: null,
 
                     origin:{
-                        x: (2.5*r)-this.spacing.x+(r*0.5)- .8,
-                        y: 10,
+                        x: (3.5*r)-this.spacing.x+(r*0.5)- 1,
+                        y: 9.8,
                         z: (3.5*c)-this.spacing.y+(c*0.5) - 2
                     }
                 });
@@ -1531,8 +1450,9 @@ function init(){
   t.scene = scene;
   t.camera = camera;
 
-  var axesHelper = new THREE.AxesHelper( 5 );
-  scene.add( axesHelper );
+  t.axesHelper = new THREE.AxesHelper( 5 );
+  t.camera.add(t.axesHelper)
+
 
   t.camera.position.set(0.16986347385576694,25.65695945633288,-10.061902520372364);
   t.camera.rotation.x=-2.108777799386355;
@@ -1541,6 +1461,9 @@ function init(){
 
   t.controls = controls;
   t.controls.enabled = false;
+  t.controls.target.x = 0;
+  t.controls.target.y = 0;
+  t.controls.target.z = 0;
 
   t.opponent_video = document.querySelector('.opponent_video');
 
@@ -1674,6 +1597,8 @@ function render(){
 function initLights(){
   var ambientLight = new THREE.AmbientLight( 0xffffff, 0.5 )
 
+  t.ambientLight = ambientLight
+
   var dirLight = new THREE.DirectionalLight( 0xcceeff, 0.5 );
   dirLight.castShadow = true;
   dirLight.shadow.camera.visible = true;
@@ -1682,6 +1607,8 @@ function initLights(){
   dirLight.position.y = 5;
   dirLight.position.x = 5;
   dirLight.position.z = 5;
+
+  t.dirLight = dirLight;
 
   var d = 100;
 
@@ -1826,7 +1753,7 @@ function initRoomMeshes(){
             vertexColors: true, //THREE.VertexColors,
             // fragmentShader: shader.fragmentShader,
             // vertexShader: shader.vertexShader,
-            side: THREE.DoubleSide,
+            side: THREE.FrontSide,
             // uniforms: uniforms
           };
           object.scale.set(0.1,0.1,0.1);
@@ -2186,7 +2113,7 @@ function updateClientCursor(){
   // Toggle rotation bool for meshes that we clicked
   const pointer = t.players?.[t.app.state.my_client_id]?.pointer?.mesh;
   if(pointer){
-    var intersects = raycaster.intersectObjects( t.zonegroup.children );
+    var intersects = intersectsGroup( [t.tableMesh,...t.zonegroup.children] );
     // console.log('intersects',intersects);
     if ( intersects.length > 0 ) {
 
@@ -2423,16 +2350,16 @@ function setupRaycast(){
 	raycaster.setFromCamera( mouse, camera );
 }
 
-function raycastObject( object ){
-  setupRaycast();
+// function raycastObject( object ){
+//   setupRaycast();
 
-	// calculate objects intersecting the picking ray
-	var intersects = raycaster.intersectObject( object );
-  if( intersects.length > 0 ){
-    return true;
-  }
-  return false;
-}
+// 	// calculate objects intersecting the picking ray
+// 	var intersects = raycaster.intersectObject( object );
+//   if( intersects.length > 0 ){
+//     return true;
+//   }
+//   return false;
+// }
 
 function intersectsGroup( group ){
   setupRaycast();

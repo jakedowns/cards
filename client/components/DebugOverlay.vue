@@ -4,12 +4,17 @@
         <div>Round {{state?.round_number}}</div>
         <div class="scores" v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: <span class="hit">{{state?.player_scores?.[id]?.[0] ?? 0}}</span> / <span class="miss">{{state?.player_scores?.[id]?.[1] ?? 0}}</span> </div>
 
-        <div v-if="!calling"
-            @click.prevent="start_video_chat"
+        <!-- have to enable video or mic first before this option becomes available -->
+        <div v-if="
+            !calling
+            && !show_end_call_button
+            && (video_enabled || !mic_muted)
+        "
+            @click.prevent="startVideoChat"
             style="pointer-events:all;">
             <button class="video-chat-call-start">Join Chat</button>
         </div>
-        <div v-if="!show_end_call_button"
+        <div v-if="show_end_call_button"
             @click.prevent="end_video_chat"
             style="pointer-events:all;">
             <button class="video-chat-call-end">Leave Chat</button>
@@ -90,7 +95,7 @@
                 </li> -->
 
                 <li v-if="im_game_host"
-                    @click.prevent="restart_game">
+                    @click.prevent="restartGame">
                     <button class="new-game">Restart Game</button>
                 </li>
 
@@ -117,18 +122,23 @@
 <script>
 export default {
     props:{
-        state:Object,
+        calling:Boolean,
+        camera_locked:Boolean,
         game:Object,
-        round:Object,
         im_game_host:Boolean,
         its_my_turn:Boolean,
         messages:Array,
-        show_end_call_button:Boolean,
-        show_debug_info:Boolean,
-        calling:Boolean,
-        camera_locked:Boolean,
+        mic_muted:Boolean,
         resetCamera:Function,
+        restartGame:Function,
+        round:Object,
+        show_debug_info:Boolean,
+        show_end_call_button:Boolean,
+        startVideoChat:Function,
+        state:Object,
         toggleCameraLock:Function,
+        video_enabled:Boolean,
+        video_muted:Boolean,
     }
 }
 </script>

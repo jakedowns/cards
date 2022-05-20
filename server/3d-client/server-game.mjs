@@ -365,7 +365,15 @@ class ServerGame{
                 })
                 let client_ids = Object.keys(this.clients);
                 // switch player turn
-                this.player_turn = this.player_turn === client_ids[0] ? client_ids[1] : client_ids[0];
+                if(client_ids.length){
+                    // multiplayer mode
+                    let current_player_index = client_ids.indexOf(this.player_turn);
+                    let next_player_index = current_player_index+1;
+                    if(next_player_index >= client_ids.length){
+                        next_player_index = 0;
+                    }
+                    this.player_turn = client_ids[next_player_index];
+                }
             }
             await delay(300);
             this.ignore_clicks = false;

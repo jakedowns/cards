@@ -16874,7 +16874,10 @@ __webpack_require__.r(__webpack_exports__);
     video_muted: Boolean,
     mic_muted: Boolean,
     enableVideo: Function,
-    openPauseMenu: Function
+    disableVideo: Function,
+    openPauseMenu: Function,
+    toggleMute: Function,
+    audio_muted: Boolean
   }
 });
 
@@ -16893,18 +16896,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
-    state: Object,
+    calling: Boolean,
+    camera_locked: Boolean,
     game: Object,
-    round: Object,
     im_game_host: Boolean,
     its_my_turn: Boolean,
     messages: Array,
-    show_end_call_button: Boolean,
-    show_debug_info: Boolean,
-    calling: Boolean,
-    camera_locked: Boolean,
+    mic_muted: Boolean,
     resetCamera: Function,
-    toggleCameraLock: Function
+    restartGame: Function,
+    round: Object,
+    show_debug_info: Boolean,
+    show_end_call_button: Boolean,
+    startVideoChat: Function,
+    state: Object,
+    toggleCameraLock: Function,
+    video_enabled: Boolean,
+    video_muted: Boolean
   }
 });
 
@@ -17075,9 +17083,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       show_end_call_button: false,
       camera_locked: false,
       messages: [],
-      mic_muted: false,
+      mic_muted: true,
       video_enabled: false,
       video_muted: false,
+      audio_muted: true,
+      // mute by default
       // modal data
       world_selection: '',
       new_world_name: '',
@@ -17107,21 +17117,36 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       // todo: should i detect deck<->zone<->hand movement implicitly / reactively?
       // or do i need to say ON_MATCH_PASS, ON_MATCH_FAIL to trigger next steps?
       handler: function handler(new_state, old_state) {
-        var _t, _t$peer, _new_state$game, _old_state$game, _new_state$client_ids, _old_state$client_ids;
+        var _Object$values,
+            _t$peers$remote_peers,
+            _t,
+            _t$peers,
+            _this2 = this,
+            _new_state$game,
+            _old_state$game,
+            _new_state$client_ids,
+            _old_state$client_ids;
 
         // if we have an active webrtc connection, give user option to end it
-        this.show_end_call_button = ((_t = t) === null || _t === void 0 ? void 0 : (_t$peer = _t.peer) === null || _t$peer === void 0 ? void 0 : _t$peer.connectionState) === 'connected';
+        this.show_end_call_button = false; // at least one active peer?
+
+        (_Object$values = Object.values((_t$peers$remote_peers = (_t = t) === null || _t === void 0 ? void 0 : (_t$peers = _t.peers) === null || _t$peers === void 0 ? void 0 : _t$peers.remote_peers) !== null && _t$peers$remote_peers !== void 0 ? _t$peers$remote_peers : {})) === null || _Object$values === void 0 ? void 0 : _Object$values.forEach(function (conn) {
+          if (conn.connectionState === 'connected') {
+            _this2.show_end_call_button = true;
+          }
+        }); // if(new_state?.client_ids?.length > old_state?.client_ids?.length){
+        //     t.setupRTCPeerConnections();
+        // }
 
         if (new_state !== null && new_state !== void 0 && (_new_state$game = new_state.game) !== null && _new_state$game !== void 0 && _new_state$game.started && !(old_state !== null && old_state !== void 0 && (_old_state$game = old_state.game) !== null && _old_state$game !== void 0 && _old_state$game.started)) {
           t.startGame();
-        } // console.log('last dealt?',new_state?.last_dealt,old_state?.last_dealt);
+        } // TODO constantly tween towards Zones, remove the need to explictly detect zone changes and manually trigger tweens
+        // console.log('last dealt?',new_state?.last_dealt,old_state?.last_dealt);
 
 
         if (new_state !== null && new_state !== void 0 && new_state.shuffling && !(old_state !== null && old_state !== void 0 && old_state.shuffling)) {
           t.deck.tweenCardsToDeck();
-        }
-
-        if ((new_state === null || new_state === void 0 ? void 0 : new_state.last_dealt) !== (old_state === null || old_state === void 0 ? void 0 : old_state.last_dealt)) {
+        } else if ((new_state === null || new_state === void 0 ? void 0 : new_state.last_dealt) !== (old_state === null || old_state === void 0 ? void 0 : old_state.last_dealt)) {
           t.deck.tweenCardsToZones();
         }
 
@@ -17206,14 +17231,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.openPauseMenu();
     },
     onLoginNotAuthenticated: function onLoginNotAuthenticated() {
-      var _this2 = this;
+      var _this3 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _this2.show_login_loading = false;
+                _this3.show_login_loading = false;
 
               case 1:
               case "end":
@@ -17224,10 +17249,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     onLoginAuthenticated: function onLoginAuthenticated() {
-      var _this3 = this;
+      var _this4 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
-        var _result$data, _this3$user_session, _this3$user_session$c, _this3$user_session2, _this3$user_session3, _this3$user, _this3$user$first_nam;
+        var _result$data, _this4$user_session, _this4$user_session$c, _this4$user_session2, _this4$user_session3, _this4$user, _this4$user$first_nam;
 
         var result;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
@@ -17243,42 +17268,42 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 3:
-                _this3.user = _context2.sent;
+                _this4.user = _context2.sent;
 
-                if (_this3.user) {
+                if (_this4.user) {
                   _context2.next = 7;
                   break;
                 }
 
-                _this3.show_login_loading = false;
+                _this4.show_login_loading = false;
                 return _context2.abrupt("return");
 
               case 7:
-                console.log('this user?', _this3.user);
+                console.log('this user?', _this4.user);
                 _context2.next = 10;
                 return t.server.directus.items('Sessions').readByQuery({
                   limit: 1,
                   filter: {
-                    user: _this3.user.id
+                    user: _this4.user.id
                   }
                 });
 
               case 10:
                 result = _context2.sent;
-                _this3.user_session = null; // reset
+                _this4.user_session = null; // reset
 
                 if (result !== null && result !== void 0 && (_result$data = result.data) !== null && _result$data !== void 0 && _result$data.length) {
-                  _this3.user_session = result.data[0];
+                  _this4.user_session = result.data[0];
                 }
 
-                console.log('servers user_session:', _this3.user_session); // if the user does not have a session, created one
+                console.log('servers user_session:', _this4.user_session); // if the user does not have a session, created one
 
-                if (_this3.user_session) {
+                if (_this4.user_session) {
                   _context2.next = 18;
                   break;
                 }
 
-                _this3.user_session = {
+                _this4.user_session = {
                   current_world: 2,
                   // todo: use uuid // jakes world by default
                   current_room: 'bbce1345-0718-4faf-812d-e8c9040e1341',
@@ -17289,11 +17314,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 _context2.next = 18;
                 return t.server.directus.items('Sessions').createOne({
                   user: {
-                    id: _this3.user.id
+                    id: _this4.user.id
                   },
-                  current_world: _this3.user_session.current_world,
-                  current_room: _this3.user_session.current_room,
-                  current_game: _this3.user_session.current_game
+                  current_world: _this4.user_session.current_world,
+                  current_room: _this4.user_session.current_room,
+                  current_game: _this4.user_session.current_game
                 }).then(function (res) {
                   console.log('user session created', res); // this.user_session = res;
                 })["catch"](function (e) {
@@ -17301,29 +17326,29 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 18:
-                _this3.world_selection = (_this3$user_session = _this3.user_session) === null || _this3$user_session === void 0 ? void 0 : (_this3$user_session$c = _this3$user_session.current_world) === null || _this3$user_session$c === void 0 ? void 0 : _this3$user_session$c.toString();
-                _this3.room_selection = (_this3$user_session2 = _this3.user_session) === null || _this3$user_session2 === void 0 ? void 0 : _this3$user_session2.current_room;
-                _this3.game_selection = (_this3$user_session3 = _this3.user_session) === null || _this3$user_session3 === void 0 ? void 0 : _this3$user_session3.current_game; // TODO: make game->room->world a single query
+                _this4.world_selection = (_this4$user_session = _this4.user_session) === null || _this4$user_session === void 0 ? void 0 : (_this4$user_session$c = _this4$user_session.current_world) === null || _this4$user_session$c === void 0 ? void 0 : _this4$user_session$c.toString();
+                _this4.room_selection = (_this4$user_session2 = _this4.user_session) === null || _this4$user_session2 === void 0 ? void 0 : _this4$user_session2.current_room;
+                _this4.game_selection = (_this4$user_session3 = _this4.user_session) === null || _this4$user_session3 === void 0 ? void 0 : _this4$user_session3.current_game; // TODO: make game->room->world a single query
 
-                if (_this3.game_selection) {
-                  _this3.getGamesForRoom(_this3.room_selection);
+                if (_this4.game_selection) {
+                  _this4.getGamesForRoom(_this4.room_selection);
 
-                  _this3.getRoomsForWorld(_this3.world_selection);
-                } else if (_this3.room_selection) {
-                  _this3.getRoomsForWorld(_this3.world_selection);
+                  _this4.getRoomsForWorld(_this4.world_selection);
+                } else if (_this4.room_selection) {
+                  _this4.getRoomsForWorld(_this4.world_selection);
                 }
 
-                _this3.show_login_modal = false;
+                _this4.show_login_modal = false;
 
-                if (!((_this3$user = _this3.user) !== null && _this3$user !== void 0 && (_this3$user$first_nam = _this3$user.first_name) !== null && _this3$user$first_nam !== void 0 && _this3$user$first_nam.length)) {
+                if (!((_this4$user = _this4.user) !== null && _this4$user !== void 0 && (_this4$user$first_nam = _this4$user.first_name) !== null && _this4$user$first_nam !== void 0 && _this4$user$first_nam.length)) {
                   // give us a name!
-                  _this3.show_name_modal = true;
+                  _this4.show_name_modal = true;
                 } else {
-                  if (!_this3.game_selection) {
+                  if (!_this4.game_selection) {
                     // need to pick a game
-                    _this3.openPauseMenu();
+                    _this4.openPauseMenu();
                   } else {
-                    _this3.closePauseMenu();
+                    _this4.closePauseMenu();
                   }
                 }
 
@@ -17334,6 +17359,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           }
         }, _callee2);
       }))();
+    },
+    toggleMute: function toggleMute() {
+      this.audio_muted = !this.audio_muted;
     },
     closePauseMenu: function closePauseMenu() {
       this.show_modal = false;
@@ -17363,20 +17391,26 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     // toggle_vid_mute(){
     //     this.video_muted = !this.video_muted;
     // },
-    start_video_chat: function start_video_chat() {
-      this.calling = true;
+    startVideoChat: function startVideoChat() {
+      this.calling = true; // this.video_enabled = true;
+
+      window.t.setupVideoStream();
       window.t.call();
     },
     end_video_chat: function end_video_chat() {
-      var _window$t, _window$t$peer;
+      // window.t?.peer?.close();
+      // if(window.t.peer){
+      //     window.t.peer = null;
+      // }
+      window.t.peers.closeAll();
+      /*
+      window.t.webrtc_peer_connections.forEach((conn)=>{
+          conn.close();
+      })
+      window.t.webrtc_peer_connections = {};
+      window.t.peers.setupRTCPeerConnections();
+      */
 
-      (_window$t = window.t) === null || _window$t === void 0 ? void 0 : (_window$t$peer = _window$t.peer) === null || _window$t$peer === void 0 ? void 0 : _window$t$peer.close();
-
-      if (window.t.peer) {
-        window.t.peer = null;
-      }
-
-      window.t.setupOpponentPeer();
       this.show_end_call_button = false;
       this.calling = false;
     },
@@ -17403,7 +17437,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
       });
     },
-    restart_game: function restart_game() {
+    restartGame: function restartGame() {
       this.closePauseMenu();
       window.t.server.send({
         type: 'RESTART_GAME' //game_id: this.state.game_id // server should know based on client id
@@ -17411,25 +17445,25 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       });
     },
     getWorlds: function getWorlds() {
-      var _this4 = this;
+      var _this5 = this;
 
       axios.get('/api/worlds').then(function (res) {
-        _this4.worlds = res.data.data;
+        _this5.worlds = res.data.data;
       })["catch"](function (err) {
         console.error(err);
       });
     },
     updateSessionOnServer: function updateSessionOnServer() {
-      var _this5 = this;
+      var _this6 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
-        var _this5$user_session, _this5$user_session2;
+        var _this6$user_session, _this6$user_session2;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                if ((_this5$user_session = _this5.user_session) !== null && _this5$user_session !== void 0 && _this5$user_session.id) {
+                if ((_this6$user_session = _this6.user_session) !== null && _this6$user_session !== void 0 && _this6$user_session.id) {
                   _context3.next = 3;
                   break;
                 }
@@ -17439,11 +17473,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 3:
                 _context3.next = 5;
-                return t.server.directus.items('Sessions').updateOne((_this5$user_session2 = _this5.user_session) === null || _this5$user_session2 === void 0 ? void 0 : _this5$user_session2.id, {
+                return t.server.directus.items('Sessions').updateOne((_this6$user_session2 = _this6.user_session) === null || _this6$user_session2 === void 0 ? void 0 : _this6$user_session2.id, {
                   // user: {id:this.user.id},
-                  current_world: _this5.user_session.current_world,
-                  current_room: _this5.user_session.current_room,
-                  current_game: _this5.user_session.current_game
+                  current_world: _this6.user_session.current_world,
+                  current_room: _this6.user_session.current_room,
+                  current_game: _this6.user_session.current_game
                 }).then(function (res) {
                   console.log('user session updated', res); // this.user_session = res;
                 })["catch"](function (e) {
@@ -17466,13 +17500,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     // },
     // worldSelectionChanged =>
     getRoomsForWorld: function getRoomsForWorld(world_id) {
-      var _this6 = this;
+      var _this7 = this;
 
       this.world_selection = world_id.toString();
       this.updateSessionOnServer(); // console.log('getRoomsForWorld',arguments)
 
       axios.get("/api/world/".concat(world_id, "/rooms")).then(function (res) {
-        _this6.rooms = res.data.data; // this.room_selection = null;
+        _this7.rooms = res.data.data; // this.room_selection = null;
         // this.game_selection = null;
       })["catch"](function (err) {
         console.error(err);
@@ -17480,14 +17514,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
     // roomSelectionChanged =>
     getGamesForRoom: function getGamesForRoom(room_id) {
-      var _this7 = this;
+      var _this8 = this;
 
       // console.log('getGamesForRoom',$event.target.value);
       this.room_selection = room_id;
       this.updateSessionOnServer();
       axios.get("/api/rooms/".concat(this.room_selection, "/games")).then(function (res) {
-        _this7.games = res.data.games;
-        _this7.game_types = res.data.game_types; // this.game_selection = null;
+        _this8.games = res.data.games;
+        _this8.game_types = res.data.game_types; // this.game_selection = null;
       })["catch"](function (err) {
         console.error(err);
       });
@@ -17495,14 +17529,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   computed: {
     gameTypeName: function gameTypeName() {
-      var _this8 = this;
+      var _this9 = this;
 
       return function (game_type_id) {
-        var _this8$game_types$fil, _this8$game_types$fil2;
+        var _this9$game_types$fil, _this9$game_types$fil2;
 
-        return (_this8$game_types$fil = _this8.game_types.filter(function (type) {
+        return (_this9$game_types$fil = _this9.game_types.filter(function (type) {
           return type.id === game_type_id;
-        })) === null || _this8$game_types$fil === void 0 ? void 0 : (_this8$game_types$fil2 = _this8$game_types$fil[0]) === null || _this8$game_types$fil2 === void 0 ? void 0 : _this8$game_types$fil2.Name;
+        })) === null || _this9$game_types$fil === void 0 ? void 0 : (_this9$game_types$fil2 = _this9$game_types$fil[0]) === null || _this9$game_types$fil2 === void 0 ? void 0 : _this9$game_types$fil2.Name;
       };
     },
     // show_modal(){
@@ -17932,10 +17966,66 @@ var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 
 var _hoisted_4 = [_hoisted_3];
 var _hoisted_5 = {
-  "class": "av-controls"
+  key: 0,
+  "class": "mute"
 };
 
 var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "1em",
+  height: "1em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 512 512"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "512",
+  height: "512",
+  fill: "none",
+  stroke: "none"
+}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zM461.64 256l45.64-45.64c6.3-6.3 6.3-16.52 0-22.82l-22.82-22.82c-6.3-6.3-16.52-6.3-22.82 0L416 210.36l-45.64-45.64c-6.3-6.3-16.52-6.3-22.82 0l-22.82 22.82c-6.3 6.3-6.3 16.52 0 22.82L370.36 256l-45.63 45.63c-6.3 6.3-6.3 16.52 0 22.82l22.82 22.82c6.3 6.3 16.52 6.3 22.82 0L416 301.64l45.64 45.64c6.3 6.3 16.52 6.3 22.82 0l22.82-22.82c6.3-6.3 6.3-16.52 0-22.82L461.64 256z"
+})], -1
+/* HOISTED */
+);
+
+var _hoisted_7 = [_hoisted_6];
+var _hoisted_8 = {
+  key: 1,
+  "class": "volume-up"
+};
+
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "1.13em",
+  height: "1em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 576 512"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "576",
+  height: "512",
+  fill: "none",
+  stroke: "none"
+}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95c-7.34 11.17-4.22 26.18 6.95 33.51c66.27 43.49 105.82 116.6 105.82 195.58c0 78.98-39.55 152.09-105.82 195.58c-11.17 7.32-14.29 22.34-6.95 33.5c7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24c-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36c6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256zm-141.77-76.87c-11.58-6.33-26.19-2.16-32.61 9.45c-6.39 11.61-2.16 26.2 9.45 32.61C327.98 228.28 336 241.63 336 256c0 14.38-8.02 27.72-20.92 34.81c-11.61 6.41-15.84 21-9.45 32.61c6.43 11.66 21.05 15.8 32.61 9.45c28.23-15.55 45.77-45 45.77-76.88s-17.54-61.32-45.78-76.86z"
+})], -1
+/* HOISTED */
+);
+
+var _hoisted_10 = [_hoisted_9];
+var _hoisted_11 = {
+  "class": "av-controls"
+};
+
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   width: "55",
   height: "38",
   viewBox: "0 0 55 38",
@@ -17948,9 +18038,9 @@ var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 /* HOISTED */
 );
 
-var _hoisted_7 = [_hoisted_6];
+var _hoisted_13 = [_hoisted_12];
 
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   "aria-hidden": "true",
   role: "img",
@@ -17973,34 +18063,34 @@ var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 /* HOISTED */
 );
 
-var _hoisted_9 = [_hoisted_8];
-var _hoisted_10 = {
+var _hoisted_15 = [_hoisted_14];
+var _hoisted_16 = {
   key: 0
 };
-var _hoisted_11 = {
+var _hoisted_17 = {
   key: 1
 };
-var _hoisted_12 = {
+var _hoisted_18 = {
   "class": "debug-video"
 };
 
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
+var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
   id: "sound_effects",
   src: "./public/sounds/flip.mp3"
 }, null, -1
 /* HOISTED */
 );
 
-var _hoisted_14 = {
+var _hoisted_20 = {
   id: "video",
   autoplay: "",
   playsinline: "",
   muted: ""
 };
-var _hoisted_15 = {
+var _hoisted_21 = {
   "class": "opponent_videos"
 };
-var _hoisted_16 = ["data-client-id"];
+var _hoisted_22 = ["data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _$props$state$client_, _$props$state;
 
@@ -18012,27 +18102,32 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.openPauseMenu && $props.openPauseMenu.apply($props, arguments);
     }, ["prevent"]))
-  }, _hoisted_4), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$props.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_4), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    "class": "mute-video",
+    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $props.toggleMute && $props.toggleMute.apply($props, arguments);
+    }, ["prevent"]))
+  }, [$props.audio_muted ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_5, _hoisted_7)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_8, _hoisted_10))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$props.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
     style: {
       "pointer-events": "all"
     },
     id: "icon-video-enable",
-    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+    onClick: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $props.enableVideo();
     }, ["prevent"]))
-  }, _hoisted_7)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_13)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
     style: {
       "pointer-events": "all"
     },
     id: "icon-video-disable",
-    onClick: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
-      return _ctx.disableVideo();
+    onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return $props.disableVideo();
     }, ["prevent"]))
-  }, _hoisted_9)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $props.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_10, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_11, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_14, null, 512
+  }, _hoisted_15)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $props.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_16, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_20, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_ = (_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.client_ids) !== null && _$props$state$client_ !== void 0 ? _$props$state$client_ : []).filter(function (id) {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_ = (_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.client_ids) !== null && _$props$state$client_ !== void 0 ? _$props$state$client_ : []).filter(function (id) {
     return id !== $props.state.my_client_id;
   }), function (client_id) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("video", {
@@ -18046,7 +18141,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "data-client-id": client_id
     }, null, 8
     /* PROPS */
-    , _hoisted_16);
+    , _hoisted_22);
   }), 128
   /* KEYED_FRAGMENT */
   ))])])]);
@@ -18235,15 +18330,15 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     )]);
   }), 128
   /* KEYED_FRAGMENT */
-  )), !$props.calling ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" have to enable video or mic first before this option becomes available "), !$props.calling && !$props.show_end_call_button && ($props.video_enabled || !$props.mic_muted) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
     onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
-      return _ctx.start_video_chat && _ctx.start_video_chat.apply(_ctx, arguments);
+      return $props.startVideoChat && $props.startVideoChat.apply($props, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$props.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
     onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return _ctx.end_video_chat && _ctx.end_video_chat.apply(_ctx, arguments);
@@ -18320,7 +18415,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                <li v-if=\"!state?.room_id\">\n                    <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                </li>\n\n                <li v-if=\"state?.room_id && !state?.game_id\"\n                    @click.prevent=\"new_game\">\n                    <button class=\"new-game\">New Game</button>\n                </li> "), $props.im_game_host ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
     key: 0,
     onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
-      return _ctx.restart_game && _ctx.restart_game.apply(_ctx, arguments);
+      return $props.restartGame && $props.restartGame.apply($props, arguments);
     }, ["prevent"]))
   }, _hoisted_41)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                    @click.prevent=\"start_game\">\n                    <button class=\"start-game\">Start Game</button>\n                </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.messages, function (message, i) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
@@ -18692,22 +18787,31 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     show_end_call_button: $setup.show_end_call_button,
     show_debug_info: $setup.show_debug_info,
     onToggleShowDebugInfo: $options.toggleShowDebugInfo,
+    mic_muted: $setup.mic_muted,
+    video_enabled: $setup.video_enabled,
+    video_muted: $setup.video_muted,
+    startVideoChat: $options.startVideoChat,
     camera_locked: $setup.camera_locked,
     resetCamera: $options.resetCamera,
-    toggleCameraLock: $options.toggleCameraLock
+    toggleCameraLock: $options.toggleCameraLock,
+    restartGame: $options.restartGame
   }, null, 8
   /* PROPS */
-  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_end_call_button", "show_debug_info", "onToggleShowDebugInfo", "camera_locked", "resetCamera", "toggleCameraLock"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
+  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_end_call_button", "show_debug_info", "onToggleShowDebugInfo", "mic_muted", "video_enabled", "video_muted", "startVideoChat", "camera_locked", "resetCamera", "toggleCameraLock", "restartGame"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
+    ref: "AVHud",
     state: $props.state,
     its_my_turn: $options.its_my_turn,
     video_enabled: $setup.video_enabled,
     video_muted: $setup.video_muted,
     mic_muted: $setup.mic_muted,
+    audio_muted: $setup.audio_muted,
     enableVideo: $options.enableVideo,
-    openPauseMenu: $options.openPauseMenu
+    disableVideo: $options.disableVideo,
+    openPauseMenu: $options.openPauseMenu,
+    toggleMute: $options.toggleMute
   }, null, 8
   /* PROPS */
-  , ["state", "its_my_turn", "video_enabled", "video_muted", "mic_muted", "enableVideo", "openPauseMenu"])]);
+  , ["state", "its_my_turn", "video_enabled", "video_muted", "mic_muted", "audio_muted", "enableVideo", "disableVideo", "openPauseMenu", "toggleMute"])]);
 }
 
 /***/ }),
@@ -18950,7 +19054,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 60px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 63px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal {\n  pointer-events: all;\n  top: 60px;\n  position: absolute;\n  width: calc(33vw - 40px);\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  left: 50%;\n  transform: translateX(-16.5vw);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 103px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n  cursor: pointer;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal {\n  pointer-events: all;\n  top: 60px;\n  position: absolute;\n  width: 320px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  left: 50%;\n  transform: translateX(-16.5vw);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -26450,6 +26554,438 @@ const getGlobalThis = () => {
 
 /***/ }),
 
+/***/ "./client/PeerConnections.mjs":
+/*!************************************!*\
+  !*** ./client/PeerConnections.mjs ***!
+  \************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+var PeerConnections = /*#__PURE__*/function () {
+  function PeerConnections() {
+    _classCallCheck(this, PeerConnections);
+
+    this.local_peers = {};
+    this.remote_peers = {};
+    this.peer_streams = {};
+    this.peer_video_settings = {};
+  }
+
+  _createClass(PeerConnections, [{
+    key: "offerStreamToPeer",
+    value: function () {
+      var _offerStreamToPeer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee(peer_id) {
+        var peer, localPeerOffer;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                // make sure we have a connection container for the remote peer id
+                this.remote_peers[peer_id] = this.setupRTCPeerConnection(peer_id); // gather it off the instance
+
+                peer = this.remote_peers[peer_id]; // error if none found for peer id
+
+                if (peer) {
+                  _context.next = 5;
+                  break;
+                }
+
+                console.error('no peer connection for', peer_id);
+                return _context.abrupt("return");
+
+              case 5:
+                // offer our audio, video tracks to the peer connection
+                t.stream.getTracks().forEach(function (track) {
+                  peer.addTrack(track, t.stream);
+                }); // generate an offer to send to the remote peer
+
+                _context.next = 8;
+                return peer.createOffer();
+
+              case 8:
+                localPeerOffer = _context.sent;
+                _context.next = 11;
+                return peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
+
+              case 11:
+                // send the offer to the remote peer via websocket -> node events
+                t.server.send({
+                  type: 'mediaOffer',
+                  offer: localPeerOffer,
+                  from: t.app.state.my_client_id,
+                  to: peer_id,
+                  // extras
+                  stream_settings: t.stream.getVideoTracks()[0].getSettings()
+                });
+
+              case 12:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function offerStreamToPeer(_x) {
+        return _offerStreamToPeer.apply(this, arguments);
+      }
+
+      return offerStreamToPeer;
+    }() // TODO: don't offer to stream with peer if they haven't enabled video or audio
+    // TODO: maybe show a "calling" popup and send a pre-offer to the peer
+    // TODO: when a client joins, and 2 or more clients are already connected,
+    //      we need to send them an offer to connect to each other
+
+  }, {
+    key: "setupRTCPeerConnections",
+    value: function setupRTCPeerConnections() {
+      var _this = this;
+
+      t.app.state.client_ids.forEach(function (client_id) {
+        var _this$remote_peers;
+
+        if (client_id !== t.app.state.my_client_id && !((_this$remote_peers = _this.remote_peers) !== null && _this$remote_peers !== void 0 && _this$remote_peers[client_id])) {
+          // one connection per peer
+          _this.remote_peers[client_id] = _this.setupRTCPeerConnection(client_id); // offer the stream to the peer
+
+          _this.offerStreamToPeer(client_id);
+        }
+      });
+    }
+  }, {
+    key: "closeAll",
+    value: function closeAll() {
+      console.warn('todo close all');
+    }
+    /* handler for when a peer offers a video/audio stream */
+
+  }, {
+    key: "onMediaOffer",
+    value: function () {
+      var _onMediaOffer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee2(decoded) {
+        var _this$remote_peers2, FROM_PEER_ID, peer_remote, peerAnswer, _t, _t$players, _t$players$FROM_PEER_, ovss, aspect_ratio;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if (t.stream) {
+                  _context2.next = 9;
+                  break;
+                }
+
+                _context2.prev = 1;
+                _context2.next = 4;
+                return t.setupVideoStream();
+
+              case 4:
+                _context2.next = 9;
+                break;
+
+              case 6:
+                _context2.prev = 6;
+                _context2.t0 = _context2["catch"](1);
+                console.error('error setting up outbound stream');
+
+              case 9:
+                _context2.prev = 9;
+                FROM_PEER_ID = decoded.from;
+                /* make sure we have a "remote peer" object for this client */
+
+                peer_remote = (_this$remote_peers2 = this.remote_peers) === null || _this$remote_peers2 === void 0 ? void 0 : _this$remote_peers2[FROM_PEER_ID];
+
+                if (!peer_remote) {
+                  // create a new container if we don't have one
+                  peer_remote = this.setupRTCPeerConnection(FROM_PEER_ID); // peer = t.webrtc_peer_connections?.[FROM_PEER_ID];
+
+                  this.remote_peers[FROM_PEER_ID] = peer_remote;
+                }
+
+                if (peer_remote) {
+                  _context2.next = 16;
+                  break;
+                }
+
+                // if peer is STILL not set, something's gone wrong
+                console.error("error with peer_remote", decoded);
+                return _context2.abrupt("return");
+
+              case 16:
+                _context2.next = 18;
+                return peer_remote.setRemoteDescription(new RTCSessionDescription(decoded.offer));
+
+              case 18:
+                // offer our audio, video tracks to the peer connection
+                t.stream.getTracks().forEach(function (track) {
+                  peer_remote.addTrack(track, t.stream);
+                });
+                /* create an answer to the offer */
+
+                _context2.next = 21;
+                return peer_remote.createAnswer();
+
+              case 21:
+                peerAnswer = _context2.sent;
+                _context2.next = 24;
+                return peer_remote.setLocalDescription(new RTCSessionDescription(peerAnswer));
+
+              case 24:
+                // save call initiators stream settings (for aspect ratio calculations)
+                this.peer_video_settings[FROM_PEER_ID] = decoded.stream_settings;
+
+                if (this.peer_video_settings[FROM_PEER_ID]) {
+                  ovss = this.peer_video_settings[FROM_PEER_ID];
+                  aspect_ratio = ovss.width / ovss.height; // scale the player's head to match the source video aspect ratio
+                  // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
+
+                  (_t = t) === null || _t === void 0 ? void 0 : (_t$players = _t.players) === null || _t$players === void 0 ? void 0 : (_t$players$FROM_PEER_ = _t$players[FROM_PEER_ID]) === null || _t$players$FROM_PEER_ === void 0 ? void 0 : _t$players$FROM_PEER_.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
+                } // send the answer to the peer
+
+
+                t.server.send({
+                  type: "mediaAnswer",
+                  answer: peerAnswer,
+                  from: t.app.state.my_client_id,
+                  to: FROM_PEER_ID,
+                  // extras
+                  stream_settings: t.stream.getVideoTracks()[0].getSettings()
+                });
+                _context2.next = 32;
+                break;
+
+              case 29:
+                _context2.prev = 29;
+                _context2.t1 = _context2["catch"](9);
+                console.error("onMediaOffer", _context2.t1);
+
+              case 32:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[1, 6], [9, 29]]);
+      }));
+
+      function onMediaOffer(_x2) {
+        return _onMediaOffer.apply(this, arguments);
+      }
+
+      return onMediaOffer;
+    }()
+    /* handler for when a peer responds to our media offer */
+
+  }, {
+    key: "onMediaAnswer",
+    value: function () {
+      var _onMediaAnswer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(decoded) {
+        var peer_connection, _t2, _t2$players, _t2$players$decoded$f, ovss, aspect_ratio;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                // console.log('onMediaAnswer',decoded)
+                peer_connection = this.remote_peers[decoded.from]; // store the answer as the remote description on the peer connection
+
+                _context3.next = 3;
+                return peer_connection.setRemoteDescription(new RTCSessionDescription(decoded.answer));
+
+              case 3:
+                // save call recipients stream settings (for aspect ratio calculations)
+                this.peer_video_settings[decoded.from] = decoded.stream_settings; // TODO: dry this up
+                // update opponent's "head" shape to match their video aspect ratio
+
+                if (decoded.stream_settings) {
+                  ovss = decoded.stream_settings;
+                  aspect_ratio = ovss.width / ovss.height; // mobiel safari did not send .aspectRatio so calculate it
+                  // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+
+                  (_t2 = t) === null || _t2 === void 0 ? void 0 : (_t2$players = _t2.players) === null || _t2$players === void 0 ? void 0 : (_t2$players$decoded$f = _t2$players[decoded.from]) === null || _t2$players$decoded$f === void 0 ? void 0 : _t2$players$decoded$f.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
+                }
+
+              case 5:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function onMediaAnswer(_x3) {
+        return _onMediaAnswer.apply(this, arguments);
+      }
+
+      return onMediaAnswer;
+    }()
+  }, {
+    key: "setupRTCPeerConnection",
+    value: function setupRTCPeerConnection(client_id) {
+      var _this2 = this;
+
+      // fresh peer connection container
+      var peer_connection = new RTCPeerConnection({
+        iceServers: [{
+          urls: "stun:stun.stunprotocol.org"
+        }]
+      }); // event binding for ice candidates received
+
+      peer_connection.onicecandidate = t.onIceCandidateEvent; // callback for remote stream available, where we bind it to a video output object
+
+      var gotRemoteStream = function gotRemoteStream(event) {
+        var _t$root$$refs$AVHud$$;
+
+        console.log("gotRemoteStream", event);
+
+        var _event$streams = _slicedToArray(event.streams, 1),
+            stream = _event$streams[0];
+
+        _this2.peer_streams[client_id] = stream;
+        var video = (_t$root$$refs$AVHud$$ = t.root.$refs.AVHud.$refs) === null || _t$root$$refs$AVHud$$ === void 0 ? void 0 : _t$root$$refs$AVHud$$["opponent_video_".concat(client_id)];
+        console.log("video?", video);
+
+        if (video && video.length) {
+          video[0].srcObject = stream;
+        }
+
+        if (!video || !video.length || video.length > 1) {
+          console.warn("huh?", video);
+        }
+      }; // bind the callback
+
+
+      peer_connection.addEventListener("track", gotRemoteStream); // return the connection
+
+      return peer_connection;
+    }
+  }, {
+    key: "onIceCandidateEvent",
+    value: function onIceCandidateEvent(event) {
+      var ids = t.app.state.client_ids.slice();
+      var my_index = ids.indexOf(t.app.state.my_client_id);
+      ids.splice(my_index, 1);
+
+      if (event.candidate) {
+        // should we send to all peers or just one by one?
+        console.log(event); // debugger;
+
+        ids.forEach(function (id) {
+          t.server.send({
+            type: "iceCandidate",
+            to: id,
+            candidate: event.candidate
+          });
+        });
+      } else {
+        console.log("ignoring null candidate", event);
+      }
+    }
+  }, {
+    key: "onRemotePeerIceCandidate",
+    value: function () {
+      var _onRemotePeerIceCandidate = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(data) {
+        var candidate, _this$remote_peers3, PEER_CONNECTION;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                // console.warn('onRemotePeerIceCandidate',data);
+                candidate = null;
+
+                try {
+                  candidate = new RTCIceCandidate(data.candidate);
+                } catch (error) {
+                  console.error(error);
+                }
+
+                if (!candidate) {
+                  _context4.next = 17;
+                  break;
+                }
+
+                PEER_CONNECTION = (_this$remote_peers3 = this.remote_peers) === null || _this$remote_peers3 === void 0 ? void 0 : _this$remote_peers3[data.client_id]; // console.log('PEER_CONNECTION',PEER_CONNECTION);
+
+                if (PEER_CONNECTION) {
+                  _context4.next = 7;
+                  break;
+                }
+
+                console.error("no peer connection for", data.client_id);
+                return _context4.abrupt("return");
+
+              case 7:
+                _context4.prev = 7;
+                _context4.next = 10;
+                return PEER_CONNECTION.addIceCandidate(candidate);
+
+              case 10:
+                _context4.next = 15;
+                break;
+
+              case 12:
+                _context4.prev = 12;
+                _context4.t0 = _context4["catch"](7);
+                console.error(_context4.t0);
+
+              case 15:
+                _context4.next = 18;
+                break;
+
+              case 17:
+                console.error("no candidate", data.candidate);
+
+              case 18:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this, [[7, 12]]);
+      }));
+
+      function onRemotePeerIceCandidate(_x4) {
+        return _onRemotePeerIceCandidate.apply(this, arguments);
+      }
+
+      return onRemotePeerIceCandidate;
+    }()
+  }]);
+
+  return PeerConnections;
+}();
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PeerConnections);
+
+/***/ }),
+
 /***/ "./client/client3d.mjs":
 /*!*****************************!*\
   !*** ./client/client3d.mjs ***!
@@ -26459,9 +26995,10 @@ const getGlobalThis = () => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
-/* harmony import */ var _components_app_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/app.vue */ "./client/components/app.vue");
-/* harmony import */ var _directus_sdk__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @directus/sdk */ "./node_modules/@directus/sdk/dist/sdk.bundler.js");
+/* harmony import */ var _PeerConnections_mjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PeerConnections.mjs */ "./client/PeerConnections.mjs");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+/* harmony import */ var _components_app_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/app.vue */ "./client/components/app.vue");
+/* harmony import */ var _directus_sdk__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @directus/sdk */ "./node_modules/@directus/sdk/dist/sdk.bundler.js");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 var _module;
@@ -26479,14 +27016,6 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
@@ -26518,8 +27047,9 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-// This example uses THREE.CatmullRomCurve3 to create a path for a custom Keyframe Track position animation.
+ // This example uses THREE.CatmullRomCurve3 to create a path for a custom Keyframe Track position animation.
 // AnimationClip creation function on line 136
+
 if (typeof module !== 'undefined' && (_module = module) !== null && _module !== void 0 && _module.hot) {
   var _module2, _module2$hot;
 
@@ -26562,21 +27092,21 @@ function delay(_x) {
 }
 
 function _delay() {
-  _delay = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee14(t) {
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee14$(_context14) {
+  _delay = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10(t) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
       while (1) {
-        switch (_context14.prev = _context14.next) {
+        switch (_context10.prev = _context10.next) {
           case 0:
-            return _context14.abrupt("return", new Promise(function (resolve) {
+            return _context10.abrupt("return", new Promise(function (resolve) {
               return setTimeout(resolve, t);
             }));
 
           case 1:
           case "end":
-            return _context14.stop();
+            return _context10.stop();
         }
       }
-    }, _callee14);
+    }, _callee10);
   }));
   return _delay.apply(this, arguments);
 }
@@ -26636,7 +27166,7 @@ var SocketConnection = /*#__PURE__*/function () {
   }, {
     key: "onServerMessage",
     value: function onServerMessage(event) {
-      var _decoded, _decoded2, _window$t$app$state$h, _window, _window$t, _window$t$app, _window$t$app$state, _decoded3, _t$players;
+      var _decoded, _decoded2, _decoded3, _decoded4, _decoded5, _window$t$app$state$h, _window, _window$t, _window$t$app, _window$t$app$state, _decoded6, _t$players;
 
       //console.log(event);
       var decoded = null;
@@ -26647,23 +27177,23 @@ var SocketConnection = /*#__PURE__*/function () {
         console.error(e, event.data);
       }
 
-      if (((_decoded = decoded) === null || _decoded === void 0 ? void 0 : _decoded.type) !== 'PING') {
+      if (((_decoded = decoded) === null || _decoded === void 0 ? void 0 : _decoded.type) !== 'PING' && ((_decoded2 = decoded) === null || _decoded2 === void 0 ? void 0 : _decoded2.type) !== 'remotePeerIceCandidate' && ((_decoded3 = decoded) === null || _decoded3 === void 0 ? void 0 : _decoded3.type) !== 'mediaAnswer' && ((_decoded4 = decoded) === null || _decoded4 === void 0 ? void 0 : _decoded4.type) !== 'iceCandidate') {
         console.log('socket message:', decoded);
         t.app.$refs.app.messages.push(decoded);
       } // todo: switch on type not message
 
 
-      switch ((_decoded2 = decoded) === null || _decoded2 === void 0 ? void 0 : _decoded2.type) {
+      switch ((_decoded5 = decoded) === null || _decoded5 === void 0 ? void 0 : _decoded5.type) {
         case 'mediaOffer':
-          t.onMediaOffer(decoded);
+          t.peers.onMediaOffer(decoded);
           break;
 
         case 'mediaAnswer':
-          t.onMediaAnswer(decoded);
+          t.peers.onMediaAnswer(decoded);
           break;
 
         case 'remotePeerIceCandidate':
-          t.onRemotePeerIceCandidate(decoded);
+          t.peers.onRemotePeerIceCandidate(decoded);
           break;
 
         case 'PING':
@@ -26671,7 +27201,7 @@ var SocketConnection = /*#__PURE__*/function () {
           //todo: remove manual linkage:
           //window.t.app.state.client_ids = decoded.client_ids;
           window.t.app.state.hovered_prev = ((_window$t$app$state$h = (_window = window) === null || _window === void 0 ? void 0 : (_window$t = _window.t) === null || _window$t === void 0 ? void 0 : (_window$t$app = _window$t.app) === null || _window$t$app === void 0 ? void 0 : (_window$t$app$state = _window$t$app.state) === null || _window$t$app$state === void 0 ? void 0 : _window$t$app$state.hovered) !== null && _window$t$app$state$h !== void 0 ? _window$t$app$state$h : []).slice();
-          window.t.app.state = _objectSpread(_objectSpread({}, window.t.app.state), (_decoded3 = decoded) === null || _decoded3 === void 0 ? void 0 : _decoded3.state);
+          window.t.app.state = _objectSpread(_objectSpread({}, window.t.app.state), (_decoded6 = decoded) === null || _decoded6 === void 0 ? void 0 : _decoded6.state);
           break;
 
         case 'NEW_CLIENT_CONNECTED':
@@ -26792,21 +27322,29 @@ var SoundsManager = /*#__PURE__*/function () {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                if (!t.root.audio_muted) {
+                  _context.next = 2;
+                  break;
+                }
+
+                return _context.abrupt("return");
+
+              case 2:
                 this.element = document.getElementById('sound_effects');
                 console.trace('play sound', this.muted, sound_name, this.sound_map);
 
                 if (!(!this.muted && (_this$sound_map = this.sound_map) !== null && _this$sound_map !== void 0 && _this$sound_map[sound_name])) {
-                  _context.next = 6;
+                  _context.next = 8;
                   break;
                 }
 
                 // this.element.setAttribute('src',this.sound_map[sound_name]);
                 this.element.currentTime = 0; // seek to beginning
 
-                _context.next = 6;
+                _context.next = 8;
                 return this.element.play();
 
-              case 6:
+              case 8:
               case "end":
                 return _context.stop();
             }
@@ -26870,13 +27408,15 @@ var Tabletop = /*#__PURE__*/function () {
     this.server = new SocketConnection(); // t.sounds =
 
     this.sounds = new SoundsManager();
-    this.webrtc_peer_connections = {};
-    this.webrtc_peer_streams = {};
-    this.webrtc_peer_video_settings = {};
+    this.peers = new _PeerConnections_mjs__WEBPACK_IMPORTED_MODULE_1__["default"](); // this.webrtc_peer_connections = {};
+    // this.webrtc_peer_streams = {};
+    // this.webrtc_peer_video_settings = {};
+
     this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
     this.deckgroup = new THREE.Group();
-    this.deckgroup.position.y = 10;
+    this.deckgroup.position.y = 5;
+    this.deckgroup.position.z = -5;
     scene.add(this.deckgroup); // playfield cards (intersection group)
 
     this.zonegroup = new THREE.Group();
@@ -26917,32 +27457,19 @@ var Tabletop = /*#__PURE__*/function () {
     key: "startGame",
     value: function startGame() {
       this.game.startRound();
-    }
-  }, {
-    key: "setupOpponentPeer",
-    value: function setupOpponentPeer(client_id) {
-      // oponent stream
-      var createPeerConnection = function createPeerConnection() {
-        return new RTCPeerConnection({
-          iceServers: [{
-            urls: "stun:stun.stunprotocol.org"
-          }]
-        });
-      };
+    } // call -> setupRTCPeerConnections -> offerStreamToPeer -> setupRTCPeerConnection
+    // todo: do this each time a new client joins?
+    // setupRTCPeerConnections(){
+    //   for(var i = 0; i<t.app.state.client_ids.length; i++){
+    //     let client_id = t.app.state.client_ids[i];
+    //     if(client_id !== t.app.state.my_client_id){
+    //       if(!t.webrtc_peer_connections[client_id]){
+    //         t.offerStreamToPeer(client_id);
+    //       }
+    //     }
+    //   }
+    // }
 
-      t.webrtc_peer_connections[client_id] = createPeerConnection();
-      t.webrtc_peer_connections[client_id].onicecandidate = t.onIceCandidateEvent;
-
-      var gotRemoteStream = function gotRemoteStream(event) {
-        var _event$streams = _slicedToArray(event.streams, 1),
-            stream = _event$streams[0];
-
-        t.webrtc_peer_streams[client_id] = stream;
-        t.root.$refs["opponent_video_".concat(client_id)].srcObject = stream;
-      };
-
-      t.webrtc_peer_connections[client_id].addEventListener('track', gotRemoteStream);
-    }
   }, {
     key: "closeVideoStream",
     value: function closeVideoStream() {
@@ -26963,121 +27490,77 @@ var Tabletop = /*#__PURE__*/function () {
       (_t2 = t) === null || _t2 === void 0 ? void 0 : (_t2$stream = _t2.stream) === null || _t2$stream === void 0 ? void 0 : (_t2$stream$getAudioTr = _t2$stream.getAudioTracks()) === null || _t2$stream$getAudioTr === void 0 ? void 0 : _t2$stream$getAudioTr.forEach(function (track) {
         track.stop();
       });
-    }
+    } // loop through ALL peers and send them the stream
+    // TODO: max peers
+
   }, {
-    key: "setupVideoStream",
-    value: function setupVideoStream() {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        // todo add camera flip (self)
-        // add video mute (self/other)
-        // add audio mute (self/other)
-        var constraints = {
-          audio: true,
-          video: {
-            exposureMode: {
-              ideal: 'continuous'
-            },
-            exposureCompensation: {
-              ideal: 0
-            },
-            width: {
-              ideal: 1280
-            },
-            height: {
-              ideal: 720
-            },
-            facingMode: 'user'
-          }
-        };
-        navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-          // NOTE: t.stream === the current client's outbound stream
-          // apply the stream to the video element used in the texture
-          t.stream = stream;
-          t.video.srcObject = stream;
-          t.video.play();
-        })["catch"](function (error) {
-          console.error('Unable to access the camera/webcam.', error);
-        });
-      } else {
-        console.error('MediaDevices interface not available.');
-      } // loop through ALL peers and send them the stream
-      // TODO: max peers
-
-
-      t.call = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee2() {
+    key: "call",
+    value: function () {
+      var _call = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee2() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                t.opponentIDs.forEach(function (id) {
-                  t.setupOpponentPeer(id);
-                  t.offerStreamToPeer(id);
-                });
+                _context2.next = 2;
+                return t.peers.setupRTCPeerConnections();
 
-              case 1:
+              case 2:
               case "end":
                 return _context2.stop();
             }
           }
         }, _callee2);
       }));
-    }
-  }, {
-    key: "offerStreamToPeer",
-    value: function () {
-      var _offerStreamToPeer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(peer_id) {
-        var peer, localPeerOffer;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                peer = t.webrtc_peer_connections[peer_id];
 
-                if (peer) {
-                  _context3.next = 4;
-                  break;
-                }
-
-                console.error('no peer connection for', peer_id);
-                return _context3.abrupt("return");
-
-              case 4:
-                // offer our audio, video tracks to the peer connection
-                t.stream.getTracks().forEach(function (track) {
-                  return peer.addTrack(track, t.stream);
-                });
-                _context3.next = 7;
-                return peer.createOffer();
-
-              case 7:
-                localPeerOffer = _context3.sent;
-                _context3.next = 10;
-                return peer.setLocalDescription(new RTCSessionDescription(localPeerOffer));
-
-              case 10:
-                //const opponent_id = getOpponentID()
-                t.server.send({
-                  type: 'mediaOffer',
-                  offer: localPeerOffer,
-                  stream_settings: t.stream.getVideoTracks()[0].getSettings(),
-                  from: t.app.state.my_client_id,
-                  to: peer_id
-                });
-
-              case 11:
-              case "end":
-                return _context3.stop();
-            }
-          }
-        }, _callee3);
-      }));
-
-      function offerStreamToPeer(_x3) {
-        return _offerStreamToPeer.apply(this, arguments);
+      function call() {
+        return _call.apply(this, arguments);
       }
 
-      return offerStreamToPeer;
-    }() // animate the cards within the hand to maintain spacing
+      return call;
+    }()
+  }, {
+    key: "setupVideoStream",
+    value: function setupVideoStream() {
+      return new Promise(function (resolve, reject) {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          // todo add camera flip (self)
+          // add video mute (self/other)
+          // add audio mute (self/other)
+          var constraints = {
+            audio: true,
+            video: {
+              exposureMode: {
+                ideal: 'continuous'
+              },
+              exposureCompensation: {
+                ideal: 0
+              },
+              width: {
+                ideal: 1280
+              },
+              height: {
+                ideal: 720
+              },
+              facingMode: 'user'
+            }
+          };
+          navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+            // NOTE: t.stream === the current client's outbound stream
+            // apply the stream to the video element used in the texture
+            t.stream = stream;
+            t.video.srcObject = stream;
+            t.video.play();
+            resolve();
+          })["catch"](function (error) {
+            console.error('Unable to access the camera/webcam.', error);
+            reject();
+          });
+        } else {
+          console.error('MediaDevices interface not available.');
+          reject();
+        }
+      });
+    } // animate the cards within the hand to maintain spacing
     // also handles animating cards from playfield to hand after a match is validated by the server
 
   }, {
@@ -27101,8 +27584,8 @@ var Tabletop = /*#__PURE__*/function () {
         var hand = (_t$app$state$player_h = (_t$app$state = t.app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$player_h2 = _t$app$state.player_hands) === null || _t$app$state$player_h2 === void 0 ? void 0 : _t$app$state$player_h2[player_id]) !== null && _t$app$state$player_h !== void 0 ? _t$app$state$player_h : [];
         var matches_count = hand.length / 2; // console.log('matches_count?',matches_count);
 
-        for (var a = 0; (_ref2 = a < (hand === null || hand === void 0 ? void 0 : hand.length)) !== null && _ref2 !== void 0 ? _ref2 : 0; a++) {
-          var _ref2;
+        for (var a = 0; (_ref = a < (hand === null || hand === void 0 ? void 0 : hand.length)) !== null && _ref !== void 0 ? _ref : 0; a++) {
+          var _ref;
 
           var i_card = hand[a];
           var card = t.cards[i_card];
@@ -27144,15 +27627,15 @@ var Tabletop = /*#__PURE__*/function () {
         }
       }
 
-      for (var _i2 in t.app.state.player_cursors) {
-        var player_cursor_position = t.app.state.player_cursors[_i2]; // console.log(i===t.app.,player_cursor_position);
+      for (var _i in t.app.state.player_cursors) {
+        var player_cursor_position = t.app.state.player_cursors[_i]; // console.log(i===t.app.,player_cursor_position);
 
-        if (_i2 !== t.app.state.my_client_id) {
+        if (_i !== t.app.state.my_client_id) {
           var _t3, _t3$players, _t3$players$_i, _t3$players$_i$pointe;
 
           // console.log('update opponent cursor');
           // only update other players, let mousemove drive local players cursor so it doesn't fight with server-streaming values
-          (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$players = _t3.players) === null || _t3$players === void 0 ? void 0 : (_t3$players$_i = _t3$players[_i2]) === null || _t3$players$_i === void 0 ? void 0 : (_t3$players$_i$pointe = _t3$players$_i.pointer) === null || _t3$players$_i$pointe === void 0 ? void 0 : _t3$players$_i$pointe.tweenTo({
+          (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$players = _t3.players) === null || _t3$players === void 0 ? void 0 : (_t3$players$_i = _t3$players[_i]) === null || _t3$players$_i === void 0 ? void 0 : (_t3$players$_i$pointe = _t3$players$_i.pointer) === null || _t3$players$_i$pointe === void 0 ? void 0 : _t3$players$_i$pointe.tweenTo({
             pos_x: player_cursor_position.x,
             pos_y: player_cursor_position.y,
             pos_z: player_cursor_position.z
@@ -27271,194 +27754,6 @@ var Tabletop = /*#__PURE__*/function () {
     get: function get() {
       return this.deck.cards;
     }
-  }, {
-    key: "onMediaOffer",
-    value: function () {
-      var _onMediaOffer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(decoded) {
-        var FROM_PEER_ID, PEER, peerAnswer, _t5, _t5$players, _t5$players$FROM_PEER, ovss, aspect_ratio;
-
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                console.log('todo: if we already have a peer, do we keep or destroy that connection to respond to the new offer?');
-                console.log('onMediaOffer', decoded);
-                _context4.prev = 2;
-                FROM_PEER_ID = decoded.from;
-                PEER = t.webrtc_peer_connections[FROM_PEER_ID];
-
-                if (!PEER) {
-                  t.setupOpponentPeer(FROM_PEER_ID); // t.offerStreamToPeer(FROM_PEER_ID);
-                  // console.error('no peer for',FROM_PEER_ID);
-                  // return;
-                }
-
-                _context4.next = 8;
-                return PEER.setRemoteDescription(new RTCSessionDescription(decoded.offer));
-
-              case 8:
-                _context4.next = 10;
-                return PEER.createAnswer();
-
-              case 10:
-                peerAnswer = _context4.sent;
-                _context4.next = 13;
-                return PEER.setLocalDescription(new RTCSessionDescription(peerAnswer));
-
-              case 13:
-                // save call initiators stream settings
-                t.webrtc_peer_video_settings[FROM_PEER_ID] = decoded.stream_settings;
-
-                if (t.webrtc_peer_video_settings[FROM_PEER_ID]) {
-                  ovss = t.webrtc_peer_video_settings[FROM_PEER_ID];
-                  aspect_ratio = ovss.width / ovss.height; // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
-
-                  (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : (_t5$players$FROM_PEER = _t5$players[FROM_PEER_ID]) === null || _t5$players$FROM_PEER === void 0 ? void 0 : _t5$players$FROM_PEER.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[FROM_PEER_ID]?.head?.mesh?.scale)
-                }
-
-                t.server.send({
-                  type: 'mediaAnswer',
-                  answer: peerAnswer,
-                  from: t.app.state.my_client_id,
-                  to: FROM_PEER_ID,
-                  stream_settings: t.stream.getVideoTracks()[0].getSettings()
-                });
-                _context4.next = 21;
-                break;
-
-              case 18:
-                _context4.prev = 18;
-                _context4.t0 = _context4["catch"](2);
-                console.error('onMediaOffer', _context4.t0);
-
-              case 21:
-              case "end":
-                return _context4.stop();
-            }
-          }
-        }, _callee4, null, [[2, 18]]);
-      }));
-
-      function onMediaOffer(_x4) {
-        return _onMediaOffer.apply(this, arguments);
-      }
-
-      return onMediaOffer;
-    }()
-  }, {
-    key: "onMediaAnswer",
-    value: function () {
-      var _onMediaAnswer = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee5(decoded) {
-        var _t6, _t6$players, _t6$players$getOppone, ovss, aspect_ratio;
-
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee5$(_context5) {
-          while (1) {
-            switch (_context5.prev = _context5.next) {
-              case 0:
-                console.log('onMediaAnswer', decoded);
-                _context5.next = 3;
-                return t.peer.setRemoteDescription(new RTCSessionDescription(decoded.answer));
-
-              case 3:
-                // save call recipients stream settings
-                t.opponent_video_stream_settings = decoded.stream_settings; // update opponent's "head" shape to match their video aspect ratio
-
-                console.log('opponent stream ar', //stream.getVideoTracks()[0].getSettings()
-                t.opponent_video_stream_settings);
-
-                if (t.opponent_video_stream_settings) {
-                  ovss = t.opponent_video_stream_settings;
-                  aspect_ratio = ovss.width / ovss.height; // mobiel safari did not send .aspectRatio so calculate it
-                  // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
-
-                  (_t6 = t) === null || _t6 === void 0 ? void 0 : (_t6$players = _t6.players) === null || _t6$players === void 0 ? void 0 : (_t6$players$getOppone = _t6$players[getOpponentID()]) === null || _t6$players$getOppone === void 0 ? void 0 : _t6$players$getOppone.head.mesh.scale.set(aspect_ratio, 1, 1); // console.log('opponent head scale?',t?.players?.[getOpponentID()]?.head?.mesh?.scale)
-                }
-
-              case 6:
-              case "end":
-                return _context5.stop();
-            }
-          }
-        }, _callee5);
-      }));
-
-      function onMediaAnswer(_x5) {
-        return _onMediaAnswer.apply(this, arguments);
-      }
-
-      return onMediaAnswer;
-    }()
-  }, {
-    key: "onIceCandidateEvent",
-    value: function onIceCandidateEvent(event) {
-      var ids = t.app.state.client_ids.slice(); // if(ids.length<2){
-      //   console.error('no one to call');
-      // }else if(ids.length > 2){
-      //   console.error('need to figure out multipeer connections');
-      // }else{
-
-      var my_index = ids.indexOf(t.app.state.my_client_id);
-      ids.splice(my_index, 1);
-      console.warn('attempting media offer to peer:', ids); // }
-
-      t.server.send({
-        type: 'iceCandidate',
-        to: ids[0],
-        candidate: event.candidate
-      });
-    }
-  }, {
-    key: "onRemotePeerIceCandidate",
-    value: function () {
-      var _onRemotePeerIceCandidate = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6(data) {
-        var _t$webrtc_peer_connec, candidate, PEER_CONNECTION;
-
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee6$(_context6) {
-          while (1) {
-            switch (_context6.prev = _context6.next) {
-              case 0:
-                _context6.prev = 0;
-                candidate = new RTCIceCandidate(data.candidate);
-                console.log('onRemotePeerIceCandidate', data);
-                PEER_CONNECTION = (_t$webrtc_peer_connec = t.webrtc_peer_connections) === null || _t$webrtc_peer_connec === void 0 ? void 0 : _t$webrtc_peer_connec[data.client_id];
-                console.log('PEER_CONNECTION', PEER_CONNECTION);
-
-                if (PEER_CONNECTION) {
-                  _context6.next = 8;
-                  break;
-                }
-
-                console.error('no peer connection for', data.client_id);
-                return _context6.abrupt("return");
-
-              case 8:
-                _context6.next = 10;
-                return PEER_CONNECTION.addIceCandidate(candidate);
-
-              case 10:
-                _context6.next = 15;
-                break;
-
-              case 12:
-                _context6.prev = 12;
-                _context6.t0 = _context6["catch"](0);
-                // Handle error // some shit occurred
-                console.error('onRemotePeerIceCandidate', _context6.t0);
-
-              case 15:
-              case "end":
-                return _context6.stop();
-            }
-          }
-        }, _callee6, null, [[0, 12]]);
-      }));
-
-      function onRemotePeerIceCandidate(_x6) {
-        return _onRemotePeerIceCandidate.apply(this, arguments);
-      }
-
-      return onRemotePeerIceCandidate;
-    }()
   }]);
 
   return Tabletop;
@@ -27478,36 +27773,36 @@ var TweenableMesh = /*#__PURE__*/function () {
   _createClass(TweenableMesh, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7(destination, _ref3) {
+      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(destination, _ref2) {
         var _this$mesh, _this$mesh$position, _destination$pos_x, _this$mesh2, _this$mesh2$position, _destination$pos_y, _this$mesh3, _this$mesh3$position, _destination$pos_z, _this$mesh4, _this$mesh4$position;
 
-        var _ref3$duration, duration, _mesh, magnitude, tweenEnd;
+        var _ref2$duration, duration, _mesh, magnitude, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                _ref3$duration = _ref3.duration, duration = _ref3$duration === void 0 ? 1000 : _ref3$duration;
+                _ref2$duration = _ref2.duration, duration = _ref2$duration === void 0 ? 1000 : _ref2$duration;
                 // console.log('tweenTo',destination);
                 this.destination = destination; // todo: accept option to stop,finish,queue tweens
 
                 if (!this.tweening) {
-                  _context7.next = 6;
+                  _context3.next = 6;
                   break;
                 }
 
-                return _context7.abrupt("return", false);
+                return _context3.abrupt("return", false);
 
               case 6:
                 _mesh = this.mesh;
 
                 if (_mesh) {
-                  _context7.next = 10;
+                  _context3.next = 10;
                   break;
                 }
 
                 console.error('mesh not found', this);
-                return _context7.abrupt("return");
+                return _context3.abrupt("return");
 
               case 10:
                 this.tweening = true; // TODO: add ability to include/exclude properties from tween to save overhead
@@ -27526,12 +27821,12 @@ var TweenableMesh = /*#__PURE__*/function () {
                 }
 
                 if (!(magnitude < 0.1)) {
-                  _context7.next = 16;
+                  _context3.next = 16;
                   break;
                 }
 
                 this.tweening = false;
-                return _context7.abrupt("return");
+                return _context3.abrupt("return");
 
               case 16:
                 tweenEnd = getMeshTween(_mesh, destination, {
@@ -27543,7 +27838,7 @@ var TweenableMesh = /*#__PURE__*/function () {
                 }); // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
 
                 this.tween = tweenEnd.start();
-                _context7.next = 20;
+                _context3.next = 20;
                 return delay(duration);
 
               case 20:
@@ -27552,13 +27847,13 @@ var TweenableMesh = /*#__PURE__*/function () {
 
               case 21:
               case "end":
-                return _context7.stop();
+                return _context3.stop();
             }
           }
-        }, _callee7, this);
+        }, _callee3, this);
       }));
 
-      function tweenTo(_x7, _x8) {
+      function tweenTo(_x3, _x4) {
         return _tweenTo.apply(this, arguments);
       }
 
@@ -27667,34 +27962,34 @@ var PlayerPointer = /*#__PURE__*/function () {
   _createClass(PlayerPointer, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8(destination, _ref4) {
+      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(destination, _ref3) {
         var _this$mesh5, _this$mesh5$position, _destination$pos_x2, _this$mesh6, _this$mesh6$position, _destination$pos_y2, _this$mesh7, _this$mesh7$position, _destination$pos_z2, _this$mesh8, _this$mesh8$position;
 
-        var _ref4$duration, duration, _mesh, magnitude, tweenEnd;
+        var _ref3$duration, duration, _mesh, magnitude, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
-                _ref4$duration = _ref4.duration, duration = _ref4$duration === void 0 ? 1000 : _ref4$duration;
+                _ref3$duration = _ref3.duration, duration = _ref3$duration === void 0 ? 1000 : _ref3$duration;
                 this.destination = destination;
 
                 if (!this.tweening) {
-                  _context8.next = 6;
+                  _context4.next = 6;
                   break;
                 }
 
-                return _context8.abrupt("return", false);
+                return _context4.abrupt("return", false);
 
               case 6:
                 _mesh = this.mesh;
 
                 if (_mesh) {
-                  _context8.next = 9;
+                  _context4.next = 9;
                   break;
                 }
 
-                return _context8.abrupt("return");
+                return _context4.abrupt("return");
 
               case 9:
                 this.tweening = true; // TODO: add ability to include/exclude properties from tween to save overhead
@@ -27713,12 +28008,12 @@ var PlayerPointer = /*#__PURE__*/function () {
                 }
 
                 if (!(magnitude < 0.1)) {
-                  _context8.next = 15;
+                  _context4.next = 15;
                   break;
                 }
 
                 this.tweening = false;
-                return _context8.abrupt("return");
+                return _context4.abrupt("return");
 
               case 15:
                 tweenEnd = getMeshTween(_mesh, destination, {
@@ -27730,7 +28025,7 @@ var PlayerPointer = /*#__PURE__*/function () {
                 }); // this.tween = tweenMid ? tweenMid.chain(tweenEnd).start() : tweenEnd.start();
 
                 this.tween = tweenEnd.start();
-                _context8.next = 19;
+                _context4.next = 19;
                 return delay(duration);
 
               case 19:
@@ -27739,13 +28034,13 @@ var PlayerPointer = /*#__PURE__*/function () {
 
               case 20:
               case "end":
-                return _context8.stop();
+                return _context4.stop();
             }
           }
-        }, _callee8, this);
+        }, _callee4, this);
       }));
 
-      function tweenTo(_x9, _x10) {
+      function tweenTo(_x5, _x6) {
         return _tweenTo2.apply(this, arguments);
       }
 
@@ -27838,21 +28133,27 @@ var Card = /*#__PURE__*/function () {
     value: function setupTexturesAndMaterials() {
       // The Card
       // 'https://images-na.ssl-images-amazon.com/images/I/61YXNhfzlzL._SL1012_.jpg'
-      this.faceUpTexture = txtLoader.load(this.front_image);
-      this.faceDownTexture = txtLoader.load('https://vignette3.wikia.nocookie.net/yugioh/images/9/94/Back-Anime-2.png/revision/latest?cb=20110624090942'); // faceUpTexture.flipY = false;
+      this.faceUpTexture = txtLoader.load(this.front_image); // back image
+      // this.faceDownTexture = txtLoader.load('https://vignette3.wikia.nocookie.net/yugioh/images/9/94/Back-Anime-2.png/revision/latest?cb=20110624090942');
+      // this.faceDownTexture = txtLoader.load('./public/images/default-back.jpg');
 
-      this.darkMaterial = new THREE.MeshPhongMaterial({
-        color: 0x111111
+      this.faceDownTexture = txtLoader.load('./public/images/decks/fruits/BACK.jpg'); // faceUpTexture.flipY = false;
+
+      this.darkMaterial = new THREE.MeshBasicMaterial({
+        color: 0x111111,
+        side: THREE.FrontSide
       });
-      this.faceUpMaterial = new THREE.MeshPhongMaterial({
+      this.faceUpMaterial = new THREE.MeshBasicMaterial({
         color: colorDark,
         map: this.faceUpTexture,
-        shininess: 40
+        shininess: 40,
+        side: THREE.FrontSide
       });
-      this.faceDownMaterial = new THREE.MeshPhongMaterial({
+      this.faceDownMaterial = new THREE.MeshBasicMaterial({
         color: colorDark,
         map: this.faceDownTexture,
-        shininess: 40
+        shininess: 40,
+        side: THREE.FrontSide
       });
     } // used to move a card from a deck to a zone or a player hand
     // note you can use options{arc:true,arcTo:{}} to move the card in an arc (basically just adds an intermediate keyframe point to the curve)
@@ -27860,16 +28161,16 @@ var Card = /*#__PURE__*/function () {
   }, {
     key: "tweenTo",
     value: function () {
-      var _tweenTo3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9(destination, options) {
+      var _tweenTo3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee5(destination, options) {
         var _options$priority,
             _this3 = this,
             _this$tween;
 
         var priority, _mesh, tweenMid, duration, tweenEnd;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
                 // console.log('card move to point',destination,options);
                 // this generates a tween between the current position and the destination
@@ -27877,16 +28178,16 @@ var Card = /*#__PURE__*/function () {
                 priority = (_options$priority = options === null || options === void 0 ? void 0 : options.priority) !== null && _options$priority !== void 0 ? _options$priority : 3; // 1-4 default: 3
 
                 if (!this.tweening) {
-                  _context9.next = 5;
+                  _context5.next = 5;
                   break;
                 }
 
                 if (!(priority === 4)) {
-                  _context9.next = 5;
+                  _context5.next = 5;
                   break;
                 }
 
-                return _context9.abrupt("return");
+                return _context5.abrupt("return");
 
               case 5:
                 this.current_tween_priority = priority;
@@ -27905,12 +28206,12 @@ var Card = /*#__PURE__*/function () {
                 });
 
                 if (!(priority === 3)) {
-                  _context9.next = 14;
+                  _context5.next = 14;
                   break;
                 }
 
                 if (!(this.tweening && this.tween && !this.tween.stopped)) {
-                  _context9.next = 14;
+                  _context5.next = 14;
                   break;
                 }
 
@@ -27930,7 +28231,7 @@ var Card = /*#__PURE__*/function () {
                 // TODO: put this in a callback
                 // this.tweening = false;
 
-                return _context9.abrupt("return");
+                return _context5.abrupt("return");
 
               case 14:
                 if (priority === 2) {// jump the tween to the last frame, then do the next tween
@@ -27951,13 +28252,13 @@ var Card = /*#__PURE__*/function () {
 
               case 20:
               case "end":
-                return _context9.stop();
+                return _context5.stop();
             }
           }
-        }, _callee9, this);
+        }, _callee5, this);
       }));
 
-      function tweenTo(_x11, _x12) {
+      function tweenTo(_x7, _x8) {
         return _tweenTo3.apply(this, arguments);
       }
 
@@ -27988,8 +28289,8 @@ var Deck = /*#__PURE__*/function () {
     this.available_cards_history = [];
     this.card_types = ['APPLE', 'ORANGE', 'LEMON', 'PEAR', 'BLUEBERRY', 'GRAPES', 'RASPBERRY', 'STRAWBERRY'];
 
-    for (var i = 0; (_ref5 = i < (options === null || options === void 0 ? void 0 : options.card_count)) !== null && _ref5 !== void 0 ? _ref5 : 52; i++) {
-      var _ref5;
+    for (var i = 0; (_ref4 = i < (options === null || options === void 0 ? void 0 : options.card_count)) !== null && _ref4 !== void 0 ? _ref4 : 52; i++) {
+      var _ref4;
 
       this.cards.push(new Card(i, this.card_types[i % 2 === 0 ? i / 2 : (i - 1) / 2]));
       this.available_cards.push(i);
@@ -28113,11 +28414,11 @@ var Deck = /*#__PURE__*/function () {
   _createClass(Deck, [{
     key: "tweenCardsToDeck",
     value: function () {
-      var _tweenCardsToDeck = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10() {
+      var _tweenCardsToDeck = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6() {
         var i, card;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context10.prev = _context10.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
                 for (i in t.cards) {
                   card = t.cards[i];
@@ -28131,17 +28432,16 @@ var Deck = /*#__PURE__*/function () {
                     }, {
                       duration: 1000
                     });
-                  } else {
-                    console.error('failed to tween card to deck', i);
+                  } else {// console.error('failed to tween card to deck',i)
                   }
                 }
 
               case 1:
               case "end":
-                return _context10.stop();
+                return _context6.stop();
             }
           }
-        }, _callee10);
+        }, _callee6);
       }));
 
       function tweenCardsToDeck() {
@@ -28153,54 +28453,53 @@ var Deck = /*#__PURE__*/function () {
   }, {
     key: "tweenCardsToZones",
     value: function () {
-      var _tweenCardsToZones = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee11() {
+      var _tweenCardsToZones = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7() {
         var i, _card2, _card3, zone, card, j, c;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee11$(_context11) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
-                _context11.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.game.layout.zones);
+                _context7.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.game.layout.zones);
 
               case 1:
-                if ((_context11.t1 = _context11.t0()).done) {
-                  _context11.next = 21;
+                if ((_context7.t1 = _context7.t0()).done) {
+                  _context7.next = 21;
                   break;
                 }
 
-                i = _context11.t1.value;
+                i = _context7.t1.value;
                 zone = t.game.layout.zones[i];
                 card = null; //cardforzone
 
-                _context11.t2 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.app.state.cards);
+                _context7.t2 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.app.state.cards);
 
               case 6:
-                if ((_context11.t3 = _context11.t2()).done) {
-                  _context11.next = 15;
+                if ((_context7.t3 = _context7.t2()).done) {
+                  _context7.next = 15;
                   break;
                 }
 
-                j = _context11.t3.value;
+                j = _context7.t3.value;
                 c = t.app.state.cards[j];
 
                 if (!(c.zone == i)) {
-                  _context11.next = 13;
+                  _context7.next = 13;
                   break;
                 }
 
                 card = t.cards[j]; // our LOCAL card (not the server-managed representation)
 
                 card.zone = i;
-                return _context11.abrupt("break", 15);
+                return _context7.abrupt("break", 15);
 
               case 13:
-                _context11.next = 6;
+                _context7.next = 6;
                 break;
 
               case 15:
                 // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
-                if (!((_card2 = card) !== null && _card2 !== void 0 && _card2.mesh)) {
-                  console.error('failed to tween card to zone', i, card);
+                if (!((_card2 = card) !== null && _card2 !== void 0 && _card2.mesh)) {// console.error('failed to tween card to zone',i,card)
                 } else {
                   t.zonegroup.attach(card.mesh);
                 } // console.log('tween card to zone',card);
@@ -28213,19 +28512,19 @@ var Deck = /*#__PURE__*/function () {
                 }, {
                   duration: 1000
                 });
-                _context11.next = 19;
+                _context7.next = 19;
                 return delay(150);
 
               case 19:
-                _context11.next = 1;
+                _context7.next = 1;
                 break;
 
               case 21:
               case "end":
-                return _context11.stop();
+                return _context7.stop();
             }
           }
-        }, _callee11);
+        }, _callee7);
       }));
 
       function tweenCardsToZones() {
@@ -28273,10 +28572,10 @@ var Round = /*#__PURE__*/function () {
   _createClass(Round, [{
     key: "start",
     value: function () {
-      var _start = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee12() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee12$(_context12) {
+      var _start = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
           while (1) {
-            switch (_context12.prev = _context12.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
                 console.log('round start', 'deck', window.t.deck); // center the deck
                 // animate the camera
@@ -28295,7 +28594,7 @@ var Round = /*#__PURE__*/function () {
                     updatePlayerHead();
                   }
                 }).start();
-                _context12.next = 4;
+                _context8.next = 4;
                 return delay(1000);
 
               case 4:
@@ -28311,15 +28610,15 @@ var Round = /*#__PURE__*/function () {
                   duration: 1000,
                   easing: TWEEN.Easing.Quadratic.Out
                 }).start();
-                _context12.next = 7;
+                _context8.next = 7;
                 return delay(1000);
 
               case 7:
               case "end":
-                return _context12.stop();
+                return _context8.stop();
             }
           }
-        }, _callee12);
+        }, _callee8);
       }));
 
       function start() {
@@ -28341,9 +28640,9 @@ var Round = /*#__PURE__*/function () {
   }, {
     key: "current_player",
     get: function get() {
-      var _t7, _t7$players, _t$app$state8;
+      var _t5, _t5$players, _t$app$state8;
 
-      return (_t7 = t) === null || _t7 === void 0 ? void 0 : (_t7$players = _t7.players) === null || _t7$players === void 0 ? void 0 : _t7$players[(_t$app$state8 = t.app.state) === null || _t$app$state8 === void 0 ? void 0 : _t$app$state8.player_turn];
+      return (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : _t5$players[(_t$app$state8 = t.app.state) === null || _t$app$state8 === void 0 ? void 0 : _t$app$state8.player_turn];
     }
   }]);
 
@@ -28370,8 +28669,8 @@ var Layout = /*#__PURE__*/_createClass(function Layout(options) {
         col: c,
         card: null,
         origin: {
-          x: 2.5 * r - this.spacing.x + r * 0.5 - .8,
-          y: 10,
+          x: 3.5 * r - this.spacing.x + r * 0.5 - 1,
+          y: 9.8,
           z: 3.5 * c - this.spacing.y + c * 0.5 - 2
         }
       });
@@ -28473,10 +28772,10 @@ var Game_PVPMemory = /*#__PURE__*/function () {
   }, {
     key: "checkForMatches",
     value: function () {
-      var _checkForMatches = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee13() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee13$(_context13) {
+      var _checkForMatches = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
           while (1) {
-            switch (_context13.prev = _context13.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
                 // we've flipped 2+ cards,
                 t.game.ignore_clicks = true; // server is checking for matches
@@ -28500,10 +28799,10 @@ var Game_PVPMemory = /*#__PURE__*/function () {
 
               case 1:
               case "end":
-                return _context13.stop();
+                return _context9.stop();
             }
           }
-        }, _callee13);
+        }, _callee9);
       }));
 
       function checkForMatches() {
@@ -28546,14 +28845,17 @@ function init() {
   window.t = new Tabletop();
   t.scene = scene;
   t.camera = camera;
-  var axesHelper = new THREE.AxesHelper(5);
-  scene.add(axesHelper);
+  t.axesHelper = new THREE.AxesHelper(5);
+  t.camera.add(t.axesHelper);
   t.camera.position.set(0.16986347385576694, 25.65695945633288, -10.061902520372364);
   t.camera.rotation.x = -2.108777799386355;
   t.camera.rotation.y = 0.003962076364974097;
   t.camera.rotation.z = 3.134952666963505;
   t.controls = controls;
   t.controls.enabled = false;
+  t.controls.target.x = 0;
+  t.controls.target.y = 0;
+  t.controls.target.z = 0;
   t.opponent_video = document.querySelector('.opponent_video');
 
   function checkReady(callback) {
@@ -28573,16 +28875,16 @@ function init() {
   }
 
   checkReady(function () {
-    t.server.directus = new _directus_sdk__WEBPACK_IMPORTED_MODULE_3__.Directus("https://u2ijwrng.directus.app", {
+    t.server.directus = new _directus_sdk__WEBPACK_IMPORTED_MODULE_4__.Directus("https://u2ijwrng.directus.app", {
       auth: {
         mode: 'json' // autoRefresh: true,
 
       }
     }); // alert('mounting vue');
 
-    t.app = (0,vue__WEBPACK_IMPORTED_MODULE_1__.createApp)({
+    t.app = (0,vue__WEBPACK_IMPORTED_MODULE_2__.createApp)({
       components: {
-        App: _components_app_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
+        App: _components_app_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
       },
       template: '<div><app :state="state" ref="app"></app></div>',
       data: function data() {
@@ -28630,7 +28932,7 @@ function getOpponentID() {
 }
 
 function render() {
-  var _t8, _t8$app, _t8$app$state;
+  var _t6, _t6$app, _t6$app$state;
 
   if (resize(renderer)) {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -28645,7 +28947,7 @@ function render() {
   // update "hovered" status of cards
   // todo only run this loop if t.app.state.hovered has changed since last tick
 
-  if ((_t8 = t) !== null && _t8 !== void 0 && (_t8$app = _t8.app) !== null && _t8$app !== void 0 && (_t8$app$state = _t8$app.state) !== null && _t8$app$state !== void 0 && _t8$app$state.hovered) {
+  if ((_t6 = t) !== null && _t6 !== void 0 && (_t6$app = _t6.app) !== null && _t6$app !== void 0 && (_t6$app$state = _t6$app.state) !== null && _t6$app$state !== void 0 && _t6$app$state.hovered) {
     // TODO: this check is probably wasteful, find a better way
     // like .last_hovered_at dirty flag
     if (JSON.stringify(t.app.state.hovered) !== JSON.stringify(t.app.state.hovered_prev)) {
@@ -28684,6 +28986,7 @@ function render() {
 
 function initLights() {
   var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  t.ambientLight = ambientLight;
   var dirLight = new THREE.DirectionalLight(0xcceeff, 0.5);
   dirLight.castShadow = true;
   dirLight.shadow.camera.visible = true;
@@ -28692,6 +28995,7 @@ function initLights() {
   dirLight.position.y = 5;
   dirLight.position.x = 5;
   dirLight.position.z = 5;
+  t.dirLight = dirLight;
   var d = 100;
   dirLight.shadow.camera.left = -d;
   dirLight.shadow.camera.right = d;
@@ -28810,7 +29114,7 @@ function initRoomMeshes() {
       //THREE.VertexColors,
       // fragmentShader: shader.fragmentShader,
       // vertexShader: shader.vertexShader,
-      side: THREE.DoubleSide // uniforms: uniforms
+      side: THREE.FrontSide // uniforms: uniforms
 
     };
     object.scale.set(0.1, 0.1, 0.1);
@@ -28985,24 +29289,24 @@ function onTouchMove(evt) {
 // TODO: animate color transition
 
 
-function onMouseMove(_x13) {
+function onMouseMove(_x9) {
   return _onMouseMove.apply(this, arguments);
 }
 
 function _onMouseMove() {
-  _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee15(evt) {
-    var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i3;
+  _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee11(evt) {
+    var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i2;
 
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee15$(_context15) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee11$(_context11) {
       while (1) {
-        switch (_context15.prev = _context15.next) {
+        switch (_context11.prev = _context11.next) {
           case 0:
             if (!t.root.show_modal) {
-              _context15.next = 2;
+              _context11.next = 2;
               break;
             }
 
-            return _context15.abrupt("return");
+            return _context11.abrupt("return");
 
           case 2:
             updateClientCursor();
@@ -29078,9 +29382,9 @@ function _onMouseMove() {
               }
             } else {
               if (t.app.state.hovered && (_t$app$state$hovered3 = t.app.state.hovered) !== null && _t$app$state$hovered3 !== void 0 && _t$app$state$hovered3[0]) {
-                _i3 = (_t$app$state$hovered4 = t.app.state.hovered) === null || _t$app$state$hovered4 === void 0 ? void 0 : _t$app$state$hovered4[0];
-                t.cards[_i3].mouseOver = false;
-                t.cards[_i3].hovered = false;
+                _i2 = (_t$app$state$hovered4 = t.app.state.hovered) === null || _t$app$state$hovered4 === void 0 ? void 0 : _t$app$state$hovered4[0];
+                t.cards[_i2].mouseOver = false;
+                t.cards[_i2].hovered = false;
               }
 
               t.server.send({
@@ -29095,10 +29399,10 @@ function _onMouseMove() {
 
           case 8:
           case "end":
-            return _context15.stop();
+            return _context11.stop();
         }
       }
-    }, _callee15);
+    }, _callee11);
   }));
   return _onMouseMove.apply(this, arguments);
 }
@@ -29175,7 +29479,7 @@ function updateClientCursor() {
   var pointer = (_t$players3 = t.players) === null || _t$players3 === void 0 ? void 0 : (_t$players3$t$app$sta = _t$players3[t.app.state.my_client_id]) === null || _t$players3$t$app$sta === void 0 ? void 0 : (_t$players3$t$app$sta2 = _t$players3$t$app$sta.pointer) === null || _t$players3$t$app$sta2 === void 0 ? void 0 : _t$players3$t$app$sta2.mesh;
 
   if (pointer) {
-    var intersects = raycaster.intersectObjects(t.zonegroup.children); // console.log('intersects',intersects);
+    var intersects = intersectsGroup([t.tableMesh].concat(_toConsumableArray(t.zonegroup.children))); // console.log('intersects',intersects);
 
     if (intersects.length > 0) {
       pointer.position.copy(intersects[0].point);
@@ -29400,19 +29704,16 @@ function setupRaycast() {
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; // update the picking ray with the camera and mouse position
 
   raycaster.setFromCamera(mouse, camera);
-}
+} // function raycastObject( object ){
+//   setupRaycast();
+// 	// calculate objects intersecting the picking ray
+// 	var intersects = raycaster.intersectObject( object );
+//   if( intersects.length > 0 ){
+//     return true;
+//   }
+//   return false;
+// }
 
-function raycastObject(object) {
-  setupRaycast(); // calculate objects intersecting the picking ray
-
-  var intersects = raycaster.intersectObject(object);
-
-  if (intersects.length > 0) {
-    return true;
-  }
-
-  return false;
-}
 
 function intersectsGroup(group) {
   setupRaycast(); // calculate objects intersecting the picking ray
