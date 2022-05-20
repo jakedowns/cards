@@ -751,6 +751,7 @@ input[type=text],input[type=password]{
     position: relative;
     display: inline-block;
     background: black;
+    pointer-events: all;
 }
 .modal-error {
     color: red;

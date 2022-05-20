@@ -86,6 +86,8 @@ class PeerConnections {
         console.error("error with peer_remote", decoded);
         return;
       }
+
+      // set the remote description as the offer
       await peer_remote.setRemoteDescription(new RTCSessionDescription(decoded.offer));
 
       // offer our audio, video tracks to the peer connection
@@ -158,7 +160,9 @@ class PeerConnections {
     });
 
     // event binding for ice candidates received
-    peer_connection.onicecandidate = t.onIceCandidateEvent;
+    peer_connection.onicecandidate = (event)=>{
+        this.onIceCandidateEvent(event, client_id);
+    };
 
     // callback for remote stream available, where we bind it to a video output object
     const gotRemoteStream = (event) => {
@@ -173,6 +177,10 @@ class PeerConnections {
       if (!video || !video.length || video.length > 1) {
         console.warn("huh?", video);
       }
+
+      let playerHead = t.players?.[client_id]?.head;
+      console.log('playerHead',playerHead);
+      playerHead.assignVideoToHead(video[0])
     };
 
     // bind the callback
@@ -182,28 +190,33 @@ class PeerConnections {
     return peer_connection;
   }
 
-  onIceCandidateEvent(event) {
-    const ids = t.app.state.client_ids.slice();
-    let my_index = ids.indexOf(t.app.state.my_client_id);
-    ids.splice(my_index, 1);
+  onIceCandidateEvent(event, client_id) {
+    // const ids = t.app.state.client_ids.slice();
+    // let my_index = ids.indexOf(t.app.state.my_client_id);
+    // ids.splice(my_index, 1);
     if (event.candidate) {
       // should we send to all peers or just one by one?
-      console.log(event);
+    //   console.log(event);
       // debugger;
-      ids.forEach((id) => {
+    //   ids.forEach((id) => {
+    //     t.server.send({
+    //       type: "iceCandidate",
+    //       to: id,
+    //       candidate: event.candidate,
+    //     });
+    //   });
         t.server.send({
-          type: "iceCandidate",
-          to: id,
-          candidate: event.candidate,
+            type: "iceCandidate",
+            to: client_id,
+            candidate: event.candidate,
         });
-      });
     } else {
       console.log("ignoring null candidate", event);
     }
   }
 
   async onRemotePeerIceCandidate(data) {
-    // console.warn('onRemotePeerIceCandidate',data);
+    console.warn('onRemotePeerIceCandidate',data);
 
     let candidate = null;
     try {
@@ -221,6 +234,7 @@ class PeerConnections {
       }
       try {
         await PEER_CONNECTION.addIceCandidate(candidate);
+        console.log('ice candidate added');
       } catch (error) {
         console.error(error);
       }

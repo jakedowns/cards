@@ -697,10 +697,21 @@ class PlayerHead extends TweenableMesh {
   }
   setupTexturesAndMaterials(){
     // if(this.player_is_me){
-      console.warn('todo: need to set up opponent webcam texture as well as spectator webpack textures')
-      // this.video_texture = new THREE.VideoTexture(t.video); // webcam stream
-      // this.video_texture.format = THREE.RGBAFormat;
+      // console.warn('todo: need to set up opponent webcam texture as well as spectator webpack textures')
     // }
+  }
+  assignVideoToHead(video){
+    this.video_texture = new THREE.VideoTexture(video); // webcam stream
+    this.video_texture.format = THREE.RGBAFormat;
+    this.video_material = new THREE.MeshBasicMaterial({
+      color: 0x800080,
+      // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
+      // wireframe: true,
+      // transparent: this.player_is_me ? true : false,
+      // opacity: this.player_is_me ? 0.0 : 1.0,
+      map: this.video_texture,
+    })
+    this.mesh.material = this.video_material;
   }
   setupMesh(){
     this.mesh = new THREE.Mesh(

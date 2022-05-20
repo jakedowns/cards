@@ -19054,7 +19054,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 103px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n  cursor: pointer;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal {\n  pointer-events: all;\n  top: 60px;\n  position: absolute;\n  width: 320px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  left: 50%;\n  transform: translateX(-16.5vw);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 103px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n  cursor: pointer;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal {\n  pointer-events: all;\n  top: 60px;\n  position: absolute;\n  width: 320px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  left: 50%;\n  transform: translateX(-16.5vw);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n  pointer-events: all;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -26858,10 +26858,13 @@ var PeerConnections = /*#__PURE__*/function () {
         }]
       }); // event binding for ice candidates received
 
-      peer_connection.onicecandidate = t.onIceCandidateEvent; // callback for remote stream available, where we bind it to a video output object
+      peer_connection.onicecandidate = function (event) {
+        _this2.onIceCandidateEvent(event, client_id);
+      }; // callback for remote stream available, where we bind it to a video output object
+
 
       var gotRemoteStream = function gotRemoteStream(event) {
-        var _t$root$$refs$AVHud$$;
+        var _t$root$$refs$AVHud$$, _t$players2, _t$players2$client_id;
 
         console.log("gotRemoteStream", event);
 
@@ -26879,6 +26882,10 @@ var PeerConnections = /*#__PURE__*/function () {
         if (!video || !video.length || video.length > 1) {
           console.warn("huh?", video);
         }
+
+        var playerHead = (_t$players2 = t.players) === null || _t$players2 === void 0 ? void 0 : (_t$players2$client_id = _t$players2[client_id]) === null || _t$players2$client_id === void 0 ? void 0 : _t$players2$client_id.head;
+        console.log('playerHead', playerHead);
+        playerHead.assignVideoToHead(video[0]);
       }; // bind the callback
 
 
@@ -26888,21 +26895,25 @@ var PeerConnections = /*#__PURE__*/function () {
     }
   }, {
     key: "onIceCandidateEvent",
-    value: function onIceCandidateEvent(event) {
-      var ids = t.app.state.client_ids.slice();
-      var my_index = ids.indexOf(t.app.state.my_client_id);
-      ids.splice(my_index, 1);
-
+    value: function onIceCandidateEvent(event, client_id) {
+      // const ids = t.app.state.client_ids.slice();
+      // let my_index = ids.indexOf(t.app.state.my_client_id);
+      // ids.splice(my_index, 1);
       if (event.candidate) {
         // should we send to all peers or just one by one?
-        console.log(event); // debugger;
-
-        ids.forEach(function (id) {
-          t.server.send({
-            type: "iceCandidate",
-            to: id,
-            candidate: event.candidate
-          });
+        //   console.log(event);
+        // debugger;
+        //   ids.forEach((id) => {
+        //     t.server.send({
+        //       type: "iceCandidate",
+        //       to: id,
+        //       candidate: event.candidate,
+        //     });
+        //   });
+        t.server.send({
+          type: "iceCandidate",
+          to: client_id,
+          candidate: event.candidate
         });
       } else {
         console.log("ignoring null candidate", event);
@@ -26918,7 +26929,7 @@ var PeerConnections = /*#__PURE__*/function () {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                // console.warn('onRemotePeerIceCandidate',data);
+                console.warn('onRemotePeerIceCandidate', data);
                 candidate = null;
 
                 try {
@@ -26928,47 +26939,48 @@ var PeerConnections = /*#__PURE__*/function () {
                 }
 
                 if (!candidate) {
-                  _context4.next = 17;
+                  _context4.next = 19;
                   break;
                 }
 
                 PEER_CONNECTION = (_this$remote_peers3 = this.remote_peers) === null || _this$remote_peers3 === void 0 ? void 0 : _this$remote_peers3[data.client_id]; // console.log('PEER_CONNECTION',PEER_CONNECTION);
 
                 if (PEER_CONNECTION) {
-                  _context4.next = 7;
+                  _context4.next = 8;
                   break;
                 }
 
                 console.error("no peer connection for", data.client_id);
                 return _context4.abrupt("return");
 
-              case 7:
-                _context4.prev = 7;
-                _context4.next = 10;
+              case 8:
+                _context4.prev = 8;
+                _context4.next = 11;
                 return PEER_CONNECTION.addIceCandidate(candidate);
 
-              case 10:
-                _context4.next = 15;
+              case 11:
+                console.log('ice candidate added');
+                _context4.next = 17;
                 break;
 
-              case 12:
-                _context4.prev = 12;
-                _context4.t0 = _context4["catch"](7);
+              case 14:
+                _context4.prev = 14;
+                _context4.t0 = _context4["catch"](8);
                 console.error(_context4.t0);
 
-              case 15:
-                _context4.next = 18;
+              case 17:
+                _context4.next = 20;
                 break;
 
-              case 17:
+              case 19:
                 console.error("no candidate", data.candidate);
 
-              case 18:
+              case 20:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, this, [[7, 12]]);
+        }, _callee4, this, [[8, 14]]);
       }));
 
       function onRemotePeerIceCandidate(_x4) {
@@ -27899,11 +27911,25 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
     }
   }, {
     key: "setupTexturesAndMaterials",
-    value: function setupTexturesAndMaterials() {
-      // if(this.player_is_me){
-      console.warn('todo: need to set up opponent webcam texture as well as spectator webpack textures'); // this.video_texture = new THREE.VideoTexture(t.video); // webcam stream
-      // this.video_texture.format = THREE.RGBAFormat;
+    value: function setupTexturesAndMaterials() {// if(this.player_is_me){
+      // console.warn('todo: need to set up opponent webcam texture as well as spectator webpack textures')
       // }
+    }
+  }, {
+    key: "assignVideoToHead",
+    value: function assignVideoToHead(video) {
+      this.video_texture = new THREE.VideoTexture(video); // webcam stream
+
+      this.video_texture.format = THREE.RGBAFormat;
+      this.video_material = new THREE.MeshBasicMaterial({
+        color: 0x800080,
+        // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
+        // wireframe: true,
+        // transparent: this.player_is_me ? true : false,
+        // opacity: this.player_is_me ? 0.0 : 1.0,
+        map: this.video_texture
+      });
+      this.mesh.material = this.video_material;
     }
   }, {
     key: "setupMesh",
