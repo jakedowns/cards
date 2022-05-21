@@ -16867,17 +16867,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
-    state: Object,
-    client_id: String,
     its_my_turn: Boolean,
     video_enabled: Boolean,
     video_muted: Boolean,
     mic_muted: Boolean,
+    audio_muted: Boolean,
+    is_streaming: Boolean,
+    client_id: String,
     enableVideo: Function,
     disableVideo: Function,
     openPauseMenu: Function,
     toggleMute: Function,
-    audio_muted: Boolean,
+    state: Object,
     chat_messages: Array
   },
   setup: function setup() {
@@ -16900,6 +16901,11 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   computed: {
+    my_user_id: function my_user_id() {
+      var _t, _t$app, _t$app$user;
+
+      return (_t = t) === null || _t === void 0 ? void 0 : (_t$app = _t.app) === null || _t$app === void 0 ? void 0 : (_t$app$user = _t$app.user) === null || _t$app$user === void 0 ? void 0 : _t$app$user.id;
+    },
     nameForUserID: function nameForUserID() {
       var _this2 = this;
 
@@ -16938,6 +16944,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
     calling: Boolean,
@@ -16960,8 +16968,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   setup: function setup() {
     return {
-      show_debug: false,
-      wireframe: false
+      show_debug: (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(false),
+      wireframe: (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(false)
     };
   },
   methods: {
@@ -16969,6 +16977,25 @@ __webpack_require__.r(__webpack_exports__);
       this.wireframe = !this.wireframe;
       t.tableMesh.children[0].material.wireframe = this.wireframe;
     }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/LeftHud.vue?vue&type=script&lang=js":
+/*!*******************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/LeftHud.vue?vue&type=script&lang=js ***!
+  \*******************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  props: {
+    state: Object
   }
 });
 
@@ -17067,6 +17094,25 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/TopHud.vue?vue&type=script&lang=js":
+/*!******************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/TopHud.vue?vue&type=script&lang=js ***!
+  \******************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  props: {
+    its_my_turn: Boolean
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=script&lang=js":
 /*!****************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=script&lang=js ***!
@@ -17080,10 +17126,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
-    submitModal: {
-      type: Function,
-      required: true
-    },
+    // submitModal:{
+    //     type: Function,
+    //     required: true
+    // },
     // getRoomsForWorld:{
     //     type: Function,
     //     required: true
@@ -17178,12 +17224,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _PauseMenuModal_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./PauseMenuModal.vue */ "./client/components/PauseMenuModal.vue");
 /* harmony import */ var _DebugOverlay_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./DebugOverlay.vue */ "./client/components/DebugOverlay.vue");
 /* harmony import */ var _AVHud_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./AVHud.vue */ "./client/components/AVHud.vue");
-/* harmony import */ var _WorldSelectModal_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./WorldSelectModal.vue */ "./client/components/WorldSelectModal.vue");
+/* harmony import */ var _TopHud_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./TopHud.vue */ "./client/components/TopHud.vue");
+/* harmony import */ var _LeftHud_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./LeftHud.vue */ "./client/components/LeftHud.vue");
+/* harmony import */ var _WorldSelectModal_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./WorldSelectModal.vue */ "./client/components/WorldSelectModal.vue");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+
 
 
 
@@ -17198,7 +17250,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     PauseMenuModal: _PauseMenuModal_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
     DebugOverlay: _DebugOverlay_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
     AVHud: _AVHud_vue__WEBPACK_IMPORTED_MODULE_5__["default"],
-    WorldSelectModal: _WorldSelectModal_vue__WEBPACK_IMPORTED_MODULE_6__["default"]
+    TopHud: _TopHud_vue__WEBPACK_IMPORTED_MODULE_6__["default"],
+    LeftHud: _LeftHud_vue__WEBPACK_IMPORTED_MODULE_7__["default"],
+    WorldSelectModal: _WorldSelectModal_vue__WEBPACK_IMPORTED_MODULE_8__["default"]
   },
   props: {
     state: {
@@ -17208,7 +17262,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   setup: function setup() {
     return {
-      chat_messages: [],
+      chat_messages: (0,vue__WEBPACK_IMPORTED_MODULE_9__.ref)([]),
       authenticated: false,
       show_login_loading: true,
       // key ourselves in the users{}
@@ -17224,16 +17278,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       selected_room_clients: [],
       selected_game_clients: [],
       directus_loaded: false,
-      show_modal: true,
-      show_login_modal: true,
+      show_modal: (0,vue__WEBPACK_IMPORTED_MODULE_9__.ref)(true),
+      show_login_modal: (0,vue__WEBPACK_IMPORTED_MODULE_9__.ref)(true),
       show_name_modal: false,
       show_pause_menu: false,
       show_world_select_modal: false,
       show_player_request_modal: false,
       show_spectator_joined_modal: false,
       show_game_in_progress_modal: false,
-      show_debug_info: false,
+      show_debug_info: (0,vue__WEBPACK_IMPORTED_MODULE_9__.ref)(false),
       calling: false,
+      is_streaming: (0,vue__WEBPACK_IMPORTED_MODULE_9__.ref)(false),
       show_end_call_button: false,
       camera_locked: false,
       messages: [],
@@ -17365,6 +17420,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
   },
   methods: {
+    toggleStream: function toggleStream() {},
     resetCamera: function resetCamera() {
       t.cameraman.goToView('overhead');
     },
@@ -17374,6 +17430,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
     toggleShowDebugInfo: function toggleShowDebugInfo() {
       this.show_debug_info = !this.show_debug_info;
+    },
+    togglePauseMenu: function togglePauseMenu() {
+      if (this.show_pause_menu) {
+        this.closeModal();
+      } else {
+        this.openPauseMenu();
+      }
     },
     openPauseMenu: function openPauseMenu() {
       this.getWorlds();
@@ -17542,6 +17605,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee2);
       }))();
     },
+    // Sound FX Mute Toggle
     toggleMute: function toggleMute() {
       this.audio_muted = !this.audio_muted;
     },
@@ -17566,7 +17630,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       window.t.closeVideoStream();
       this.video_enabled = false;
     },
-    toggle_mic_mute: function toggle_mic_mute() {
+    toggleMicMute: function toggleMicMute() {
       this.mic_muted = !this.mic_muted;
     },
     // toggle_vid_mute(){
@@ -18117,50 +18181,12 @@ var _hoisted_1 = {
 var _hoisted_2 = {
   "class": "hud-inner"
 };
-
-var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
-  xmlns: "http://www.w3.org/2000/svg",
-  "aria-hidden": "true",
-  role: "img",
-  width: "1em",
-  height: "1em",
-  preserveAspectRatio: "xMidYMid meet",
-  viewBox: "0 0 48 48"
-}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
-  x: "0",
-  y: "0",
-  width: "48",
-  height: "48",
-  fill: "none",
-  stroke: "none"
-}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("mask", {
-  id: "svgIDa"
-}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("g", {
-  fill: "none",
-  stroke: "#fff",
-  "stroke-linejoin": "round",
-  "stroke-width": "4"
-}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
-  fill: "#fff",
-  d: "M28 28h16v16H28zM13 4l9 16H4l9-16Zm23 16a8 8 0 1 0 0-16a8 8 0 0 0 0 16Z"
-}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
-  "stroke-linecap": "round",
-  d: "m4 28l16 16m0-16L4 44"
-})])]), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
-  fill: "currentColor",
-  d: "M0 0h48v48H0z",
-  mask: "url(#svgIDa)"
-})], -1
-/* HOISTED */
-);
-
-var _hoisted_4 = [_hoisted_3];
-var _hoisted_5 = {
+var _hoisted_3 = {
   key: 0,
   "class": "mute"
 };
 
-var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   "aria-hidden": "true",
   role: "img",
@@ -18182,13 +18208,13 @@ var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 /* HOISTED */
 );
 
-var _hoisted_7 = [_hoisted_6];
-var _hoisted_8 = {
+var _hoisted_5 = [_hoisted_4];
+var _hoisted_6 = {
   key: 1,
   "class": "volume-up"
 };
 
-var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   "aria-hidden": "true",
   role: "img",
@@ -18210,12 +18236,87 @@ var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 /* HOISTED */
 );
 
-var _hoisted_10 = [_hoisted_9];
-var _hoisted_11 = {
-  "class": "av-controls"
+var _hoisted_8 = [_hoisted_7];
+var _hoisted_9 = {
+  key: 0,
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "1em",
+  height: "1em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 24 24"
 };
 
-var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "24",
+  height: "24",
+  fill: "none",
+  stroke: "none"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4Z"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M19 11a1 1 0 0 0-2 0a5 5 0 0 1-10 0a1 1 0 0 0-2 0a7 7 0 0 0 6 6.92V20H8.89a.89.89 0 0 0-.89.89v.22a.89.89 0 0 0 .89.89h6.22a.89.89 0 0 0 .89-.89v-.22a.89.89 0 0 0-.89-.89H13v-2.08A7 7 0 0 0 19 11Z"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_13 = [_hoisted_10, _hoisted_11, _hoisted_12];
+var _hoisted_14 = {
+  key: 1,
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "1em",
+  height: "1em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 24 24"
+};
+
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "24",
+  height: "24",
+  fill: "none",
+  stroke: "none"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M15.58 12.75A4 4 0 0 0 16 11V6a4 4 0 0 0-7.92-.75M19 11a1 1 0 0 0-2 0a4.86 4.86 0 0 1-.69 2.48L17.78 15A7 7 0 0 0 19 11Zm-7 4h.16L8 10.83V11a4 4 0 0 0 4 4Zm8.71 4.29l-16-16a1 1 0 0 0-1.42 1.42l16 16a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.42Z"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M15 20h-2v-2.08a7 7 0 0 0 1.65-.44l-1.6-1.6A4.57 4.57 0 0 1 12 16a5 5 0 0 1-5-5a1 1 0 0 0-2 0a7 7 0 0 0 6 6.92V20H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2Z"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_18 = [_hoisted_15, _hoisted_16, _hoisted_17];
+var _hoisted_19 = {
+  "class": "video-toggle svg-button",
+  title: "Toggle Video"
+};
+
+var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   width: "55",
   height: "38",
   viewBox: "0 0 55 38",
@@ -18228,9 +18329,9 @@ var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_13 = [_hoisted_12];
+var _hoisted_21 = [_hoisted_20];
 
-var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   "aria-hidden": "true",
   role: "img",
@@ -18253,86 +18354,124 @@ var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_15 = [_hoisted_14];
-var _hoisted_16 = {
-  "class": "turn-indicator"
-};
-var _hoisted_17 = {
-  key: 0,
-  "class": "my-turn"
-};
-var _hoisted_18 = {
-  key: 1,
-  "class": "not-my-turn"
-};
-var _hoisted_19 = {
-  "class": "scores-wrapper"
-};
-var _hoisted_20 = {
-  "class": "hit"
-};
-
-var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" / ");
-
-var _hoisted_22 = {
-  "class": "miss"
-};
-var _hoisted_23 = {
-  "class": "chat-box"
-};
+var _hoisted_23 = [_hoisted_22];
 var _hoisted_24 = {
-  "class": "messages"
-};
-var _hoisted_25 = {
-  "class": "message-wrapper"
-};
-var _hoisted_26 = {
-  "class": "message-sender"
-};
-var _hoisted_27 = {
-  "class": "message-text"
-};
-var _hoisted_28 = {
-  "class": "chat-input"
-};
-var _hoisted_29 = {
-  "class": "debug-video"
+  key: 0,
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "1em",
+  height: "1em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 24 24"
 };
 
-var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
-  id: "sound_effects",
-  src: "./public/sounds/flip.mp3"
+var _hoisted_25 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "24",
+  height: "24",
+  fill: "none",
+  stroke: "none"
 }, null, -1
 /* HOISTED */
 );
 
-var _hoisted_31 = {
+var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M6.343 4.938a1 1 0 0 1 0 1.415a8.003 8.003 0 0 0 0 11.317a1 1 0 1 1-1.415 1.414c-3.906-3.906-3.906-10.24 0-14.146a1 1 0 0 1 1.415 0Zm12.731 0c3.906 3.907 3.906 10.24 0 14.146a1 1 0 0 1-1.414-1.414a8.003 8.003 0 0 0 0-11.317a1 1 0 0 1 1.414-1.415ZM9.31 7.812a1 1 0 0 1 0 1.414a3.92 3.92 0 0 0 0 5.544a1 1 0 1 1-1.414 1.414a5.92 5.92 0 0 1 0-8.372a1 1 0 0 1 1.414 0Zm6.959 0a5.92 5.92 0 0 1 0 8.372a1 1 0 0 1-1.415-1.414a3.92 3.92 0 0 0 0-5.544a1 1 0 0 1 1.415-1.414Zm-4.187 2.77a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Z"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_27 = [_hoisted_25, _hoisted_26];
+var _hoisted_28 = {
+  key: 1,
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "1em",
+  height: "1em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 24 24"
+};
+
+var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "24",
+  height: "24",
+  fill: "none",
+  stroke: "none"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M3.28 2.22a.75.75 0 1 0-1.06 1.06l2.202 2.203c-3.392 3.93-3.223 9.872.506 13.601a1 1 0 0 0 1.415-1.414A8.004 8.004 0 0 1 5.84 6.902l1.521 1.52a5.922 5.922 0 0 0 .533 7.763A1 1 0 0 0 9.31 14.77a3.922 3.922 0 0 1-.513-4.913l1.836 1.836a1.5 1.5 0 0 0 1.838 1.838l8.25 8.25a.75.75 0 0 0 1.06-1.061L3.28 2.22Zm15.748 13.626l1.461 1.462c2.414-3.861 1.943-9.012-1.415-12.37a1 1 0 1 0-1.414 1.415a8.006 8.006 0 0 1 1.368 9.493Zm-3.098-3.098l1.59 1.591a5.922 5.922 0 0 0-1.252-6.527a1 1 0 1 0-1.415 1.414a3.916 3.916 0 0 1 1.077 3.522Z"
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_31 = [_hoisted_29, _hoisted_30];
+var _hoisted_32 = {
+  "class": "chat-box"
+};
+var _hoisted_33 = {
+  "class": "messages"
+};
+var _hoisted_34 = {
+  "class": "message-wrapper"
+};
+var _hoisted_35 = {
+  "class": "message-sender"
+};
+var _hoisted_36 = {
+  "class": "message-text"
+};
+var _hoisted_37 = {
+  "class": "chat-input"
+};
+
+var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "sounds"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
+  id: "sound_effects",
+  src: "./public/sounds/flip.mp3"
+})], -1
+/* HOISTED */
+);
+
+var _hoisted_39 = {
+  "class": "videos"
+};
+var _hoisted_40 = {
   id: "video",
   autoplay: "",
   playsinline: "",
   muted: ""
 };
-var _hoisted_32 = {
+var _hoisted_41 = {
   "class": "opponent_videos"
 };
-var _hoisted_33 = ["onClick", "muted", "data-client-id"];
+var _hoisted_42 = ["onClick", "muted", "data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state, _$props$state$user_id, _$props$state2, _$props$state3, _$props$state$client_, _$props$state7;
+  var _$props$state$user_id, _$props$state;
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    style: {
-      "pointer-events": "all"
-    },
-    "class": "game-modal-toggle-icon",
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Bottom Hud "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" SOUND FX MUTE TOGGLE "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    "class": "mute-video svg-button",
+    title: "Toggle Sounds",
     onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
-      return $props.openPauseMenu && $props.openPauseMenu.apply($props, arguments);
-    }, ["prevent"]))
-  }, _hoisted_4), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    "class": "mute-video",
-    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.toggleMute && $props.toggleMute.apply($props, arguments);
     }, ["prevent"]))
-  }, [$props.audio_muted ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_5, _hoisted_7)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_8, _hoisted_10))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$props.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, [$props.audio_muted ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, _hoisted_5)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, _hoisted_8))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" INPUT MIC TOGGLE "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    "class": "svg-button mic-toggle",
+    title: "Toggle Mic",
+    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return _ctx.$emit('toggleMicMute');
+    }, ["prevent"]))
+  }, [!$props.mic_muted ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_9, _hoisted_13)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.mic_muted ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_14, _hoisted_18)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" INPUT VIDEO TOGGLE "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TOGGLE YOUR OWN VIDEO "), !$props.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
     style: {
       "pointer-events": "all"
@@ -18341,7 +18480,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $props.enableVideo();
     }, ["prevent"]))
-  }, _hoisted_13)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_21)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.video_enabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
     style: {
       "pointer-events": "all"
@@ -18350,78 +18489,67 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $props.disableVideo();
     }, ["prevent"]))
-  }, _hoisted_15)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [$props.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$user_id = _$props$state.user_ids) === null || _$props$state$user_id === void 0 ? void 0 : _$props$state$user_id.length), 1
-  /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.round_number), 1
-  /* TEXT */
-  ), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)((_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.user_ids, function (user_id) {
-    var _$props$state$user_na, _$props$state4, _$props$state4$user_n, _$props$state$player_, _$props$state5, _$props$state5$player, _$props$state5$player2, _$props$state$player_2, _$props$state6, _$props$state6$player, _$props$state6$player2;
-
-    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-      "class": "scores",
-      key: user_id
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$user_na = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$user_n = _$props$state4.user_names) === null || _$props$state4$user_n === void 0 ? void 0 : _$props$state4$user_n[user_id]) !== null && _$props$state$user_na !== void 0 ? _$props$state$user_na : 'player') + ": ", 1
-    /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[user_id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 0), 1
-    /* TEXT */
-    ), _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[user_id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
-    /* TEXT */
-    )]);
-  }), 128
-  /* KEYED_FRAGMENT */
-  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.chat_messages, function (message) {
+  }, _hoisted_23)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" STREAMING TOGGLE "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    "class": "svg-button stream-toggle",
+    title: "Toggle Streaming",
+    onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return _ctx.$emit('toggleStream');
+    }, ["prevent"]))
+  }, [!_ctx.streaming ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_24, _hoisted_27)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.streaming ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_28, _hoisted_31)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.chat_messages, function (message) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: message.timestamp
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.nameForUserID(message.user_id)), 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.nameForUserID(message.user_id)), 1
     /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.message), 1
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.message), 1
     /* TEXT */
     )])]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_28, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  ))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_37, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "text",
     placeholder: "Chat...",
-    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
       return $setup.chat_input = $event;
     }),
-    onKeyup: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withKeys)(function ($event) {
+    onKeyup: _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withKeys)(function ($event) {
       return $options.sendChatMessage();
     }, ["enter"]))
   }, null, 544
   /* HYDRATE_EVENTS, NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.chat_input]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    type: "button",
-    onClick: _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.chat_input]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.sendChatMessage && $options.sendChatMessage.apply($options, arguments);
     }, ["prevent"]))
-  })])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_29, [_hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_31, null, 512
+  }, "Send")])]), _hoisted_38, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_39, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_40, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_ = (_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.client_ids) !== null && _$props$state$client_ !== void 0 ? _$props$state$client_ : []).filter(function (id) {
-    return id !== $props.state.my_client_id;
-  }), function (client_id) {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_41, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$user_id = (_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.user_ids) !== null && _$props$state$user_id !== void 0 ? _$props$state$user_id : []).filter(function (id) {
+    return id !== $options.my_user_id;
+  }), function (user_id) {
     var _$setup$client_mute_s, _$setup$client_mute_s2;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("video", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["opponent_video", {
-        'muted': $setup.client_mute_states[client_id]
+        'muted': $setup.client_mute_states[user_id]
       }]),
+      key: user_id,
       autoplay: "",
+      title: "Tap To Mute",
       ref_for: true,
-      ref: "opponent_video_".concat(client_id),
+      ref: "opponent_video_".concat(user_id),
       playsinline: "",
       onClick: function onClick($event) {
-        return $options.toggleOpponentMute(client_id);
+        return $options.toggleOpponentMute(user_id);
       },
-      key: client_id,
-      muted: (_$setup$client_mute_s = (_$setup$client_mute_s2 = $setup.client_mute_states) === null || _$setup$client_mute_s2 === void 0 ? void 0 : _$setup$client_mute_s2[client_id]) !== null && _$setup$client_mute_s !== void 0 ? _$setup$client_mute_s : false,
-      "data-client-id": client_id
+      muted: (_$setup$client_mute_s = (_$setup$client_mute_s2 = $setup.client_mute_states) === null || _$setup$client_mute_s2 === void 0 ? void 0 : _$setup$client_mute_s2[user_id]) !== null && _$setup$client_mute_s !== void 0 ? _$setup$client_mute_s : false,
+      "data-client-id": user_id
     }, null, 10
     /* CLASS, PROPS */
-    , _hoisted_33);
+    , _hoisted_42);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])])]);
+  ))])])])], 2112
+  /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */
+  );
 }
 
 /***/ }),
@@ -18472,133 +18600,125 @@ var _hoisted_4 = {
 };
 
 var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-  "class": "video-chat-call-start"
-}, "Join Chat", -1
+  "class": "video-chat-call-end"
+}, "Leave Chat", -1
 /* HOISTED */
 );
 
 var _hoisted_6 = [_hoisted_5];
 
 var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-  "class": "video-chat-call-end"
-}, "Leave Chat", -1
-/* HOISTED */
-);
-
-var _hoisted_8 = [_hoisted_7];
-
-var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": ""
 }, "Reset Camera", -1
 /* HOISTED */
 );
 
-var _hoisted_10 = [_hoisted_9];
-var _hoisted_11 = {
+var _hoisted_8 = [_hoisted_7];
+var _hoisted_9 = {
   "class": ""
 };
 
-var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_13 = {
+var _hoisted_11 = {
   "class": "inner"
 };
-var _hoisted_14 = {
+var _hoisted_12 = {
   "class": "details"
 };
-var _hoisted_15 = {
+var _hoisted_13 = {
   "class": "my_client_id"
 };
 
-var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
+var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
 
-var _hoisted_17 = {
+var _hoisted_15 = {
   "class": "value"
 };
-var _hoisted_18 = {
+var _hoisted_16 = {
   "class": "room_id"
 };
 
-var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
 
-var _hoisted_20 = {
+var _hoisted_18 = {
   "class": "value"
 };
-var _hoisted_21 = {
+var _hoisted_19 = {
   "class": "game_id"
 };
 
-var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
+var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
+
+var _hoisted_21 = {
+  "class": "value"
+};
+
+var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
 var _hoisted_23 = {
   "class": "value"
 };
-
-var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
-
-var _hoisted_25 = {
-  "class": "value"
-};
-var _hoisted_26 = {
+var _hoisted_24 = {
   "class": "host_id"
 };
 
-var _hoisted_27 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
+var _hoisted_25 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
 
-var _hoisted_28 = {
+var _hoisted_26 = {
   "class": "value"
 };
 
-var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_27 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
-var _hoisted_30 = {
+var _hoisted_28 = {
   "class": "round_id"
 };
 
-var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
+var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
+
+var _hoisted_30 = {
+  "class": "value"
+};
+
+var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
 var _hoisted_32 = {
   "class": "value"
 };
-
-var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
-
-var _hoisted_34 = {
-  "class": "value"
-};
-var _hoisted_35 = {
+var _hoisted_33 = {
   "class": "clients"
 };
 
-var _hoisted_36 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
+var _hoisted_34 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
 
-var _hoisted_37 = {
+var _hoisted_35 = {
   "class": "value"
 };
 
-var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
+var _hoisted_36 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
 
-var _hoisted_39 = {
+var _hoisted_37 = {
   key: 0
 };
 
-var _hoisted_40 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "new-game"
 }, "Restart Game", -1
 /* HOISTED */
 );
 
-var _hoisted_41 = [_hoisted_40];
-var _hoisted_42 = {
+var _hoisted_39 = [_hoisted_38];
+var _hoisted_40 = {
   "class": "messages"
 };
-var _hoisted_43 = {
+var _hoisted_41 = {
   "class": "message-text"
 };
 
-var _hoisted_44 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_42 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "bg-blur"
 }, null, -1
 /* HOISTED */
@@ -18608,76 +18728,68 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _$props$state, _$props$state$room_id, _$props$state2, _$props$state$game_id, _$props$state3, _$props$game, _$props$state$game_ho, _$props$state4, _$props$state$round_i, _$props$state5, _$props$round, _$props$state$player_;
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    "class": "debug-toggle",
+    "class": "debug-toggle svg-button",
     onClick: _cache[0] || (_cache[0] = function ($event) {
       return $setup.show_debug = !$setup.show_debug;
     })
-  }, _hoisted_3), $setup.show_debug ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" have to enable video or mic first before this option becomes available "), !$props.calling && !$props.show_end_call_button && ($props.video_enabled || !$props.mic_muted) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_3), $setup.show_debug ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" have to enable video or mic first before this option becomes available "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <div v-if=\"\n                !calling\n                && !show_end_call_button\n                && (video_enabled || !mic_muted)\n            \"\n                @click.prevent=\"startVideoChat\"\n                style=\"pointer-events:all;\">\n                <button class=\"video-chat-call-start\">Join Chat</button>\n            </div> "), $props.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
     onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
-      return $props.startVideoChat && $props.startVideoChat.apply($props, arguments);
-    }, ["prevent"])),
-    style: {
-      "pointer-events": "all"
-    }
-  }, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-    key: 1,
-    onClick: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return _ctx.end_video_chat && _ctx.end_video_chat.apply(_ctx, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[3] || (_cache[3] = function () {
+  }, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[2] || (_cache[2] = function () {
       return $options.toggleWireframe && $options.toggleWireframe.apply($options, arguments);
     }),
     style: {
       "pointer-events": "all"
     }
   }, "Wireframe"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.resetCamera && $props.resetCamera.apply($props, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_10), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+  }, _hoisted_8), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.toggleCameraLock && $props.toggleCameraLock.apply($props, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.camera_locked ? 'Unlock' : 'Lock') + " Camera", 1
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.camera_locked ? 'Unlock' : 'Lock') + " Camera", 1
   /* TEXT */
-  )]), _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[6] || (_cache[6] = function ($event) {
+  )]), _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[5] || (_cache[5] = function ($event) {
       return _ctx.$emit('toggleShowDebugInfo');
     })
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.show_debug_info ? 'Hide' : 'Show Debug Info'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.my_client_id), 1
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_13, [_hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.my_client_id), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_16, [_hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_21, [_hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_19, [_hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
   /* TEXT */
-  ), _hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$game = $props.game) !== null && _$props$game !== void 0 && _$props$game.started ? 'started' : 'not-started'), 1
+  ), _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$game = $props.game) !== null && _$props$game !== void 0 && _$props$game.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_26, [_hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : _$props$state4.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_24, [_hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : _$props$state4.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
   /* TEXT */
-  ), _hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  ), _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
       color: $props.im_game_host ? 'green' : 'red'
     })
   }, "You're " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.im_game_host ? '' : 'NOT') + " the game host!", 5
   /* TEXT, STYLE */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_30, [_hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : _$props$state5.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_28, [_hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : _$props$state5.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
   /* TEXT */
-  ), _hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$round = $props.round) !== null && _$props$round !== void 0 && _$props$round.started ? 'started' : 'not-started'), 1
+  ), _hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$round = $props.round) !== null && _$props$round !== void 0 && _$props$round.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_35, [_hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_37, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_33, [_hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
   /* TEXT */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player turn id: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.state.player_turn) + " ", 1
   /* TEXT */
@@ -18689,12 +18801,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT, STYLE */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = $props.state.player_type) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'connecting'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_38, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.user_ids, function (user_id) {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.user_ids, function (user_id) {
     var _$props$state$player_2, _$props$state$player_3, _$props$state6, _$props$state6$player;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
       key: user_id
-    }, [!((_$props$state$player_2 = $props.state.player_hands) !== null && _$props$state$player_2 !== void 0 && (_$props$state$player_3 = _$props$state$player_2[user_id]) !== null && _$props$state$player_3 !== void 0 && _$props$state$player_3.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_39, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_hands) === null || _$props$state6$player === void 0 ? void 0 : _$props$state6$player[user_id])), 1
+    }, [!((_$props$state$player_2 = $props.state.player_hands) !== null && _$props$state$player_2 !== void 0 && (_$props$state$player_3 = _$props$state$player_2[user_id]) !== null && _$props$state$player_3 !== void 0 && _$props$state$player_3.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_37, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_hands) === null || _$props$state6$player === void 0 ? void 0 : _$props$state6$player[user_id])), 1
     /* TEXT */
     )]);
   }), 128
@@ -18703,21 +18815,76 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                    <li v-if=\"!state?.room_id\">\n                        <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                    </li>\n\n                    <li v-if=\"state?.room_id && !state?.game_id\"\n                        @click.prevent=\"new_game\">\n                        <button class=\"new-game\">New Game</button>\n                    </li> "), $props.im_game_host ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
     key: 0,
-    onClick: _cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.restartGame && $props.restartGame.apply($props, arguments);
     }, ["prevent"]))
-  }, _hoisted_41)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                        @click.prevent=\"start_game\">\n                        <button class=\"start-game\">Start Game</button>\n                    </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.messages, function (message, i) {
+  }, _hoisted_39)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                        @click.prevent=\"start_game\">\n                        <button class=\"start-game\">Start Game</button>\n                    </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.messages, function (message, i) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "message",
       key: i
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_41, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])])]), _hoisted_44], 512
+  ))])])]), _hoisted_42], 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.show_debug_info]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
+}
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/LeftHud.vue?vue&type=template&id=258c16fd":
+/*!***********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/LeftHud.vue?vue&type=template&id=258c16fd ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+var _hoisted_1 = {
+  "class": "left-hud"
+};
+var _hoisted_2 = {
+  "class": "scores-wrapper"
+};
+var _hoisted_3 = {
+  "class": "hit"
+};
+
+var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" / ");
+
+var _hoisted_5 = {
+  "class": "miss"
+};
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  var _$props$state, _$props$state$user_id, _$props$state2, _$props$state3;
+
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$user_id = _$props$state.user_ids) === null || _$props$state$user_id === void 0 ? void 0 : _$props$state$user_id.length), 1
+  /* TEXT */
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.round_number), 1
+  /* TEXT */
+  ), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)((_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.user_ids, function (user_id) {
+    var _$props$state$user_na, _$props$state4, _$props$state4$user_n, _$props$state$player_, _$props$state5, _$props$state5$player, _$props$state5$player2, _$props$state$player_2, _$props$state6, _$props$state6$player, _$props$state6$player2;
+
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+      "class": "scores",
+      key: user_id
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$user_na = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$user_n = _$props$state4.user_names) === null || _$props$state4$user_n === void 0 ? void 0 : _$props$state4$user_n[user_id]) !== null && _$props$state$user_na !== void 0 ? _$props$state$user_na : 'player') + ": ", 1
+    /* TEXT */
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[user_id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 0), 1
+    /* TEXT */
+    ), _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[user_id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
+    /* TEXT */
+    )]);
+  }), 128
+  /* KEYED_FRAGMENT */
+  ))])]);
 }
 
 /***/ }),
@@ -18782,6 +18949,39 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/TopHud.vue?vue&type=template&id=03bf2d65":
+/*!**********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/TopHud.vue?vue&type=template&id=03bf2d65 ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+var _hoisted_1 = {
+  "class": "top-hud"
+};
+var _hoisted_2 = {
+  "class": "turn-indicator"
+};
+var _hoisted_3 = {
+  key: 0,
+  "class": "my-turn"
+};
+var _hoisted_4 = {
+  key: 1,
+  "class": "not-my-turn"
+};
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [$props.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, "Opponent's Turn"))])]);
+}
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=template&id=72f16de2":
 /*!********************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=template&id=72f16de2 ***!
@@ -18804,7 +19004,7 @@ var _hoisted_2 = {
 
 var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
-}, "Where do you want to go?", -1
+}, "Game Switcher", -1
 /* HOISTED */
 );
 
@@ -19000,12 +19200,16 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return _ctx.restart_game && _ctx.restart_game.apply(_ctx, arguments);
     }, ["prevent"]))
   }, "Restart Game")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[11] || (_cache[11] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return _ctx.$emit('closeModal');
+    }, ["prevent"]))
+  }, "Cancel"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
       opacity: $props.world_selection && $props.room_selection && $props.game_selection ? 1 : 0.5,
       pointerEvents: $props.world_selection && $props.room_selection && $props.game_selection ? 'all' : 'none'
     }),
-    onClick: _cache[11] || (_cache[11] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
-      return $props.submitModal && $props.submitModal.apply($props, arguments);
+    onClick: _cache[12] || (_cache[12] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+      return _ctx.$emit('closeModal');
     }, ["prevent"])),
     disabled: !$props.world_selection || !$props.room_selection || !$props.game_selection
   }, "Continue", 12
@@ -19031,19 +19235,57 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   id: "app"
 };
-var _hoisted_2 = {
+
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "1em",
+  height: "1em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 48 48"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "48",
+  height: "48",
+  fill: "none",
+  stroke: "none"
+}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("mask", {
+  id: "svgIDa"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("g", {
+  fill: "none",
+  stroke: "#fff",
+  "stroke-linejoin": "round",
+  "stroke-width": "4"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "#fff",
+  d: "M28 28h16v16H28zM13 4l9 16H4l9-16Zm23 16a8 8 0 1 0 0-16a8 8 0 0 0 0 16Z"
+}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  "stroke-linecap": "round",
+  d: "m4 28l16 16m0-16L4 44"
+})])]), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M0 0h48v48H0z",
+  mask: "url(#svgIDa)"
+})], -1
+/* HOISTED */
+);
+
+var _hoisted_3 = [_hoisted_2];
+var _hoisted_4 = {
   key: 0,
   "class": "modal-wrapper"
 };
-var _hoisted_3 = {
+var _hoisted_5 = {
   "class": "modal-inner"
 };
-var _hoisted_4 = {
+var _hoisted_6 = {
   key: 4,
   "class": "game-in-progress-modal modal"
 };
 
-var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-content"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
@@ -19051,13 +19293,13 @@ var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 /* HOISTED */
 );
 
-var _hoisted_6 = [_hoisted_5];
-var _hoisted_7 = {
+var _hoisted_8 = [_hoisted_7];
+var _hoisted_9 = {
   key: 5,
   "class": "player-request-modal modal"
 };
 
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-content"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
@@ -19065,13 +19307,13 @@ var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 /* HOISTED */
 );
 
-var _hoisted_9 = [_hoisted_8];
-var _hoisted_10 = {
+var _hoisted_11 = [_hoisted_10];
+var _hoisted_12 = {
   key: 6,
   "class": "spectator-joined-modal modal"
 };
 
-var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-content"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
@@ -19079,15 +19321,15 @@ var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_12 = [_hoisted_11];
+var _hoisted_14 = [_hoisted_13];
 
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "modal-underlay"
 }, null, -1
 /* HOISTED */
 );
 
-var _hoisted_14 = {
+var _hoisted_16 = {
   id: "debug"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -19099,11 +19341,23 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   var _component_WorldSelectModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("WorldSelectModal");
 
+  var _component_TopHud = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("TopHud");
+
+  var _component_LeftHud = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("LeftHud");
+
   var _component_DebugOverlay = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("DebugOverlay");
 
   var _component_AVHud = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("AVHud");
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [$setup.show_login_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LoginModal, {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    style: {
+      "pointer-events": "all"
+    },
+    "class": "game-modal-toggle-icon",
+    onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.togglePauseMenu && $options.togglePauseMenu.apply($options, arguments);
+    }, ["prevent"]))
+  }, _hoisted_3), $setup.show_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$setup.show_login_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LoginModal, {
     key: 0,
     onNotAuthenticated: $options.onLoginNotAuthenticated,
     authenticated: $setup.authenticated,
@@ -19118,14 +19372,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* PROPS */
   , ["onNameUpdated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_pause_menu ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_PauseMenuModal, {
     key: 2,
-    submitModal: $options.submitModal,
     gameTypeName: $options.gameTypeName,
     isHostOfSelectedGame: $options.isHostOfSelectedGame,
     onOpenWorldSelectModal: $options.openWorldSelectModal,
     onCloseModal: $options.closeModal
   }, null, 8
   /* PROPS */
-  , ["submitModal", "gameTypeName", "isHostOfSelectedGame", "onOpenWorldSelectModal", "onCloseModal"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_world_select_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_WorldSelectModal, {
+  , ["gameTypeName", "isHostOfSelectedGame", "onOpenWorldSelectModal", "onCloseModal"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_world_select_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_WorldSelectModal, {
     key: 3,
     worlds: $setup.worlds,
     rooms: $setup.rooms,
@@ -19142,7 +19395,15 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onCloseModal: $options.closeModal
   }, null, 8
   /* PROPS */
-  , ["worlds", "rooms", "games", "game_types", "gameTypeName", "world_selection", "room_selection", "game_selection", "onRoomSelectionChanged", "onWorldSelectionChanged", "onGameSelectionChanged", "isHostOfSelectedGame", "onCloseModal"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, _hoisted_9)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_10, _hoisted_12)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _hoisted_13])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DebugOverlay, {
+  , ["worlds", "rooms", "games", "game_types", "gameTypeName", "world_selection", "room_selection", "game_selection", "onRoomSelectionChanged", "onWorldSelectionChanged", "onGameSelectionChanged", "isHostOfSelectedGame", "onCloseModal"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, _hoisted_11)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, _hoisted_14)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _hoisted_15])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_TopHud, {
+    its_my_turn: $options.its_my_turn
+  }, null, 8
+  /* PROPS */
+  , ["its_my_turn"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_LeftHud, {
+    state: $props.state
+  }, null, 8
+  /* PROPS */
+  , ["state"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" RightHUD "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DebugOverlay, {
     calling: $setup.calling,
     state: $props.state,
     game: $options.game,
@@ -19163,7 +19424,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     restartGame: $options.restartGame
   }, null, 8
   /* PROPS */
-  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_end_call_button", "show_debug_info", "onToggleShowDebugInfo", "mic_muted", "video_enabled", "video_muted", "startVideoChat", "camera_locked", "resetCamera", "toggleCameraLock", "restartGame"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
+  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_end_call_button", "show_debug_info", "onToggleShowDebugInfo", "mic_muted", "video_enabled", "video_muted", "startVideoChat", "camera_locked", "resetCamera", "toggleCameraLock", "restartGame"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" BottomHUD "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
     ref: "AVHud",
     state: $props.state,
     its_my_turn: $options.its_my_turn,
@@ -19175,11 +19436,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     disableVideo: $options.disableVideo,
     openPauseMenu: $options.openPauseMenu,
     toggleMute: $options.toggleMute,
+    is_streaming: $setup.is_streaming,
+    onToggleStream: $options.toggleStream,
+    onToggleMicMute: $options.toggleMicMute,
     onSendChatMessage: $options.sendChatMessage,
     chat_messages: $setup.chat_messages
   }, null, 8
   /* PROPS */
-  , ["state", "its_my_turn", "video_enabled", "video_muted", "mic_muted", "audio_muted", "enableVideo", "disableVideo", "openPauseMenu", "toggleMute", "onSendChatMessage", "chat_messages"])]);
+  , ["state", "its_my_turn", "video_enabled", "video_muted", "mic_muted", "audio_muted", "enableVideo", "disableVideo", "openPauseMenu", "toggleMute", "is_streaming", "onToggleStream", "onToggleMicMute", "onSendChatMessage", "chat_messages"])]);
 }
 
 /***/ }),
@@ -19422,7 +19686,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 103px;\n  left: 90px;\n}\n#icon-video-enable svg {\n  width: 35px;\n  cursor: pointer;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n  margin-top: 100px;\n}\n.modal-wrapper {\n  width: 100%;\n}\n.modal-wrapper .modal-inner {\n  width: 320px;\n  margin: 0 auto;\n  position: relative;\n}\n.modal {\n  position: relative;\n  pointer-events: all;\n  top: 60px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#app {\n  color: #fff;\n}\n#debug {\n  background: transparent;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n.details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n.bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n  pointer-events: all;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}\n.turn-indicator {\n  font-weight: bold;\n  font-size: 24px;\n  text-align: center;\n  position: absolute;\n  width: 300px;\n  margin: 0 auto;\n  top: 10px;\n  left: 50%;\n  margin-left: -150px;\n}\n.turn-indicator .my-turn {\n  color: green;\n}\n.turn-indicator .not-my-turn {\n  color: red;\n}\n.debug-toggle {\n  pointer-events: all;\n}\n.hud {\n  width: 100%;\n  height: 100vh;\n  pointer-events: none;\n  position: absolute;\n  display: block;\n}\n.scores-wrapper {\n  width: auto;\n  top: 30px;\n  position: absolute;\n  left: 10px;\n}\n.scores .hit {\n  color: green;\n}\n.scores .miss {\n  color: red;\n}\n.chat-box {\n  position: absolute;\n  right: 30px;\n  bottom: 100px;\n  pointer-events: all;\n  width: 300px;\n  max-height: 50vh;\n}\n.messages {\n  overflow-y: auto;\n}\n.message-wrapper {\n  background: rgba(0, 0, 0, 0.5);\n  border-radius: 10px;\n  padding: 10px;\n  margin: 10px;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  z-index: 2;\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n.toggle-video {\n  position: absolute;\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n  margin-top: 170px;\n  text-align: right;\n  margin-right: 15px;\n}\n.modal-wrapper {\n  width: 100%;\n}\n.modal-wrapper .modal-inner {\n  width: 320px;\n  margin: 0 auto;\n  position: relative;\n}\n.modal {\n  position: relative;\n  pointer-events: all;\n  top: 60px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#app {\n  color: #fff;\n}\n#debug {\n  background: transparent;\n  position: fixed;\n  top: 0;\n  bottom: auto;\n  width: auto;\n  width: 200px;\n  height: auto;\n  right: 0;\n  left: auto;\n}\n.details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n.bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n  pointer-events: all;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}\n.turn-indicator {\n  font-weight: bold;\n  font-size: 24px;\n  text-align: center;\n  position: absolute;\n  width: 300px;\n  margin: 0 auto;\n  top: 10px;\n  left: 50%;\n  margin-left: -150px;\n}\n.turn-indicator .my-turn {\n  color: green;\n}\n.turn-indicator .not-my-turn {\n  color: red;\n}\n.svg-button {\n  pointer-events: all;\n  width: 30px;\n  cursor: pointer;\n}\n.debug-toggle {\n  top: 100px;\n  right: 20px;\n  position: absolute;\n  height: 30px;\n  cursor: pointer;\n}\n.mic-toggle {\n  position: absolute;\n  bottom: 100px;\n  left: 140px;\n}\n.video-toggle {\n  position: absolute;\n  left: 80px;\n  bottom: 106px;\n}\n.stream-toggle {\n  position: absolute;\n  bottom: 90px;\n  left: 190px;\n  width: 50px;\n}\nsvg {\n  width: 100%;\n  height: auto;\n}\n.hud {\n  width: 100%;\n  height: 100vh;\n  pointer-events: none;\n  position: absolute;\n  display: block;\n}\n.scores-wrapper {\n  width: auto;\n  top: 30px;\n  position: absolute;\n  left: 10px;\n}\n.scores .hit {\n  color: green;\n}\n.scores .miss {\n  color: red;\n}\n.chat-box {\n  position: absolute;\n  right: 30px;\n  bottom: 100px;\n  pointer-events: all;\n  width: 300px;\n  max-height: 50vh;\n}\n.messages {\n  overflow-y: auto;\n}\n.message-wrapper {\n  background: rgba(0, 0, 0, 0.5);\n  border-radius: 10px;\n  padding: 10px;\n  margin: 10px;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -20099,6 +20363,34 @@ if (false) {}
 
 /***/ }),
 
+/***/ "./client/components/LeftHud.vue":
+/*!***************************************!*\
+  !*** ./client/components/LeftHud.vue ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _LeftHud_vue_vue_type_template_id_258c16fd__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./LeftHud.vue?vue&type=template&id=258c16fd */ "./client/components/LeftHud.vue?vue&type=template&id=258c16fd");
+/* harmony import */ var _LeftHud_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./LeftHud.vue?vue&type=script&lang=js */ "./client/components/LeftHud.vue?vue&type=script&lang=js");
+/* harmony import */ var _root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+
+
+
+
+;
+const __exports__ = /*#__PURE__*/(0,_root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_LeftHud_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_LeftHud_vue_vue_type_template_id_258c16fd__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"client/components/LeftHud.vue"]])
+/* hot reload */
+if (false) {}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__exports__);
+
+/***/ }),
+
 /***/ "./client/components/PauseMenuModal.vue":
 /*!**********************************************!*\
   !*** ./client/components/PauseMenuModal.vue ***!
@@ -20119,6 +20411,34 @@ __webpack_require__.r(__webpack_exports__);
 
 ;
 const __exports__ = /*#__PURE__*/(0,_root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_PauseMenuModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_PauseMenuModal_vue_vue_type_template_id_4d7d1f3b__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"client/components/PauseMenuModal.vue"]])
+/* hot reload */
+if (false) {}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__exports__);
+
+/***/ }),
+
+/***/ "./client/components/TopHud.vue":
+/*!**************************************!*\
+  !*** ./client/components/TopHud.vue ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _TopHud_vue_vue_type_template_id_03bf2d65__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./TopHud.vue?vue&type=template&id=03bf2d65 */ "./client/components/TopHud.vue?vue&type=template&id=03bf2d65");
+/* harmony import */ var _TopHud_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./TopHud.vue?vue&type=script&lang=js */ "./client/components/TopHud.vue?vue&type=script&lang=js");
+/* harmony import */ var _root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+
+
+
+
+;
+const __exports__ = /*#__PURE__*/(0,_root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_TopHud_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_TopHud_vue_vue_type_template_id_03bf2d65__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"client/components/TopHud.vue"]])
 /* hot reload */
 if (false) {}
 
@@ -20274,6 +20594,22 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./client/components/LeftHud.vue?vue&type=script&lang=js":
+/*!***************************************************************!*\
+  !*** ./client/components/LeftHud.vue?vue&type=script&lang=js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_LeftHud_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_LeftHud_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./LeftHud.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/LeftHud.vue?vue&type=script&lang=js");
+ 
+
+/***/ }),
+
 /***/ "./client/components/PauseMenuModal.vue?vue&type=script&lang=js":
 /*!**********************************************************************!*\
   !*** ./client/components/PauseMenuModal.vue?vue&type=script&lang=js ***!
@@ -20286,6 +20622,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./PauseMenuModal.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=script&lang=js");
+ 
+
+/***/ }),
+
+/***/ "./client/components/TopHud.vue?vue&type=script&lang=js":
+/*!**************************************************************!*\
+  !*** ./client/components/TopHud.vue?vue&type=script&lang=js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_TopHud_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_TopHud_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./TopHud.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/TopHud.vue?vue&type=script&lang=js");
  
 
 /***/ }),
@@ -20386,6 +20738,22 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./client/components/LeftHud.vue?vue&type=template&id=258c16fd":
+/*!*********************************************************************!*\
+  !*** ./client/components/LeftHud.vue?vue&type=template&id=258c16fd ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_LeftHud_vue_vue_type_template_id_258c16fd__WEBPACK_IMPORTED_MODULE_0__.render)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_LeftHud_vue_vue_type_template_id_258c16fd__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./LeftHud.vue?vue&type=template&id=258c16fd */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/LeftHud.vue?vue&type=template&id=258c16fd");
+
+
+/***/ }),
+
 /***/ "./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b":
 /*!****************************************************************************!*\
   !*** ./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b ***!
@@ -20398,6 +20766,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "render": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_template_id_4d7d1f3b__WEBPACK_IMPORTED_MODULE_0__.render)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_template_id_4d7d1f3b__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./PauseMenuModal.vue?vue&type=template&id=4d7d1f3b */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b");
+
+
+/***/ }),
+
+/***/ "./client/components/TopHud.vue?vue&type=template&id=03bf2d65":
+/*!********************************************************************!*\
+  !*** ./client/components/TopHud.vue?vue&type=template&id=03bf2d65 ***!
+  \********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_TopHud_vue_vue_type_template_id_03bf2d65__WEBPACK_IMPORTED_MODULE_0__.render)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_TopHud_vue_vue_type_template_id_03bf2d65__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./TopHud.vue?vue&type=template&id=03bf2d65 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/TopHud.vue?vue&type=template&id=03bf2d65");
 
 
 /***/ }),
@@ -27606,7 +27990,7 @@ var SocketConnection = /*#__PURE__*/function () {
   }, {
     key: "onServerMessage",
     value: function onServerMessage(event) {
-      var _decoded, _decoded2, _decoded3, _decoded4, _decoded5, _window$t$app$state$h, _window, _window$t, _window$t$app, _window$t$app$state, _decoded6, _t$players;
+      var _decoded, _decoded2, _decoded3, _decoded4, _decoded5, _window$t$app$state$h, _window, _window$t, _window$t$app, _window$t$app$state, _decoded6;
 
       //console.log(event);
       var decoded = null;
@@ -27647,28 +28031,26 @@ var SocketConnection = /*#__PURE__*/function () {
           window.t.app.state.hovered_prev = ((_window$t$app$state$h = (_window = window) === null || _window === void 0 ? void 0 : (_window$t = _window.t) === null || _window$t === void 0 ? void 0 : (_window$t$app = _window$t.app) === null || _window$t$app === void 0 ? void 0 : (_window$t$app$state = _window$t$app.state) === null || _window$t$app$state === void 0 ? void 0 : _window$t$app$state.hovered) !== null && _window$t$app$state$h !== void 0 ? _window$t$app$state$h : []).slice();
           window.t.app.state = _objectSpread(_objectSpread({}, window.t.app.state), (_decoded6 = decoded) === null || _decoded6 === void 0 ? void 0 : _decoded6.state);
           break;
-
-        case 'NEW_CLIENT_CONNECTED':
-          // could write to t.state, but
-          // ping will update us every second of who's connected
-          // could show a nice alert that someone joined, tho
-          // but that could also be a reaction to a watcher on state.client_ids
-          // so, maybe we don't need this event yet
-          break;
-
-        case 'CLIENT_LEFT':
-          // same as above, client observation can happen via ping's client list
-          // todo: pause game? ask if room host wants to end the round, or end the game, or end the room
-          break;
+        // case 'NEW_CLIENT_CONNECTED':
+        //     // could write to t.state, but
+        //     // ping will update us every second of who's connected
+        //     // could show a nice alert that someone joined, tho
+        //     // but that could also be a reaction to a watcher on state.client_ids
+        //     // so, maybe we don't need this event yet
+        //     break;
+        // case 'CLIENT_LEFT':
+        //     // same as above, client observation can happen via ping's client list
+        //     // todo: pause game? ask if room host wants to end the round, or end the game, or end the room
+        //     break;
 
         case 'WELCOME':
           // delete old player if we had a previous connection that got reset
           // TODO: player accounts, IP addresses, cookies or something to persist client_ids longer
-          if ((_t$players = t.players) !== null && _t$players !== void 0 && _t$players[this.client_id]) {
-            t.players[this.client_id].destroy();
-            delete t.players[this.client_id];
-          }
-
+          // if(t.players?.[this.client_id]){
+          //   t.players[this.client_id].destroy()
+          //   delete t.players[this.client_id];
+          // }
+          // note we don't alter t.players until user is read() from directus later in onLoginAuthenticated
           this.client_id = decoded.your_client_id;
           window.t.app.my_client_id = this.client_id; // window.t.app.state.player_type = decoded.player_or_spectator;
           // console.log(
@@ -27693,14 +28075,14 @@ var SocketConnection = /*#__PURE__*/function () {
         //     window.t.app.state.game_id = decoded.game_id;
         //     window.t.app.state.round_id = decoded.round_id;
         //     break;
-
-        case 'ROOM_JOIN_SUCCESS':
-          window.t.app.state.room_id = decoded.room_id;
-          break;
-
-        case 'ROOM_EXIT_SUCCESS':
-          window.t.app.state.room_id = null;
-          break;
+        // todo
+        // case 'ROOM_JOIN_SUCCESS':
+        //     window.t.app.state.room_id = decoded.room_id;
+        //     break;
+        // todo
+        // case 'ROOM_EXIT_SUCCESS':
+        //     window.t.app.state.room_id = null;
+        //     break;
       }
     }
   }, {
@@ -28026,7 +28408,7 @@ var Tabletop = /*#__PURE__*/function () {
             t.stream = stream;
             t.video.srcObject = stream;
             t.video.play();
-            t.players[t.app.my_client_id].head.assignVideoToHead(t.video);
+            t.players[t.root.user.id].head.assignVideoToHead(t.video);
             resolve();
           })["catch"](function (error) {
             console.error('Unable to access the camera/webcam.', error);
@@ -28038,6 +28420,11 @@ var Tabletop = /*#__PURE__*/function () {
         }
       });
     }
+  }, {
+    key: "userIDForClientID",
+    value: function userIDForClientID(client_id) {
+      return t.app.state.client_ids.indexOf(client_id);
+    }
     /* this gets called with every tick from the server */
     // maybe we throttle it
 
@@ -28047,11 +28434,11 @@ var Tabletop = /*#__PURE__*/function () {
       // make sure we have a instance of a Player class
       // to represent this player
       for (var i in t.app.state.user_ids) {
-        var _t$players2;
+        var _t$players;
 
         var user_id = t.app.state.user_ids[i];
 
-        if (!((_t$players2 = t.players) !== null && _t$players2 !== void 0 && _t$players2[user_id])) {
+        if (!((_t$players = t.players) !== null && _t$players !== void 0 && _t$players[user_id])) {
           t.players[user_id] = new Player(user_id);
         }
       } // destroy player if they left
@@ -29496,7 +29883,7 @@ function init() {
       components: {
         App: _components_app_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
       },
-      template: '<div><app :state="state" ref="app"></app></div>',
+      template: '<app :state="state" ref="app"></app>',
       data: function data() {
         return {
           state: {
@@ -30101,13 +30488,13 @@ var cusorUpdateFN = getThrottledUpdateServer('SET_PLAYER_CURSOR', 128);
 var headUpdateFN = getThrottledUpdateServer('SET_PLAYER_HEAD', 128);
 
 function updateClientCursor() {
-  var _t$players3, _t$players3$t$app$my_, _t$players3$t$app$my_2;
+  var _t$players2, _t$players2$t$app$my_, _t$players2$t$app$my_2;
 
   // hit test to position pointer
   // mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
   // mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   // Toggle rotation bool for meshes that we clicked
-  var pointer = (_t$players3 = t.players) === null || _t$players3 === void 0 ? void 0 : (_t$players3$t$app$my_ = _t$players3[t.app.my_client_id]) === null || _t$players3$t$app$my_ === void 0 ? void 0 : (_t$players3$t$app$my_2 = _t$players3$t$app$my_.pointer) === null || _t$players3$t$app$my_2 === void 0 ? void 0 : _t$players3$t$app$my_2.mesh;
+  var pointer = (_t$players2 = t.players) === null || _t$players2 === void 0 ? void 0 : (_t$players2$t$app$my_ = _t$players2[t.app.my_client_id]) === null || _t$players2$t$app$my_ === void 0 ? void 0 : (_t$players2$t$app$my_2 = _t$players2$t$app$my_.pointer) === null || _t$players2$t$app$my_2 === void 0 ? void 0 : _t$players2$t$app$my_2.mesh;
 
   if (pointer) {
     var intersects = intersectsGroup([t.tableMesh].concat(_toConsumableArray(t.zonegroup.children))); // console.log('intersects',intersects);
@@ -30175,7 +30562,7 @@ function onTouchEnd(evt) {
 }
 
 function onMouseClick(evt) {
-  var _t7, _t7$root, _t7$root$player, _intersects$, _intersects$$object, _intersects$$object$u, _t$cards;
+  var _t7, _t7$root, _t7$root$user, _intersects$, _intersects$$object, _intersects$$object$u, _t$cards;
 
   if (t.root.show_modal) {
     return;
@@ -30191,7 +30578,7 @@ function onMouseClick(evt) {
   } // if we're not logged in, ignore it
 
 
-  if (!((_t7 = t) !== null && _t7 !== void 0 && (_t7$root = _t7.root) !== null && _t7$root !== void 0 && (_t7$root$player = _t7$root.player) !== null && _t7$root$player !== void 0 && _t7$root$player.id)) {
+  if (!((_t7 = t) !== null && _t7 !== void 0 && (_t7$root = _t7.root) !== null && _t7$root !== void 0 && (_t7$root$user = _t7$root.user) !== null && _t7$root$user !== void 0 && _t7$root$user.id)) {
     return;
   }
 

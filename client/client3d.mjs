@@ -148,26 +148,27 @@ class SocketConnection{
               }
               break;
 
-          case 'NEW_CLIENT_CONNECTED':
-              // could write to t.state, but
-              // ping will update us every second of who's connected
-              // could show a nice alert that someone joined, tho
-              // but that could also be a reaction to a watcher on state.client_ids
-              // so, maybe we don't need this event yet
-              break;
+          // case 'NEW_CLIENT_CONNECTED':
+          //     // could write to t.state, but
+          //     // ping will update us every second of who's connected
+          //     // could show a nice alert that someone joined, tho
+          //     // but that could also be a reaction to a watcher on state.client_ids
+          //     // so, maybe we don't need this event yet
+          //     break;
 
-          case 'CLIENT_LEFT':
-              // same as above, client observation can happen via ping's client list
-              // todo: pause game? ask if room host wants to end the round, or end the game, or end the room
-              break;
+          // case 'CLIENT_LEFT':
+          //     // same as above, client observation can happen via ping's client list
+          //     // todo: pause game? ask if room host wants to end the round, or end the game, or end the room
+          //     break;
 
           case 'WELCOME':
               // delete old player if we had a previous connection that got reset
               // TODO: player accounts, IP addresses, cookies or something to persist client_ids longer
-              if(t.players?.[this.client_id]){
-                t.players[this.client_id].destroy()
-                delete t.players[this.client_id];
-              }
+              // if(t.players?.[this.client_id]){
+              //   t.players[this.client_id].destroy()
+              //   delete t.players[this.client_id];
+              // }
+              // note we don't alter t.players until user is read() from directus later in onLoginAuthenticated
               this.client_id = decoded.your_client_id;
               window.t.app.my_client_id = this.client_id;
               // window.t.app.state.player_type = decoded.player_or_spectator;
@@ -197,13 +198,15 @@ class SocketConnection{
           //     window.t.app.state.round_id = decoded.round_id;
           //     break;
 
-          case 'ROOM_JOIN_SUCCESS':
-              window.t.app.state.room_id = decoded.room_id;
-              break;
+          // todo
+          // case 'ROOM_JOIN_SUCCESS':
+          //     window.t.app.state.room_id = decoded.room_id;
+          //     break;
 
-          case 'ROOM_EXIT_SUCCESS':
-              window.t.app.state.room_id = null;
-              break;
+          // todo
+          // case 'ROOM_EXIT_SUCCESS':
+          //     window.t.app.state.room_id = null;
+          //     break;
       }
     }
     send(data){
@@ -443,7 +446,7 @@ class Tabletop{
             t.video.srcObject = stream;
             t.video.play();
 
-            t.players[t.app.my_client_id].head.assignVideoToHead(t.video);
+            t.players[t.root.user.id].head.assignVideoToHead(t.video);
 
             resolve();
 
@@ -463,6 +466,10 @@ class Tabletop{
 
         }
       });
+    }
+
+    userIDForClientID(client_id){
+      return t.app.state.client_ids.indexOf(client_id);
     }
 
     /* this gets called with every tick from the server */
@@ -1715,7 +1722,7 @@ function init(){
     // alert('mounting vue');
     t.app = createApp({
       components:{App},
-      template:'<div><app :state="state" ref="app"></app></div>',
+      template:'<app :state="state" ref="app"></app>',
       data(){
           return {
               state: {
@@ -2447,7 +2454,7 @@ function onMouseClick( evt ){
   }
 
   // if we're not logged in, ignore it
-  if(!t?.root?.player?.id){
+  if(!t?.root?.user?.id){
     return;
   }
 
