@@ -8,13 +8,30 @@ import PlayerState from '../2d-client/player-states/4_26_2022_10_11_am_pst.mjs';
 // TODO: mysql or directus?
 import StartDirectus from '../../client/directus.mjs'
 import { createReturnStatement } from '@vue/compiler-core';
+import { rule } from 'postcss';
 
 class ServerAPI {
 
-    constructor(){
+    constructor(SERVER_ID){
+        this.SERVER_ID = SERVER_ID
+        this.booted = false; // flag as true once we've attemtped to fetch state from directus
         this.StartDirectus = StartDirectus;
+    }
+
+    bootForWorldServer(worldServer){
+        this.worldServer = worldServer;
         this.StartDirectus().then(directus=>{
             this.directus = directus;
+
+            // fetch state from server
+            this.getServerState().then(state=>{
+                // TODO: write state to Memory
+                // console.warn('TODO: write state to memory',state);
+                if(state?.worlds){
+                    this.worldServer.worlds = state.worlds;
+                }
+                this.booted = true;
+            })
         })
     }
 
@@ -212,6 +229,24 @@ class ServerAPI {
 
     freshState(){
         return DEFAULT_STATE;
+    }
+
+    async getServerState(){
+        let remoteState = await this.directus.items('server_states').readOne(this.SERVER_ID).catch((err)=>{
+            console.error('error fetching server state',err);
+        });
+        console.log('fetched remote server state', remoteState);
+        return remoteState?.state ?? DEFAULT_STATE;
+    }
+
+    async saveServerState(state){
+        await this.directus.items('server_states').updateOne(this.SERVER_ID,{state})
+            .then((res)=>{
+                console.log('server state saved', res);
+            })
+            .catch((err)=>{
+                console.error('error saving server state', err);
+            })
     }
 }
 

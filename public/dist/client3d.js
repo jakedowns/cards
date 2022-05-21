@@ -16877,11 +16877,13 @@ __webpack_require__.r(__webpack_exports__);
     disableVideo: Function,
     openPauseMenu: Function,
     toggleMute: Function,
-    audio_muted: Boolean
+    audio_muted: Boolean,
+    chat_messages: Array
   },
   setup: function setup() {
     return {
-      client_mute_states: {}
+      client_mute_states: {},
+      chat_input: ''
     };
   },
   watch: {
@@ -16897,7 +16899,25 @@ __webpack_require__.r(__webpack_exports__);
       });
     }
   },
+  computed: {
+    nameForClientID: function nameForClientID() {
+      var _this2 = this;
+
+      return function (client_id) {
+        var _this2$state$player_n, _this2$state, _this2$state$player_n2;
+
+        // TODO: server should send player_names
+        return (_this2$state$player_n = (_this2$state = _this2.state) === null || _this2$state === void 0 ? void 0 : (_this2$state$player_n2 = _this2$state.player_names) === null || _this2$state$player_n2 === void 0 ? void 0 : _this2$state$player_n2[client_id]) !== null && _this2$state$player_n !== void 0 ? _this2$state$player_n : 'player';
+      };
+    }
+  },
   methods: {
+    sendChatMessage: function sendChatMessage() {
+      if (this.chat_input) {
+        this.$emit('send-chat-message', this.chat_input);
+        this.chat_input = '';
+      }
+    },
     toggleOpponentMute: function toggleOpponentMute(client_id) {
       // this.$refs[`opponent_video_${client_id}`].muted = !this.$refs[`opponent_video_${client_id}`].muted
       this.client_mute_states[client_id] = !this.client_mute_states[client_id];
@@ -16937,6 +16957,18 @@ __webpack_require__.r(__webpack_exports__);
     toggleCameraLock: Function,
     video_enabled: Boolean,
     video_muted: Boolean
+  },
+  setup: function setup() {
+    return {
+      show_debug: false,
+      wireframe: false
+    };
+  },
+  methods: {
+    toggleWireframe: function toggleWireframe() {
+      this.wireframe = !this.wireframe;
+      t.tableMesh.children[0].material.wireframe = this.wireframe;
+    }
   }
 });
 
@@ -16946,6 +16978,99 @@ __webpack_require__.r(__webpack_exports__);
 /*!**************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=script&lang=js ***!
   \**************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  props: {
+    submitModal: {
+      type: Function,
+      required: true
+    },
+    // getRoomsForWorld:{
+    //     type: Function,
+    //     required: true
+    // },
+    // getGamesForRoom:{
+    //     type: Function,
+    //     required: true
+    // },
+    worlds: {
+      type: Array,
+      required: true
+    },
+    rooms: {
+      type: Array,
+      required: true
+    },
+    games: {
+      type: Array,
+      required: true
+    },
+    game_types: {
+      type: Array,
+      required: true
+    },
+    gameTypeName: {
+      type: Function,
+      required: true
+    },
+    world_selection: {
+      type: String,
+      required: false
+    },
+    room_selection: {
+      type: String,
+      required: false
+    },
+    game_selection: {
+      type: String,
+      required: false
+    },
+    isHostOfSelectedGame: {
+      type: Boolean,
+      required: true
+    }
+  },
+  // setup(){
+  // return {
+  //     world_selection: null,
+  //     room_selection: null,
+  //     // table_selection: null,
+  //     game_selection: null,
+  // }
+  // },
+  methods: {
+    onRoomSelectionChanged: function onRoomSelectionChanged($event) {
+      // console.log($event);
+      this.$emit('roomSelectionChanged', $event.target.value);
+    },
+    // todo: throttle
+    onWorldSelectionChanged: function onWorldSelectionChanged($event) {
+      // console.log("world selection changed",this.world_selection,$event.target.value);
+      // // save world selection to user's session on the server
+      // this.getRoomsForWorld(this.world_selection);
+      this.$emit('worldSelectionChanged', $event.target.value);
+    },
+    onGameSelectionChanged: function onGameSelectionChanged($event) {
+      // console.log("world selection changed",this.world_selection,$event.target.value);
+      // // save world selection to user's session on the server
+      // this.getRoomsForWorld(this.world_selection);
+      this.$emit('gameSelectionChanged', $event.target.value);
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=script&lang=js":
+/*!****************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=script&lang=js ***!
+  \****************************************************************************************************************************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -17053,11 +17178,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _PauseMenuModal_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./PauseMenuModal.vue */ "./client/components/PauseMenuModal.vue");
 /* harmony import */ var _DebugOverlay_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./DebugOverlay.vue */ "./client/components/DebugOverlay.vue");
 /* harmony import */ var _AVHud_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./AVHud.vue */ "./client/components/AVHud.vue");
+/* harmony import */ var _WorldSelectModal_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./WorldSelectModal.vue */ "./client/components/WorldSelectModal.vue");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 
 
 
@@ -17070,7 +17197,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     NameModal: _namemodal_vue__WEBPACK_IMPORTED_MODULE_2__["default"],
     PauseMenuModal: _PauseMenuModal_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
     DebugOverlay: _DebugOverlay_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
-    AVHud: _AVHud_vue__WEBPACK_IMPORTED_MODULE_5__["default"]
+    AVHud: _AVHud_vue__WEBPACK_IMPORTED_MODULE_5__["default"],
+    WorldSelectModal: _WorldSelectModal_vue__WEBPACK_IMPORTED_MODULE_6__["default"]
   },
   props: {
     state: {
@@ -17080,6 +17208,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   setup: function setup() {
     return {
+      chat_messages: [],
       authenticated: false,
       show_login_loading: true,
       // key ourselves in the users{}
@@ -17099,6 +17228,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       show_login_modal: true,
       show_name_modal: false,
       show_pause_menu: false,
+      show_world_select_modal: false,
       show_player_request_modal: false,
       show_spectator_joined_modal: false,
       show_game_in_progress_modal: false,
@@ -17166,21 +17296,25 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           t.startGame();
         } // TODO constantly tween towards Zones, remove the need to explictly detect zone changes and manually trigger tweens
         // console.log('last dealt?',new_state?.last_dealt,old_state?.last_dealt);
+        // if(new_state?.shuffling && !old_state?.shuffling){
+        //     t.deck.tweenCardsToDeck();
+        // }
+        // else if(new_state?.last_dealt !== old_state?.last_dealt){
+        // this loops thru all cards,
+        // so does the next block of this method
+        // so, probably should combine them into a single loo
+        // since this happens so frequently
+        //t.deck.tweenCardsToZones();
+        // }
 
-
-        if (new_state !== null && new_state !== void 0 && new_state.shuffling && !(old_state !== null && old_state !== void 0 && old_state.shuffling)) {
-          t.deck.tweenCardsToDeck();
-        } else if ((new_state === null || new_state === void 0 ? void 0 : new_state.last_dealt) !== (old_state === null || old_state === void 0 ? void 0 : old_state.last_dealt)) {
-          t.deck.tweenCardsToZones();
-        }
 
         if ((new_state === null || new_state === void 0 ? void 0 : (_new_state$client_ids = new_state.client_ids) === null || _new_state$client_ids === void 0 ? void 0 : _new_state$client_ids.length) === 2 && (old_state === null || old_state === void 0 ? void 0 : (_old_state$client_ids = old_state.client_ids) === null || _old_state$client_ids === void 0 ? void 0 : _old_state$client_ids.length) === 1) {// we just went from 1 peer to 2, start a call
           // this.calling = true; // hide start call button
           // t.call();
         } //console.log('flipped?',new_state.flipped,new_state.cards);
-        // todo: loop over all cards
-        // then animate flip based on flipped.indexOf(card.id) > -1
-        //for(var i=0; i<new_state.flipped.length; i++){
+        // animate flip based on flipped.indexOf(card.id) > -1
+        // TODO: there is something happening here where when the client flips the card, the server update takes a sec and causes a double-flip animation
+        // need to tweak this to account for that
 
 
         for (var i = 0; i < (new_state === null || new_state === void 0 ? void 0 : (_new_state$cards = new_state.cards) === null || _new_state$cards === void 0 ? void 0 : _new_state$cards.length); i++) {
@@ -17206,14 +17340,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }
 
         t.updatePlayerCursors();
-        t.updatePlayerHeads(); // todo: if player hands have changed size, run this
+        t.updatePlayerHeads();
+        /* (replacing with tweenCardsToZones)
+        // todo: if player hands have changed size, run this
         // this basically just handles animating matched cards off the table into the players hands
         // todo: need to animate other players cards into the OTHER players hand
-
-        if (JSON.stringify(new_state.player_hands) !== JSON.stringify(old_state.player_hands)) {
-          t.updateCardsInHand();
-        } //console.log('debugger state changed', new_state);
-
+        if(JSON.stringify(new_state.player_hands)!==JSON.stringify(old_state.player_hands)){
+            t.updateCardsInHand();
+        } */
+        //console.log('debugger state changed', new_state);
       },
       deep: true
     } // 'state.match_checks': {
@@ -17248,6 +17383,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
     closeModal: function closeModal() {
       this.show_modal = false;
+      this.show_login_modal = false;
+      this.show_name_modal = false;
+      this.show_pause_menu = false;
+      this.show_world_select_modal = false;
+      this.show_player_request_modal = false;
+      this.show_spectator_joined_modal = false;
+      this.show_game_in_progress_modal = false;
       t.client_ignore_clicks = false;
     },
     onNameUpdated: function onNameUpdated() {
@@ -17276,7 +17418,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this4 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
-        var _result$data, _this4$user_session, _this4$user_session$c, _this4$user_session2, _this4$user_session3, _this4$user, _this4$user$first_nam;
+        var _this4$user, _result$data, _this4$user_session, _this4$user_session$c, _this4$user_session2, _this4$user_session3, _this4$user2, _this4$user2$first_na;
 
         var result;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
@@ -17293,18 +17435,23 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 3:
                 _this4.user = _context2.sent;
+                t.server.send({
+                  type: 'CONNECT_AS_USER',
+                  user_id: _this4.user.id,
+                  name: (_this4$user = _this4.user) === null || _this4$user === void 0 ? void 0 : _this4$user.first_name
+                });
 
                 if (_this4.user) {
-                  _context2.next = 7;
+                  _context2.next = 8;
                   break;
                 }
 
                 _this4.show_login_loading = false;
                 return _context2.abrupt("return");
 
-              case 7:
+              case 8:
                 console.log('this user?', _this4.user);
-                _context2.next = 10;
+                _context2.next = 11;
                 return t.server.directus.items('Sessions').readByQuery({
                   limit: 1,
                   filter: {
@@ -17312,7 +17459,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   }
                 });
 
-              case 10:
+              case 11:
                 result = _context2.sent;
                 _this4.user_session = null; // reset
 
@@ -17323,7 +17470,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 console.log('servers user_session:', _this4.user_session); // if the user does not have a session, created one
 
                 if (_this4.user_session) {
-                  _context2.next = 18;
+                  _context2.next = 19;
                   break;
                 }
 
@@ -17335,7 +17482,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   current_game: 'f9222054-ea60-436f-9199-75b97781ec53' // food memory by default
 
                 };
-                _context2.next = 18;
+                _context2.next = 19;
                 return t.server.directus.items('Sessions').createOne({
                   user: {
                     id: _this4.user.id
@@ -17349,7 +17496,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   console.error('error creating user session on server', e);
                 });
 
-              case 18:
+              case 19:
                 _this4.world_selection = (_this4$user_session = _this4.user_session) === null || _this4$user_session === void 0 ? void 0 : (_this4$user_session$c = _this4$user_session.current_world) === null || _this4$user_session$c === void 0 ? void 0 : _this4$user_session$c.toString();
                 _this4.room_selection = (_this4$user_session2 = _this4.user_session) === null || _this4$user_session2 === void 0 ? void 0 : _this4$user_session2.current_room;
                 _this4.game_selection = (_this4$user_session3 = _this4.user_session) === null || _this4$user_session3 === void 0 ? void 0 : _this4$user_session3.current_game; // TODO: make game->room->world a single query
@@ -17364,7 +17511,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 _this4.show_login_modal = false;
 
-                if (!((_this4$user = _this4.user) !== null && _this4$user !== void 0 && (_this4$user$first_nam = _this4$user.first_name) !== null && _this4$user$first_nam !== void 0 && _this4$user$first_nam.length)) {
+                if (!((_this4$user2 = _this4.user) !== null && _this4$user2 !== void 0 && (_this4$user2$first_na = _this4$user2.first_name) !== null && _this4$user2$first_na !== void 0 && _this4$user2$first_na.length)) {
                   // give us a name!
                   _this4.show_name_modal = true;
                 } else {
@@ -17376,7 +17523,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   }
                 }
 
-              case 24:
+              case 25:
               case "end":
                 return _context2.stop();
             }
@@ -17547,6 +17694,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       })["catch"](function (err) {
         console.error(err);
       });
+    },
+    sendChatMessage: function sendChatMessage(message) {
+      t.server.send({
+        type: 'CHAT_MESSAGE',
+        message: message
+      });
+    },
+    openWorldSelectModal: function openWorldSelectModal() {
+      this.show_pause_menu = false;
+      this.show_world_select_modal = true;
     }
   },
   computed: {
@@ -18087,34 +18244,69 @@ var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 
 var _hoisted_15 = [_hoisted_14];
 var _hoisted_16 = {
-  key: 0
+  "class": "turn-indicator"
 };
 var _hoisted_17 = {
-  key: 1
+  key: 0,
+  "class": "my-turn"
 };
 var _hoisted_18 = {
+  key: 1,
+  "class": "not-my-turn"
+};
+var _hoisted_19 = {
+  "class": "scores-wrapper"
+};
+var _hoisted_20 = {
+  "class": "hit"
+};
+
+var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" / ");
+
+var _hoisted_22 = {
+  "class": "miss"
+};
+var _hoisted_23 = {
+  "class": "chat-box"
+};
+var _hoisted_24 = {
+  "class": "messages"
+};
+var _hoisted_25 = {
+  "class": "message-wrapper"
+};
+var _hoisted_26 = {
+  "class": "message-sender"
+};
+var _hoisted_27 = {
+  "class": "message-text"
+};
+var _hoisted_28 = {
+  "class": "chat-input"
+};
+var _hoisted_29 = {
   "class": "debug-video"
 };
 
-var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
+var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
   id: "sound_effects",
   src: "./public/sounds/flip.mp3"
 }, null, -1
 /* HOISTED */
 );
 
-var _hoisted_20 = {
+var _hoisted_31 = {
   id: "video",
   autoplay: "",
   playsinline: "",
   muted: ""
 };
-var _hoisted_21 = {
+var _hoisted_32 = {
   "class": "opponent_videos"
 };
-var _hoisted_22 = ["onClick", "muted", "data-client-id"];
+var _hoisted_33 = ["onClick", "muted", "data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state$client_, _$props$state;
+  var _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state$client_2, _$props$state7;
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     style: {
@@ -18147,9 +18339,54 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $props.disableVideo();
     }, ["prevent"]))
-  }, _hoisted_15)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), $props.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_16, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_20, null, 512
+  }, _hoisted_15)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [$props.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length), 1
+  /* TEXT */
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.round_number), 1
+  /* TEXT */
+  ), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)((_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.client_ids, function (id) {
+    var _$props$state$player_, _$props$state4, _$props$state4$player, _$props$state$player_2, _$props$state5, _$props$state5$player, _$props$state5$player2, _$props$state$player_3, _$props$state6, _$props$state6$player, _$props$state6$player2;
+
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+      "class": "scores",
+      key: id
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$player = _$props$state4.player_names) === null || _$props$state4$player === void 0 ? void 0 : _$props$state4$player[id]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'player') + ": ", 1
+    /* TEXT */
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
+    /* TEXT */
+    ), _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_3 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_3 !== void 0 ? _$props$state$player_3 : 0), 1
+    /* TEXT */
+    )]);
+  }), 128
+  /* KEYED_FRAGMENT */
+  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.chat_messages, function (message) {
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+      key: message.timestamp
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.nameForClientID(message.client_id)), 1
+    /* TEXT */
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.message), 1
+    /* TEXT */
+    )])]);
+  }), 128
+  /* KEYED_FRAGMENT */
+  ))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_28, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    placeholder: "Chat...",
+    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+      return $setup.chat_input = $event;
+    }),
+    onKeyup: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withKeys)(function ($event) {
+      return $options.sendChatMessage();
+    }, ["enter"]))
+  }, null, 544
+  /* HYDRATE_EVENTS, NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.chat_input]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "button",
+    onClick: _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.sendChatMessage && $options.sendChatMessage.apply($options, arguments);
+    }, ["prevent"]))
+  })])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_29, [_hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_31, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_ = (_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.client_ids) !== null && _$props$state$client_ !== void 0 ? _$props$state$client_ : []).filter(function (id) {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_2 = (_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.client_ids) !== null && _$props$state$client_2 !== void 0 ? _$props$state$client_2 : []).filter(function (id) {
     return id !== $props.state.my_client_id;
   }), function (client_id) {
     var _$setup$client_mute_s, _$setup$client_mute_s2;
@@ -18170,7 +18407,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "data-client-id": client_id
     }, null, 10
     /* CLASS, PROPS */
-    , _hoisted_22);
+    , _hoisted_33);
   }), 128
   /* KEYED_FRAGMENT */
   ))])])]);
@@ -18192,16 +18429,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "debug-inner"
-};
-var _hoisted_2 = {
-  "class": "hit"
+  "class": "debug"
 };
 
-var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" / ");
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  "aria-hidden": "true",
+  role: "img",
+  width: "1em",
+  height: "1em",
+  preserveAspectRatio: "xMidYMid meet",
+  viewBox: "0 0 512 512"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("rect", {
+  x: "0",
+  y: "0",
+  width: "512",
+  height: "512",
+  fill: "none",
+  stroke: "none"
+}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  fill: "currentColor",
+  d: "M495.9 166.6c3.3 8.6.5 18.3-6.3 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4c0 8.6-.6 17.1-1.7 25.4l43.3 39.4c6.8 6.3 9.6 16 6.3 24.6c-4.4 11.9-9.7 23.4-15.7 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.3c-6 7.1-15.7 9.6-24.5 6.8l-55.7-17.8c-13.4 10.3-29.1 18.9-44 25.5l-12.5 57.1c-2 9-9 15.4-18.2 17.8c-13.8 2.3-28 3.5-43.4 3.5c-13.6 0-27.8-1.2-41.6-3.5c-9.2-2.4-16.2-8.8-18.2-17.8l-12.5-57.1c-15.8-6.6-30.6-15.2-44-25.5l-55.66 17.8c-8.84 2.8-18.59.3-24.51-6.8c-8.11-9.9-15.51-20.3-22.11-31.3l-4.68-8.1c-6.07-10.9-11.35-22.4-15.78-34.3c-3.24-8.6-.51-18.3 6.35-24.6l43.26-39.4C64.57 273.1 64 264.6 64 256c0-8.6.57-17.1 1.67-25.4l-43.26-39.4c-6.86-6.3-9.59-15.9-6.35-24.6c4.43-11.9 9.72-23.4 15.78-34.3l4.67-8.1c6.61-11 14.01-21.4 22.12-31.25c5.92-7.15 15.67-9.63 24.51-6.81l55.66 17.76c13.4-10.34 28.2-18.94 44-25.47l12.5-57.1c2-9.08 9-16.29 18.2-17.82C227.3 1.201 241.5 0 256 0s28.7 1.201 42.5 3.51c9.2 1.53 16.2 8.74 18.2 17.82l12.5 57.1c14.9 6.53 30.6 15.13 44 25.47l55.7-17.76c8.8-2.82 18.5-.34 24.5 6.81c8.1 9.85 15.5 20.25 22.1 31.25l4.7 8.1c6 10.9 11.3 22.4 15.7 34.3zM256 336c44.2 0 80-35.8 80-80.9c0-43.3-35.8-80-80-80s-80 36.7-80 80c0 45.1 35.8 80.9 80 80.9z"
+})], -1
+/* HOISTED */
+);
 
+var _hoisted_3 = [_hoisted_2];
 var _hoisted_4 = {
-  "class": "miss"
+  key: 0,
+  "class": "debug-inner"
 };
 
 var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
@@ -18338,30 +18594,16 @@ var _hoisted_44 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 );
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state7, _$props$state$room_id, _$props$state8, _$props$state$game_id, _$props$state9, _$props$game, _$props$state$game_ho, _$props$state10, _$props$state$round_i, _$props$state11, _$props$round, _$props$state$player_4;
+  var _$props$state, _$props$state$room_id, _$props$state2, _$props$state$game_id, _$props$state3, _$props$game, _$props$state$game_ho, _$props$state4, _$props$state$round_i, _$props$state5, _$props$round, _$props$state$player_;
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length), 1
-  /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.round_number), 1
-  /* TEXT */
-  ), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)((_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.client_ids, function (id) {
-    var _$props$state$player_, _$props$state4, _$props$state4$player, _$props$state$player_2, _$props$state5, _$props$state5$player, _$props$state5$player2, _$props$state$player_3, _$props$state6, _$props$state6$player, _$props$state6$player2;
-
-    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-      "class": "scores",
-      key: id
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$player = _$props$state4.player_names) === null || _$props$state4$player === void 0 ? void 0 : _$props$state4$player[id]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'player') + ": ", 1
-    /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
-    /* TEXT */
-    ), _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_3 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_3 !== void 0 ? _$props$state$player_3 : 0), 1
-    /* TEXT */
-    )]);
-  }), 128
-  /* KEYED_FRAGMENT */
-  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" have to enable video or mic first before this option becomes available "), !$props.calling && !$props.show_end_call_button && ($props.video_enabled || !$props.mic_muted) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    "class": "debug-toggle",
+    onClick: _cache[0] || (_cache[0] = function ($event) {
+      return $setup.show_debug = !$setup.show_debug;
+    })
+  }, _hoisted_3), $setup.show_debug ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" have to enable video or mic first before this option becomes available "), !$props.calling && !$props.show_end_call_button && ($props.video_enabled || !$props.mic_muted) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
-    onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.startVideoChat && $props.startVideoChat.apply($props, arguments);
     }, ["prevent"])),
     style: {
@@ -18369,21 +18611,28 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
-    onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return _ctx.end_video_chat && _ctx.end_video_chat.apply(_ctx, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    onClick: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+  }, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[3] || (_cache[3] = function () {
+      return $options.toggleWireframe && $options.toggleWireframe.apply($options, arguments);
+    }),
+    style: {
+      "pointer-events": "all"
+    }
+  }, "Wireframe"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.resetCamera && $props.resetCamera.apply($props, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
   }, _hoisted_10), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.toggleCameraLock && $props.toggleCameraLock.apply($props, arguments);
     }, ["prevent"])),
     style: {
@@ -18392,20 +18641,20 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.camera_locked ? 'Unlock' : 'Lock') + " Camera", 1
   /* TEXT */
   )]), _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[4] || (_cache[4] = function ($event) {
+    onClick: _cache[6] || (_cache[6] = function ($event) {
       return _ctx.$emit('toggleShowDebugInfo');
     })
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.show_debug_info ? 'Hide' : 'Show Debug Info'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.my_client_id), 1
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.my_client_id), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state8 = $props.state) === null || _$props$state8 === void 0 ? void 0 : _$props$state8.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_21, [_hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state9 = $props.state) === null || _$props$state9 === void 0 ? void 0 : _$props$state9.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_21, [_hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
   /* TEXT */
   ), _hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$game = $props.game) !== null && _$props$game !== void 0 && _$props$game.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_26, [_hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state10 = $props.state) === null || _$props$state10 === void 0 ? void 0 : _$props$state10.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_26, [_hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : _$props$state4.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
   /* TEXT */
   ), _hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
@@ -18413,7 +18662,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, "You're " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.im_game_host ? '' : 'NOT') + " the game host!", 5
   /* TEXT, STYLE */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_30, [_hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state11 = $props.state) === null || _$props$state11 === void 0 ? void 0 : _$props$state11.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_30, [_hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : _$props$state5.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
   /* TEXT */
   ), _hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$round = $props.round) !== null && _$props$round !== void 0 && _$props$round.started ? 'started' : 'not-started'), 1
   /* TEXT */
@@ -18427,26 +18676,26 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, "It's " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.its_my_turn ? '' : 'NOT') + " Your Turn!", 5
   /* TEXT, STYLE */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_4 = $props.state.player_type) !== null && _$props$state$player_4 !== void 0 ? _$props$state$player_4 : 'connecting'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = $props.state.player_type) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'connecting'), 1
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_38, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
-    var _$props$state$player_5, _$props$state$player_6, _$props$state12, _$props$state12$playe;
+    var _$props$state$player_2, _$props$state$player_3, _$props$state6, _$props$state6$player;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
       key: player_id
-    }, [!((_$props$state$player_5 = $props.state.player_hands) !== null && _$props$state$player_5 !== void 0 && (_$props$state$player_6 = _$props$state$player_5[player_id]) !== null && _$props$state$player_6 !== void 0 && _$props$state$player_6.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_39, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state12 = $props.state) === null || _$props$state12 === void 0 ? void 0 : (_$props$state12$playe = _$props$state12.player_hands) === null || _$props$state12$playe === void 0 ? void 0 : _$props$state12$playe[player_id])), 1
+    }, [!((_$props$state$player_2 = $props.state.player_hands) !== null && _$props$state$player_2 !== void 0 && (_$props$state$player_3 = _$props$state$player_2[player_id]) !== null && _$props$state$player_3 !== void 0 && _$props$state$player_3.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_39, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_hands) === null || _$props$state6$player === void 0 ? void 0 : _$props$state6$player[player_id])), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
   ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "Flipped: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.flipped)), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                <li v-if=\"!state?.room_id\">\n                    <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                </li>\n\n                <li v-if=\"state?.room_id && !state?.game_id\"\n                    @click.prevent=\"new_game\">\n                    <button class=\"new-game\">New Game</button>\n                </li> "), $props.im_game_host ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n                    <li v-if=\"!state?.room_id\">\n                        <button class=\"new-room\" @click.prevent=\"new_room\">New Room</button>\n                    </li>\n\n                    <li v-if=\"state?.room_id && !state?.game_id\"\n                        @click.prevent=\"new_game\">\n                        <button class=\"new-game\">New Game</button>\n                    </li> "), $props.im_game_host ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
     key: 0,
-    onClick: _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onClick: _cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.restartGame && $props.restartGame.apply($props, arguments);
     }, ["prevent"]))
-  }, _hoisted_41)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                    @click.prevent=\"start_game\">\n                    <button class=\"start-game\">Start Game</button>\n                </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.messages, function (message, i) {
+  }, _hoisted_41)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                        @click.prevent=\"start_game\">\n                        <button class=\"start-game\">Start Game</button>\n                    </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.messages, function (message, i) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "message",
       key: i
@@ -18457,7 +18706,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* KEYED_FRAGMENT */
   ))])])]), _hoisted_44], 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.show_debug_info]])]);
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.show_debug_info]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
 }
 
 /***/ }),
@@ -18485,6 +18734,66 @@ var _hoisted_2 = {
 var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
   "class": "mb-4"
 }, "Pause Menu", -1
+/* HOISTED */
+);
+
+var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", null, "Update Game Settings", -1
+/* HOISTED */
+);
+
+var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", null, "Restart Game", -1
+/* HOISTED */
+);
+
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" game settings "), _hoisted_4, _hoisted_5, _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[0] || (_cache[0] = function ($event) {
+      return _ctx.$emit('openWorldSelectModal');
+    })
+  }, "Switch World/Room/Game"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[1] || (_cache[1] = function ($event) {
+      return _ctx.$emit('closeModal');
+    })
+  }, "Close"), _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[2] || (_cache[2] = function ($event) {
+      return _ctx.$emit('logout');
+    })
+  }, "Logout")])]);
+}
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=template&id=72f16de2":
+/*!********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=template&id=72f16de2 ***!
+  \********************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+var _hoisted_1 = {
+  "class": "world-room-game-modal modal"
+};
+var _hoisted_2 = {
+  "class": "modal-content"
+};
+
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  "class": "mb-4"
+}, "Where do you want to go?", -1
 /* HOISTED */
 );
 
@@ -18709,7 +19018,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  id: "debug"
+  id: "app"
 };
 var _hoisted_2 = {
   key: 0,
@@ -18719,7 +19028,7 @@ var _hoisted_3 = {
   "class": "modal-inner"
 };
 var _hoisted_4 = {
-  key: 3,
+  key: 4,
   "class": "game-in-progress-modal modal"
 };
 
@@ -18733,7 +19042,7 @@ var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 
 var _hoisted_6 = [_hoisted_5];
 var _hoisted_7 = {
-  key: 4,
+  key: 5,
   "class": "player-request-modal modal"
 };
 
@@ -18747,7 +19056,7 @@ var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 
 var _hoisted_9 = [_hoisted_8];
 var _hoisted_10 = {
-  key: 5,
+  key: 6,
   "class": "spectator-joined-modal modal"
 };
 
@@ -18767,12 +19076,17 @@ var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
+var _hoisted_14 = {
+  id: "debug"
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_LoginModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("LoginModal");
 
   var _component_NameModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("NameModal");
 
   var _component_PauseMenuModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("PauseMenuModal");
+
+  var _component_WorldSelectModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("WorldSelectModal");
 
   var _component_DebugOverlay = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("DebugOverlay");
 
@@ -18794,6 +19108,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   , ["onNameUpdated"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_pause_menu ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_PauseMenuModal, {
     key: 2,
     submitModal: $options.submitModal,
+    gameTypeName: $options.gameTypeName,
+    isHostOfSelectedGame: $options.isHostOfSelectedGame,
+    onOpenWorldSelectModal: $options.openWorldSelectModal,
+    onCloseModal: $options.closeModal
+  }, null, 8
+  /* PROPS */
+  , ["submitModal", "gameTypeName", "isHostOfSelectedGame", "onOpenWorldSelectModal", "onCloseModal"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_world_select_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_WorldSelectModal, {
+    key: 3,
     worlds: $setup.worlds,
     rooms: $setup.rooms,
     games: $setup.games,
@@ -18805,10 +19127,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onRoomSelectionChanged: $options.getGamesForRoom,
     onWorldSelectionChanged: $options.getRoomsForWorld,
     onGameSelectionChanged: $options.onGameSelectionChanged,
-    isHostOfSelectedGame: $options.isHostOfSelectedGame
+    isHostOfSelectedGame: $options.isHostOfSelectedGame,
+    onCloseModal: $options.closeModal
   }, null, 8
   /* PROPS */
-  , ["submitModal", "worlds", "rooms", "games", "game_types", "gameTypeName", "world_selection", "room_selection", "game_selection", "onRoomSelectionChanged", "onWorldSelectionChanged", "onGameSelectionChanged", "isHostOfSelectedGame"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, _hoisted_9)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_10, _hoisted_12)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _hoisted_13])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DebugOverlay, {
+  , ["worlds", "rooms", "games", "game_types", "gameTypeName", "world_selection", "room_selection", "game_selection", "onRoomSelectionChanged", "onWorldSelectionChanged", "onGameSelectionChanged", "isHostOfSelectedGame", "onCloseModal"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_game_in_progress_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_player_request_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, _hoisted_9)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $setup.show_spectator_joined_modal ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_10, _hoisted_12)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _hoisted_13])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DebugOverlay, {
     calling: $setup.calling,
     state: $props.state,
     game: $options.game,
@@ -18829,7 +19152,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     restartGame: $options.restartGame
   }, null, 8
   /* PROPS */
-  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_end_call_button", "show_debug_info", "onToggleShowDebugInfo", "mic_muted", "video_enabled", "video_muted", "startVideoChat", "camera_locked", "resetCamera", "toggleCameraLock", "restartGame"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
+  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_end_call_button", "show_debug_info", "onToggleShowDebugInfo", "mic_muted", "video_enabled", "video_muted", "startVideoChat", "camera_locked", "resetCamera", "toggleCameraLock", "restartGame"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
     ref: "AVHud",
     state: $props.state,
     its_my_turn: $options.its_my_turn,
@@ -18840,10 +19163,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     enableVideo: $options.enableVideo,
     disableVideo: $options.disableVideo,
     openPauseMenu: $options.openPauseMenu,
-    toggleMute: $options.toggleMute
+    toggleMute: $options.toggleMute,
+    onSendChatMessage: $options.sendChatMessage,
+    chat_messages: $setup.chat_messages
   }, null, 8
   /* PROPS */
-  , ["state", "its_my_turn", "video_enabled", "video_muted", "mic_muted", "audio_muted", "enableVideo", "disableVideo", "openPauseMenu", "toggleMute"])]);
+  , ["state", "its_my_turn", "video_enabled", "video_muted", "mic_muted", "audio_muted", "enableVideo", "disableVideo", "openPauseMenu", "toggleMute", "onSendChatMessage", "chat_messages"])]);
 }
 
 /***/ }),
@@ -19086,7 +19411,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 103px;\n  right: 20px;\n}\n#icon-video-enable svg {\n  width: 35px;\n  cursor: pointer;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n}\n.modal-wrapper {\n  width: 100%;\n}\n.modal-wrapper .modal-inner {\n  width: 320px;\n  margin: 0 auto;\n  position: relative;\n}\n.modal {\n  position: relative;\n  pointer-events: all;\n  top: 60px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#debug {\n  background: transparent;\n  color: #fff;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n#debug .details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n#debug .bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n#debug .scores .hit {\n  color: green;\n}\n#debug .scores .miss {\n  color: red;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n  pointer-events: all;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n#icon-video-enable, #icon-video-disable {\n  position: absolute;\n  bottom: 103px;\n  left: 90px;\n}\n#icon-video-enable svg {\n  width: 35px;\n  cursor: pointer;\n}\n#icon-video-disable {\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n  margin-top: 100px;\n}\n.modal-wrapper {\n  width: 100%;\n}\n.modal-wrapper .modal-inner {\n  width: 320px;\n  margin: 0 auto;\n  position: relative;\n}\n.modal {\n  position: relative;\n  pointer-events: all;\n  top: 60px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#app {\n  color: #fff;\n}\n#debug {\n  background: transparent;\n  position: fixed;\n  top: 0;\n  left: 0;\n  bottom: auto;\n  width: auto;\n  right: auto;\n  height: 100vh;\n}\n.details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n.bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n  pointer-events: all;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}\n.turn-indicator {\n  font-weight: bold;\n  font-size: 24px;\n  text-align: center;\n  position: absolute;\n  width: 300px;\n  margin: 0 auto;\n  top: 10px;\n  left: 50%;\n  margin-left: -150px;\n}\n.turn-indicator .my-turn {\n  color: green;\n}\n.turn-indicator .not-my-turn {\n  color: red;\n}\n.debug-toggle {\n  pointer-events: all;\n}\n.hud {\n  width: 100%;\n  height: 100vh;\n  pointer-events: none;\n  position: absolute;\n  display: block;\n}\n.scores-wrapper {\n  width: auto;\n  top: 30px;\n  position: absolute;\n  left: 10px;\n}\n.scores .hit {\n  color: green;\n}\n.scores .miss {\n  color: red;\n}\n.chat-box {\n  position: absolute;\n  right: 30px;\n  bottom: 100px;\n  pointer-events: all;\n  width: 300px;\n  max-height: 50vh;\n}\n.messages {\n  overflow-y: auto;\n}\n.message-wrapper {\n  background: rgba(0, 0, 0, 0.5);\n  border-radius: 10px;\n  padding: 10px;\n  margin: 10px;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -19791,6 +20116,34 @@ if (false) {}
 
 /***/ }),
 
+/***/ "./client/components/WorldSelectModal.vue":
+/*!************************************************!*\
+  !*** ./client/components/WorldSelectModal.vue ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _WorldSelectModal_vue_vue_type_template_id_72f16de2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorldSelectModal.vue?vue&type=template&id=72f16de2 */ "./client/components/WorldSelectModal.vue?vue&type=template&id=72f16de2");
+/* harmony import */ var _WorldSelectModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorldSelectModal.vue?vue&type=script&lang=js */ "./client/components/WorldSelectModal.vue?vue&type=script&lang=js");
+/* harmony import */ var _root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+
+
+
+
+;
+const __exports__ = /*#__PURE__*/(0,_root_LinuxBindMounted_cardbox_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_WorldSelectModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_WorldSelectModal_vue_vue_type_template_id_72f16de2__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"client/components/WorldSelectModal.vue"]])
+/* hot reload */
+if (false) {}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__exports__);
+
+/***/ }),
+
 /***/ "./client/components/app.vue":
 /*!***********************************!*\
   !*** ./client/components/app.vue ***!
@@ -19926,6 +20279,22 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./client/components/WorldSelectModal.vue?vue&type=script&lang=js":
+/*!************************************************************************!*\
+  !*** ./client/components/WorldSelectModal.vue?vue&type=script&lang=js ***!
+  \************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_WorldSelectModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_WorldSelectModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./WorldSelectModal.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=script&lang=js");
+ 
+
+/***/ }),
+
 /***/ "./client/components/app.vue?vue&type=script&lang=js":
 /*!***********************************************************!*\
   !*** ./client/components/app.vue?vue&type=script&lang=js ***!
@@ -20018,6 +20387,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "render": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_template_id_4d7d1f3b__WEBPACK_IMPORTED_MODULE_0__.render)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_PauseMenuModal_vue_vue_type_template_id_4d7d1f3b__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./PauseMenuModal.vue?vue&type=template&id=4d7d1f3b */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/PauseMenuModal.vue?vue&type=template&id=4d7d1f3b");
+
+
+/***/ }),
+
+/***/ "./client/components/WorldSelectModal.vue?vue&type=template&id=72f16de2":
+/*!******************************************************************************!*\
+  !*** ./client/components/WorldSelectModal.vue?vue&type=template&id=72f16de2 ***!
+  \******************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_WorldSelectModal_vue_vue_type_template_id_72f16de2__WEBPACK_IMPORTED_MODULE_0__.render)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_WorldSelectModal_vue_vue_type_template_id_72f16de2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./WorldSelectModal.vue?vue&type=template&id=72f16de2 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./client/components/WorldSelectModal.vue?vue&type=template&id=72f16de2");
 
 
 /***/ }),
@@ -27136,21 +27521,21 @@ function delay(_x) {
 }
 
 function _delay() {
-  _delay = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10(t) {
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
+  _delay = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9(t) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
-            return _context10.abrupt("return", new Promise(function (resolve) {
+            return _context9.abrupt("return", new Promise(function (resolve) {
               return setTimeout(resolve, t);
             }));
 
           case 1:
           case "end":
-            return _context10.stop();
+            return _context9.stop();
         }
       }
-    }, _callee10);
+    }, _callee9);
   }));
   return _delay.apply(this, arguments);
 }
@@ -27228,6 +27613,10 @@ var SocketConnection = /*#__PURE__*/function () {
 
 
       switch ((_decoded5 = decoded) === null || _decoded5 === void 0 ? void 0 : _decoded5.type) {
+        case 'CHAT_MESSAGE':
+          t.root.chat_messages.push(decoded);
+          break;
+
         case 'mediaOffer':
           t.peers.onMediaOffer(decoded);
           break;
@@ -27333,6 +27722,23 @@ var Player = /*#__PURE__*/function () {
 
     this.pointer = new PlayerPointer(player_id);
     this.head = new PlayerHead(player_id);
+    this.hand = new THREE.Group();
+    this.hand.name = 'hand_' + player_id;
+    t.scene.add(this.hand);
+    var handZone = {
+      group: this.hand,
+      name: 'hand_' + player_id
+    };
+    Object.defineProperty(handZone, 'origin', {
+      get: function get() {
+        return this.group.position;
+      }
+    });
+    this.hand.position.x = 0;
+    this.hand.position.y = 5;
+    this.hand.position.z = -9;
+    this.hand.rotation.z = THREE.MathUtils.degToRad(180);
+    t.game.layout.named_zones['hand_' + player_id] = handZone;
   }
 
   _createClass(Player, [{
@@ -27458,12 +27864,20 @@ var Tabletop = /*#__PURE__*/function () {
 
     this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
-    this.deckgroup = new THREE.Group();
+    this.deckgroup = new THREE.Group(); // Object.defineProperty(this.deckgroup.userData,'cardOrigin',{
+    //   get:function(){
+    //     // cards should be offset by their index within the deck
+    //   }
+    // });
+
+    this.deckgroup.name = "DeckGroup";
+    this.deckgroup.position.x = 5;
     this.deckgroup.position.y = 5;
     this.deckgroup.position.z = -5;
     scene.add(this.deckgroup); // playfield cards (intersection group)
 
     this.zonegroup = new THREE.Group();
+    this.zonegroup.name = 'ZoneGroup';
     this.zonegroup.position.y = -0.8;
     scene.add(this.zonegroup);
   }
@@ -27473,6 +27887,11 @@ var Tabletop = /*#__PURE__*/function () {
     value: // enable/disable the debug inspector
     function toggleDebugInspector() {
       this.debug_inspect_objects = !this.debug_inspect_objects;
+    }
+  }, {
+    key: "getMyPlayer",
+    value: function getMyPlayer() {
+      return this.players[t.app.state.my_client_id];
     }
   }, {
     key: "getCameraSet",
@@ -27595,6 +28014,7 @@ var Tabletop = /*#__PURE__*/function () {
             t.stream = stream;
             t.video.srcObject = stream;
             t.video.play();
+            t.players[t.app.state.my_client_id].head.assignVideoToHead(t.video);
             resolve();
           })["catch"](function (error) {
             console.error('Unable to access the camera/webcam.', error);
@@ -27605,51 +28025,47 @@ var Tabletop = /*#__PURE__*/function () {
           reject();
         }
       });
-    } // animate the cards within the hand to maintain spacing
+    }
+    /*
+    // animate the cards within the hand to maintain spacing
     // also handles animating cards from playfield to hand after a match is validated by the server
-
-  }, {
-    key: "updateCardsInHand",
-    value: function updateCardsInHand() {
+    updateCardsInHand(){
       //camera.attach(t.cards[i_card_a].mesh)
       //camera.attach(t.cards[i_card_b].mesh)
-      //   cards[i_card_a].position.set(0,-.5,-1)
-      //   cards[i_card_a].scale.set(.1,.1,.1)
-      //   cards[i_card_a].rotation.set(1,Math.PI,Math.PI,'XYZ')
-      //   cards[i_card_b].scale.set(.1,.1,.1)
-      //   cards[i_card_b].position.set(-.1,-.5,-1)
-      //   cards[i_card_b].rotation.set(1,Math.PI,Math.PI,'XYZ')
+     //   cards[i_card_a].position.set(0,-.5,-1)
+    //   cards[i_card_a].scale.set(.1,.1,.1)
+    //   cards[i_card_a].rotation.set(1,Math.PI,Math.PI,'XYZ')
+     //   cards[i_card_b].scale.set(.1,.1,.1)
+    //   cards[i_card_b].position.set(-.1,-.5,-1)
+    //   cards[i_card_b].rotation.set(1,Math.PI,Math.PI,'XYZ')
       //const current_player = t.game.current_player;
-      for (var i in t.app.state.client_ids) {
-        var _t$app$state$player_h, _t$app$state, _t$app$state$player_h2;
-
-        var player_id = t.app.state.client_ids[i];
-        console.log('updating hands', player_id); // let player = t.players[player_id];
-
-        var hand = (_t$app$state$player_h = (_t$app$state = t.app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$player_h2 = _t$app$state.player_hands) === null || _t$app$state$player_h2 === void 0 ? void 0 : _t$app$state$player_h2[player_id]) !== null && _t$app$state$player_h !== void 0 ? _t$app$state$player_h : [];
-        var matches_count = hand.length / 2; // console.log('matches_count?',matches_count);
-
-        for (var a = 0; (_ref = a < (hand === null || hand === void 0 ? void 0 : hand.length)) !== null && _ref !== void 0 ? _ref : 0; a++) {
-          var _ref;
-
-          var i_card = hand[a];
-          var card = t.cards[i_card];
+      for(let i in t.app.state.client_ids){
+        let player_id = t.app.state.client_ids[i];
+        console.log('updating hands',player_id);
+        // let player = t.players[player_id];
+        const hand = t.app.state?.player_hands?.[player_id] ?? [];
+        let matches_count = hand.length/2;
+        // console.log('matches_count?',matches_count);
+        for(let a = 0; a<hand?.length ?? 0; a++){
+          let i_card = hand[a];
+          let card = t.cards[i_card];
           camera.attach(card.mesh); // todo: only run this once (if parent isnt already camera)
-
-          var updateTo = player_id === t.app.state.my_client_id ? this.getUpdateToPlayersHand(player_id, a) : this.getUpdateToOpponentsHand(player_id, a);
-          console.log(updateTo); // TODO: cancel any existing tween
+            let updateTo = player_id === t.app.state.my_client_id
+            ? this.getUpdateToPlayersHand(player_id,a)
+            : this.getUpdateToOpponentsHand(player_id,a);
+          console.log(updateTo);
+          // TODO: cancel any existing tween
           // TODO: prevent tweens from piling up
-
-          if (!card.tweenedToHand) {
+          if(!card.tweenedToHand){
             card.tweenedToHand = true;
-            card.current_tween = card.tweenTo(updateTo, {
-              duration: 300
-            });
+            card.current_tween = card.tweenTo(updateTo,{duration:300})
           }
         }
-      } // TODO: animate cards that are in OTHER players hand...
-
+      }
+       // TODO: animate cards that are in OTHER players hand...
     }
+    */
+
   }, {
     key: "updatePlayerCursors",
     value: function updatePlayerCursors() {
@@ -27664,9 +28080,9 @@ var Tabletop = /*#__PURE__*/function () {
       }
 
       for (var b in t.players) {
-        var _t$app, _t$app$state2, _t$app$state2$client_;
+        var _t$app, _t$app$state, _t$app$state$client_i;
 
-        if (((_t$app = t.app) === null || _t$app === void 0 ? void 0 : (_t$app$state2 = _t$app.state) === null || _t$app$state2 === void 0 ? void 0 : (_t$app$state2$client_ = _t$app$state2.client_ids) === null || _t$app$state2$client_ === void 0 ? void 0 : _t$app$state2$client_.indexOf(b)) === -1) {
+        if (((_t$app = t.app) === null || _t$app === void 0 ? void 0 : (_t$app$state = _t$app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$client_i = _t$app$state.client_ids) === null || _t$app$state$client_i === void 0 ? void 0 : _t$app$state$client_i.indexOf(b)) === -1) {
           t.players[b].destroy();
           delete t.players[b];
         }
@@ -27733,9 +28149,9 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "getUpdateToPlayersHand",
     value: function getUpdateToPlayersHand(player_id, a) {
-      var _t$app$state$player_h3, _t$app$state3, _t$app$state3$player_;
+      var _t$app$state$player_h, _t$app$state2, _t$app$state2$player_;
 
-      var hand = (_t$app$state$player_h3 = (_t$app$state3 = t.app.state) === null || _t$app$state3 === void 0 ? void 0 : (_t$app$state3$player_ = _t$app$state3.player_hands) === null || _t$app$state3$player_ === void 0 ? void 0 : _t$app$state3$player_[player_id]) !== null && _t$app$state$player_h3 !== void 0 ? _t$app$state$player_h3 : [];
+      var hand = (_t$app$state$player_h = (_t$app$state2 = t.app.state) === null || _t$app$state2 === void 0 ? void 0 : (_t$app$state2$player_ = _t$app$state2.player_hands) === null || _t$app$state2$player_ === void 0 ? void 0 : _t$app$state2$player_[player_id]) !== null && _t$app$state$player_h !== void 0 ? _t$app$state$player_h : [];
       var matches_count = hand.length / 2;
       var even = a % 2 == 0;
       var lerp_max = .07 * matches_count;
@@ -27762,10 +28178,10 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "getUpdateToOpponentsHand",
     value: function getUpdateToOpponentsHand(player_id, a) {
-      var _t$app$state$player_h4, _t$app$state4, _t$app$state4$player_;
+      var _t$app$state$player_h2, _t$app$state3, _t$app$state3$player_;
 
       // let player = t.players[player_id];
-      var hand = (_t$app$state$player_h4 = (_t$app$state4 = t.app.state) === null || _t$app$state4 === void 0 ? void 0 : (_t$app$state4$player_ = _t$app$state4.player_hands) === null || _t$app$state4$player_ === void 0 ? void 0 : _t$app$state4$player_[player_id]) !== null && _t$app$state$player_h4 !== void 0 ? _t$app$state$player_h4 : [];
+      var hand = (_t$app$state$player_h2 = (_t$app$state3 = t.app.state) === null || _t$app$state3 === void 0 ? void 0 : (_t$app$state3$player_ = _t$app$state3.player_hands) === null || _t$app$state3$player_ === void 0 ? void 0 : _t$app$state3$player_[player_id]) !== null && _t$app$state$player_h2 !== void 0 ? _t$app$state$player_h2 : [];
       var matches_count = hand.length / 2;
       var even = a % 2 == 0;
       var lerp_max = .07 * matches_count;
@@ -27798,6 +28214,14 @@ var Tabletop = /*#__PURE__*/function () {
     key: "cards",
     get: function get() {
       return this.deck.cards;
+    } // debugging thing for host only
+
+  }, {
+    key: "returnCardsToDeck",
+    value: function returnCardsToDeck() {
+      t.server.send({
+        type: 'RETURN_CARDS_TO_DECK'
+      });
     }
   }]);
 
@@ -27818,16 +28242,16 @@ var TweenableMesh = /*#__PURE__*/function () {
   _createClass(TweenableMesh, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(destination, _ref2) {
+      var _tweenTo = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee3(destination, _ref) {
         var _this$mesh, _this$mesh$position, _destination$pos_x, _this$mesh2, _this$mesh2$position, _destination$pos_y, _this$mesh3, _this$mesh3$position, _destination$pos_z, _this$mesh4, _this$mesh4$position;
 
-        var _ref2$duration, duration, _mesh, magnitude, tweenEnd;
+        var _ref$duration, duration, _mesh, magnitude, tweenEnd;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                _ref2$duration = _ref2.duration, duration = _ref2$duration === void 0 ? 1000 : _ref2$duration;
+                _ref$duration = _ref.duration, duration = _ref$duration === void 0 ? 1000 : _ref$duration;
                 // console.log('tweenTo',destination);
                 this.destination = destination; // todo: accept option to stop,finish,queue tweens
 
@@ -27938,9 +28362,9 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
   _createClass(PlayerHead, [{
     key: "player_is_me",
     get: function get() {
-      var _t$app$state5;
+      var _t$app$state4;
 
-      return this.player_id === ((_t$app$state5 = t.app.state) === null || _t$app$state5 === void 0 ? void 0 : _t$app$state5.my_client_id);
+      return this.player_id === ((_t$app$state4 = t.app.state) === null || _t$app$state4 === void 0 ? void 0 : _t$app$state4.my_client_id);
     }
   }, {
     key: "setupTexturesAndMaterials",
@@ -27951,6 +28375,10 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
   }, {
     key: "assignVideoToHead",
     value: function assignVideoToHead(video) {
+      // video settings
+      var settings = video.srcObject.getVideoTracks()[0].getSettings();
+      var ar = settings.width / settings.height;
+      this.mesh.scale.set(ar, 1, 1);
       this.video_texture = new THREE.VideoTexture(video); // webcam stream
 
       this.video_texture.format = THREE.RGBAFormat;
@@ -27959,8 +28387,10 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
         // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
         // wireframe: true,
         // transparent: this.player_is_me ? true : false,
-        // opacity: this.player_is_me ? 0.0 : 1.0,
-        map: this.video_texture
+        opacity: this.player_is_me ? 0.0 : 1.0,
+        transparent: this.player_is_me ? true : false,
+        map: this.video_texture,
+        side: THREE.DoubleSide
       });
       this.mesh.material = this.video_material;
     }
@@ -27968,14 +28398,14 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
     key: "setupMesh",
     value: function setupMesh() {
       this.mesh = new THREE.Mesh( // new THREE.SphereGeometry(4.0,8,8),
-      new THREE.PlaneGeometry(16, 16), new THREE.MeshBasicMaterial({
+      new THREE.PlaneGeometry(16, 16), new THREE.MeshBasicMaterial(_defineProperty({
         color: 0x000000,
         // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
         // wireframe: true,
+        side: THREE.DoubleSide,
         transparent: false,
-        opacity: 1.0 // map: this.video_texture,
-
-      }));
+        opacity: this.player_is_me ? 0.0 : 1.0
+      }, "transparent", this.player_is_me ? true : false)));
       this.mesh.lookAt(camera.position); // this.mesh.scale.setScalar(.5)
 
       this.mesh.position.setScalar(0);
@@ -27986,6 +28416,12 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
         // let pos = new Vector3();
         // camera.getWorldPosition(pos);
         headUpdateFN(camera.position);
+        this.mesh.position.y = 17;
+        this.mesh.position.x = 0;
+        this.mesh.position.z = -15;
+        this.mesh.rotation.x = 0;
+        this.mesh.rotation.y = THREE.MathUtils.degToRad(180);
+        this.mesh.rotation.z = THREE.MathUtils.degToRad(0);
       } else {// this.mesh.position.set(camera.position);
         // this.mesh.position.x = camera.position.x * -1;
         // this.mesh.position.y = camera.position.y;
@@ -28010,27 +28446,27 @@ var PlayerPointer = /*#__PURE__*/function () {
     console.warn('new player pointer');
     scene.add(this.mesh);
     this.updateInterval = setInterval(function () {
-      var _t$app$state6;
+      var _t$app$state5;
 
       _this2.mesh.rotation.y -= .01; // todo: call this only on host change
 
-      _this2.mesh.material.color.setHex(_this2.player_id === ((_t$app$state6 = t.app.state) === null || _t$app$state6 === void 0 ? void 0 : _t$app$state6.player_turn) ? 0x0000ff : 0xff0000);
+      _this2.mesh.material.color.setHex(_this2.player_id === ((_t$app$state5 = t.app.state) === null || _t$app$state5 === void 0 ? void 0 : _t$app$state5.player_turn) ? 0x0000ff : 0xff0000);
     }, 16);
   }
 
   _createClass(PlayerPointer, [{
     key: "tweenTo",
     value: function () {
-      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(destination, _ref3) {
+      var _tweenTo2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee4(destination, _ref2) {
         var _this$mesh5, _this$mesh5$position, _destination$pos_x2, _this$mesh6, _this$mesh6$position, _destination$pos_y2, _this$mesh7, _this$mesh7$position, _destination$pos_z2, _this$mesh8, _this$mesh8$position;
 
-        var _ref3$duration, duration, _mesh, magnitude, tweenEnd;
+        var _ref2$duration, duration, _mesh, magnitude, tweenEnd;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                _ref3$duration = _ref3.duration, duration = _ref3$duration === void 0 ? 1000 : _ref3$duration;
+                _ref2$duration = _ref2.duration, duration = _ref2$duration === void 0 ? 1000 : _ref2$duration;
                 this.destination = destination;
 
                 if (!this.tweening) {
@@ -28111,10 +28547,10 @@ var PlayerPointer = /*#__PURE__*/function () {
   }, {
     key: "setupMesh",
     value: function setupMesh() {
-      var _t$app$state7;
+      var _t$app$state6;
 
       this.mesh = new THREE.Mesh(new THREE.SphereGeometry(.5, 4, 4), new THREE.MeshBasicMaterial({
-        color: this.player_id === ((_t$app$state7 = t.app.state) === null || _t$app$state7 === void 0 ? void 0 : _t$app$state7.game_host) ? 0x0000ff : 0xff0000,
+        color: this.player_id === ((_t$app$state6 = t.app.state) === null || _t$app$state6 === void 0 ? void 0 : _t$app$state6.game_host) ? 0x0000ff : 0xff0000,
         wireframe: true,
         transparent: true,
         opacity: 0.5
@@ -28205,13 +28641,13 @@ var Card = /*#__PURE__*/function () {
       this.faceUpMaterial = new THREE.MeshBasicMaterial({
         color: colorDark,
         map: this.faceUpTexture,
-        shininess: 40,
+        // shininess: 40,
         side: THREE.FrontSide
       });
       this.faceDownMaterial = new THREE.MeshBasicMaterial({
         color: colorDark,
         map: this.faceDownTexture,
-        shininess: 40,
+        // shininess: 40,
         side: THREE.FrontSide
       });
     } // used to move a card from a deck to a zone or a player hand
@@ -28348,10 +28784,12 @@ var Deck = /*#__PURE__*/function () {
     this.available_cards_history = [];
     this.card_types = ['APPLE', 'ORANGE', 'LEMON', 'PEAR', 'BLUEBERRY', 'GRAPES', 'RASPBERRY', 'STRAWBERRY'];
 
-    for (var i = 0; (_ref4 = i < (options === null || options === void 0 ? void 0 : options.card_count)) !== null && _ref4 !== void 0 ? _ref4 : 52; i++) {
-      var _ref4;
+    for (var i = 0; (_ref3 = i < (options === null || options === void 0 ? void 0 : options.card_count)) !== null && _ref3 !== void 0 ? _ref3 : 52; i++) {
+      var _ref3;
 
-      this.cards.push(new Card(i, this.card_types[i % 2 === 0 ? i / 2 : (i - 1) / 2]));
+      var new_card = new Card(i, this.card_types[i % 2 === 0 ? i / 2 : (i - 1) / 2]);
+      this.cards.push(new_card);
+      t.deckgroup.add(new_card.mesh);
       this.available_cards.push(i);
     }
   } // NOTE: server drives shuffling now...
@@ -28468,34 +28906,139 @@ var Deck = /*#__PURE__*/function () {
   //       }
   //     }
   // }
+  // async tweenCardsToDeck(){
+  //   for(let i in t.cards){
+  //     let card = t.cards[i];
+  //     if(card.mesh){
+  //       t.deckgroup.attach(card.mesh);
+  //       card?.tweenTo({
+  //         pos_x: t.deckgroup.position.x,
+  //         pos_y: t.deckgroup.position.y + (i*0.025),
+  //         pos_z: t.deckgroup.position.z
+  //       },{
+  //         duration: 1000,
+  //       });
+  //     }else{
+  //       // console.error('failed to tween card to deck',i)
+  //     }
+  //   }
+  // }
+  // changing this to loop thru cards, rather than zones
+  // todo: how to handle delaying the animation of the cards moving from the deck to the playfield during "dealing?"
 
 
   _createClass(Deck, [{
-    key: "tweenCardsToDeck",
+    key: "tweenCardsToZones",
     value: function () {
-      var _tweenCardsToDeck = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6() {
-        var i, card;
+      var _tweenCardsToZones = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee6() {
+        var _loop, i, v;
+
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
-                for (i in t.cards) {
-                  card = t.cards[i];
+                _loop = function _loop(i) {
+                  var server_card = t.app.state.cards[i];
+                  var card = t.cards[i];
 
-                  if (card.mesh) {
-                    t.deckgroup.attach(card.mesh);
-                    card === null || card === void 0 ? void 0 : card.tweenTo({
-                      pos_x: t.deckgroup.position.x,
-                      pos_y: t.deckgroup.position.y + i * 0.025,
-                      pos_z: t.deckgroup.position.z
-                    }, {
-                      duration: 1000
-                    });
-                  } else {// console.error('failed to tween card to deck',i)
+                  if (card !== null && card !== void 0 && card.mesh) {
+                    var zone = getCardZone(server_card); // console.log('zone?',server_card.zone);
+                    // console.log(card.parent);
+
+                    if (zone) {
+                      var _card$mesh, _card$mesh$parent;
+
+                      // console.log(zone.group.name,card.mesh.parent?.name)
+                      if (((_card$mesh = card.mesh) === null || _card$mesh === void 0 ? void 0 : (_card$mesh$parent = _card$mesh.parent) === null || _card$mesh$parent === void 0 ? void 0 : _card$mesh$parent.name) !== zone.group.name) {
+                        var _card$mesh2, _card$mesh2$parent, _card$mesh3, _card$mesh3$parent;
+
+                        console.log((_card$mesh2 = card.mesh) === null || _card$mesh2 === void 0 ? void 0 : (_card$mesh2$parent = _card$mesh2.parent) === null || _card$mesh2$parent === void 0 ? void 0 : _card$mesh2$parent.name, zone.group.name);
+                        card.zone_last_changed = performance.now();
+                        card.prev_zone_name = (_card$mesh3 = card.mesh) === null || _card$mesh3 === void 0 ? void 0 : (_card$mesh3$parent = _card$mesh3.parent) === null || _card$mesh3$parent === void 0 ? void 0 : _card$mesh3$parent.name; // when should we attach vs. add here?
+
+                        zone.group.attach(card.mesh); // why is this timeout needed
+
+                        setTimeout(function () {
+                          // why is the card scale being affected?
+                          card.mesh.scale.setScalar(1);
+                        }, 10); // what is our offset at switch time?
+
+                        v = new THREE.Vector3();
+                        v.copy(card.mesh.position);
+                        card.mesh.localToWorld(v);
+                        zone.group.worldToLocal(v); // console.log(v);
+                      } // debugger;
+                      // zone.group.attach(card.mesh);
+                      // wonder how we can do this locally
+                      // like... we attach, then it'll be offset from teh group
+                      // then, we just always tween to a zero position,
+                      // to assume the parent groups world position
+                      // our destination:
+                      // let DEST_POS = {x: 0,y:0,z:0}
+
+
+                      var DEST_POS = _objectSpread({}, zone.origin);
+
+                      if (zone.getCardOffset) {
+                        var offset = zone.getCardOffset(card);
+                        DEST_POS.x += offset.x;
+                        DEST_POS.y += offset.y;
+                        DEST_POS.z += offset.z;
+                      }
+
+                      var distX = DEST_POS.x - card.mesh.position.x;
+                      var distY = DEST_POS.y - card.mesh.position.y;
+                      var distZ = DEST_POS.z - card.mesh.position.z; // delay when going from deck to table ("dealing")
+
+                      var _delay2 = card.prev_zone_name === 'DeckGroup' && zone.group.name === 'ZoneGroup' ? card.index * 100 : 0;
+
+                      var _delta = performance.now() - card.zone_last_changed;
+
+                      if (Math.abs(distX) > 0.01) {
+                        var speed = Math.max(0.01, Math.abs(distX) / 2);
+
+                        if (_delay2 && _delta > _delay2) {
+                          var _speed = speed > Math.abs(distX) ? Math.abs(distX) : speed;
+
+                          card.mesh.position.x += distX > 0 ? _speed : -_speed;
+                        }
+                      }
+
+                      if (Math.abs(distY) > 0.01) {
+                        var _speed2 = Math.max(0.01, Math.abs(distY) / 2);
+
+                        if (_delay2 && _delta > _delay2) {
+                          var _speed3 = _speed2 > Math.abs(distY) ? Math.abs(distY) : _speed2;
+
+                          card.mesh.position.y += distY > 0 ? _speed3 : -_speed3;
+                        }
+                      }
+
+                      if (Math.abs(distZ) > 0.01) {
+                        var _speed4 = Math.max(0.01, Math.abs(distZ) / 2);
+
+                        if (_delay2 && _delta > _delay2) {
+                          var _speed5 = _speed4 > Math.abs(distZ) ? Math.abs(distZ) : _speed4;
+
+                          card.mesh.position.z += distZ > 0 ? _speed5 : -_speed5;
+                        }
+                      }
+                    } // card.tweenTo({
+                    //   pos_x: zone.origin.x,
+                    //   pos_y: zone.origin.y,
+                    //   pos_z: zone.origin.z
+                    // },{
+                    //   duration: 1000,
+                    // });
+
                   }
+                };
+
+                for (i in t.app.state.cards) {
+                  _loop(i);
                 }
 
-              case 1:
+              case 2:
               case "end":
                 return _context6.stop();
             }
@@ -28503,95 +29046,39 @@ var Deck = /*#__PURE__*/function () {
         }, _callee6);
       }));
 
-      function tweenCardsToDeck() {
-        return _tweenCardsToDeck.apply(this, arguments);
-      }
-
-      return tweenCardsToDeck;
-    }()
-  }, {
-    key: "tweenCardsToZones",
-    value: function () {
-      var _tweenCardsToZones = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7() {
-        var i, _card2, _card3, zone, card, j, c;
-
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
-          while (1) {
-            switch (_context7.prev = _context7.next) {
-              case 0:
-                _context7.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.game.layout.zones);
-
-              case 1:
-                if ((_context7.t1 = _context7.t0()).done) {
-                  _context7.next = 21;
-                  break;
-                }
-
-                i = _context7.t1.value;
-                zone = t.game.layout.zones[i];
-                card = null; //cardforzone
-
-                _context7.t2 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.keys(t.app.state.cards);
-
-              case 6:
-                if ((_context7.t3 = _context7.t2()).done) {
-                  _context7.next = 15;
-                  break;
-                }
-
-                j = _context7.t3.value;
-                c = t.app.state.cards[j];
-
-                if (!(c.zone == i)) {
-                  _context7.next = 13;
-                  break;
-                }
-
-                card = t.cards[j]; // our LOCAL card (not the server-managed representation)
-
-                card.zone = i;
-                return _context7.abrupt("break", 15);
-
-              case 13:
-                _context7.next = 6;
-                break;
-
-              case 15:
-                // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
-                if (!((_card2 = card) !== null && _card2 !== void 0 && _card2.mesh)) {// console.error('failed to tween card to zone',i,card)
-                } else {
-                  t.zonegroup.attach(card.mesh);
-                } // console.log('tween card to zone',card);
-
-
-                (_card3 = card) === null || _card3 === void 0 ? void 0 : _card3.tweenTo({
-                  pos_x: zone.origin.x,
-                  pos_y: zone.origin.y,
-                  pos_z: zone.origin.z
-                }, {
-                  duration: 1000
-                });
-                _context7.next = 19;
-                return delay(150);
-
-              case 19:
-                _context7.next = 1;
-                break;
-
-              case 21:
-              case "end":
-                return _context7.stop();
-            }
-          }
-        }, _callee7);
-      }));
-
       function tweenCardsToZones() {
         return _tweenCardsToZones.apply(this, arguments);
       }
 
       return tweenCardsToZones;
-    }()
+    }() //   for(let i in t.game.layout.zones){
+    //     let zone = t.game.layout.zones[i];
+    //     let card = null;
+    //     //cardforzone
+    //     for(let j in t.app.state.cards){
+    //       let c = t.app.state.cards[j];
+    //       if(c.zone == i){
+    //         card = t.cards[j]; // our LOCAL card (not the server-managed representation)
+    //         card.zone = i;
+    //         break;
+    //       }
+    //     }
+    //     // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
+    //     if(card?.mesh && zone.group){
+    //       zone.group.attach(card.mesh);
+    //     }
+    //     // console.log('tween card to zone',card);
+    //     card?.tweenTo({
+    //       pos_x: zone.origin.x,
+    //       pos_y: zone.origin.y,
+    //       pos_z: zone.origin.z
+    //     },{
+    //       duration: 1000,
+    //     });
+    //     await delay(150);
+    //   }
+    // }
+
   }]);
 
   return Deck;
@@ -28631,10 +29118,10 @@ var Round = /*#__PURE__*/function () {
   _createClass(Round, [{
     key: "start",
     value: function () {
-      var _start = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
+      var _start = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee7() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
                 console.log('round start', 'deck', window.t.deck); // center the deck
                 // animate the camera
@@ -28653,7 +29140,7 @@ var Round = /*#__PURE__*/function () {
                     updatePlayerHead();
                   }
                 }).start();
-                _context8.next = 4;
+                _context7.next = 4;
                 return delay(1000);
 
               case 4:
@@ -28669,15 +29156,15 @@ var Round = /*#__PURE__*/function () {
                   duration: 1000,
                   easing: TWEEN.Easing.Quadratic.Out
                 }).start();
-                _context8.next = 7;
+                _context7.next = 7;
                 return delay(1000);
 
               case 7:
               case "end":
-                return _context8.stop();
+                return _context7.stop();
             }
           }
-        }, _callee8);
+        }, _callee7);
       }));
 
       function start() {
@@ -28699,43 +29186,89 @@ var Round = /*#__PURE__*/function () {
   }, {
     key: "current_player",
     get: function get() {
-      var _t5, _t5$players, _t$app$state8;
+      var _t5, _t5$players, _t$app$state7;
 
-      return (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : _t5$players[(_t$app$state8 = t.app.state) === null || _t$app$state8 === void 0 ? void 0 : _t$app$state8.player_turn];
+      return (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : _t5$players[(_t$app$state7 = t.app.state) === null || _t$app$state7 === void 0 ? void 0 : _t$app$state7.player_turn];
     }
   }]);
 
   return Round;
 }();
 
-var Layout = /*#__PURE__*/_createClass(function Layout(options) {
-  _classCallCheck(this, Layout);
+var Layout = /*#__PURE__*/function () {
+  function Layout(options) {
+    _classCallCheck(this, Layout);
 
-  this.zones = []; // todo: subclass Grid Layout
+    this.zones = []; // our grid of zones (main playfield)
+    // our special named zones
 
-  this.options = options; // distance between cards
+    this.named_zones = {}; // todo: subclass Grid Layout
 
-  this.spacing = {
-    x: 3,
-    y: 3
-  };
+    this.options = options; // distance between cards
 
-  for (var r = 0; r < options.rows; r++) {
-    for (var c = 0; c < options.cols; c++) {
-      // todo: define x,y,z origin coords of zone
-      this.zones.push({
-        row: r,
-        col: c,
-        card: null,
-        origin: {
-          x: 3.5 * r - this.spacing.x + r * 0.5 - 1,
-          y: 9.8,
-          z: 3.5 * c - this.spacing.y + c * 0.5 - 2
-        }
-      });
-    }
+    this.spacing = {
+      x: 3,
+      y: 3
+    };
+
+    for (var r = 0; r < options.rows; r++) {
+      for (var c = 0; c < options.cols; c++) {
+        // todo: define x,y,z origin coords of zone
+        this.zones.push({
+          row: r,
+          col: c,
+          card: null,
+          group: t.zonegroup,
+          origin: {
+            x: 3.5 * r - this.spacing.x + r * 0.5 - 1,
+            y: 9.8,
+            z: 3.5 * c - this.spacing.y + c * 0.5 - 2
+          }
+        });
+      }
+    } // add a deckgroup zone
+
+
+    var deckZone = {
+      name: 'deck',
+      group: t.deckgroup,
+      getCardOffset: function getCardOffset(card) {
+        var cards = t.app.state.available_cards;
+        var deck_position = cards.indexOf(card.index);
+        var CARD_THICKNESS = 0.025; // console.log('getCardOffset deck_position',deck_position);
+
+        return {
+          x: 0,
+          // offset vertically based on card thickness
+          y: //( cards.length * CARD_THICKNESS ) -
+          deck_position * CARD_THICKNESS,
+          z: 0
+        };
+      }
+    };
+    Object.defineProperty(deckZone, 'origin', {
+      get: function get() {
+        return this.group.position;
+      }
+    });
+    this.named_zones.deck = deckZone; // this.zones.push(deckZone)
   }
-});
+
+  _createClass(Layout, [{
+    key: "convertClientHandsToUserHands",
+    value: function convertClientHandsToUserHands() {
+      // convert hand client id to user id
+      t.players[t.app.state.my_client_id].user_id = t.root.user.id;
+      t.players[t.app.state.my_client_id].hand.name = 'hand_' + t.root.user.id;
+      var handZone = t.game.layout.named_zones['hand_' + t.app.state.my_client_id];
+      handZone.name = 'hand_' + t.root.user.id;
+      t.game.layout.named_zones['hand_' + t.root.user.id] = handZone;
+      t.game.layout.named_zones['hand_' + t.app.state.my_client_id] = null;
+    }
+  }]);
+
+  return Layout;
+}();
 
 var Game_PVPMemory = /*#__PURE__*/function () {
   function Game_PVPMemory() {
@@ -28831,10 +29364,10 @@ var Game_PVPMemory = /*#__PURE__*/function () {
   }, {
     key: "checkForMatches",
     value: function () {
-      var _checkForMatches = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
+      var _checkForMatches = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
                 // we've flipped 2+ cards,
                 t.game.ignore_clicks = true; // server is checking for matches
@@ -28858,10 +29391,10 @@ var Game_PVPMemory = /*#__PURE__*/function () {
 
               case 1:
               case "end":
-                return _context9.stop();
+                return _context8.stop();
             }
           }
-        }, _callee9);
+        }, _callee8);
       }));
 
       function checkForMatches() {
@@ -29004,7 +29537,8 @@ function render() {
   // }
 
   TWEEN.update(); // update all tweens :)
-  // update "hovered" status of cards
+
+  t.deck.tweenCardsToZones(); // update "hovered" status of cards
   // todo only run this loop if t.app.state.hovered has changed since last tick
 
   if ((_t6 = t) !== null && _t6 !== void 0 && (_t6$app = _t6.app) !== null && _t6$app !== void 0 && (_t6$app$state = _t6$app.state) !== null && _t6$app$state !== void 0 && _t6$app$state.hovered) {
@@ -29066,9 +29600,27 @@ function initLights() {
   scene.add(dirLight, ambientLight);
 }
 
+function getCardZone(server_card) {
+  var _server_card, _t$game$layout$zones, _t$game$layout$named_;
+
+  if (((_server_card = server_card) === null || _server_card === void 0 ? void 0 : _server_card.zone) === undefined) {
+    server_card = t.app.state.cards[server_card.index];
+  }
+
+  var zone = !isNaN(parseInt(server_card.zone)) ? (_t$game$layout$zones = t.game.layout.zones) === null || _t$game$layout$zones === void 0 ? void 0 : _t$game$layout$zones[parseInt(server_card.zone)] : (_t$game$layout$named_ = t.game.layout.named_zones) === null || _t$game$layout$named_ === void 0 ? void 0 : _t$game$layout$named_[server_card.zone];
+
+  if (!zone) {// console.error('Error locating zone',server_card.zone,Object.keys(t.game.layout.named_zones),parseInt(server_card.zone));
+    // debugger;
+  }
+
+  return zone;
+}
+
 function getFlipTween(card, direction) {
-  console.log('card?', card);
-  var initPos = t.game.layout.zones[card.zone].origin;
+  var _getCardZone;
+
+  // console.log('card?',card)
+  var initPos = (_getCardZone = getCardZone(card)) === null || _getCardZone === void 0 ? void 0 : _getCardZone.origin;
   var zAxis = new THREE.Vector3(0, 0, 1);
   var qInitial = new THREE.Quaternion().setFromAxisAngle(zAxis, direction === 'facedown' ? Math.PI : 0);
   var qFinal = new THREE.Quaternion().setFromAxisAngle(zAxis, direction === 'faceup' ? Math.PI : 0);
@@ -29354,28 +29906,29 @@ function onMouseMove(_x9) {
 }
 
 function _onMouseMove() {
-  _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee11(evt) {
+  _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10(evt) {
     var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i2;
 
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee11$(_context11) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
       while (1) {
-        switch (_context11.prev = _context11.next) {
+        switch (_context10.prev = _context10.next) {
           case 0:
             if (!t.root.show_modal) {
-              _context11.next = 2;
+              _context10.next = 2;
               break;
             }
 
-            return _context11.abrupt("return");
+            return _context10.abrupt("return");
 
           case 2:
             updateClientCursor();
             updatePlayerHead(); // t.players[getOpponentID()].head.mesh.lookAt(t.camera)
             // prevent looking under the table
-
-            if (camera.position.y <= 2) {
-              camera.position.y = 2;
-            } // TODO: allow user to hover over matches in their hand,
+            // NOTE: did this with maxPolarAngle instead on controls
+            // if(camera.position.y <= 2){
+            //   camera.position.y = 2;
+            // }
+            // TODO: allow user to hover over matches in their hand,
             // but NOT the playfield cards, if it's not currently their turn
             // todo: move up to app-level
             // console.log('is it my turn?',t?.app?.$refs?.app?.its_my_turn)
@@ -29406,7 +29959,6 @@ function _onMouseMove() {
             //   }
             // }
             // TODO: don't send server highlight when debug_inspect_objects is true
-
 
             if (t.debug_inspect_objects) {
               onHoverDebugObject(intersectsGroup(t.scene.children));
@@ -29457,12 +30009,12 @@ function _onMouseMove() {
             //}
 
 
-          case 8:
+          case 7:
           case "end":
-            return _context11.stop();
+            return _context10.stop();
         }
       }
-    }, _callee11);
+    }, _callee10);
   }));
   return _onMouseMove.apply(this, arguments);
 }

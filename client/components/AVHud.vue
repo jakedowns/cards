@@ -29,8 +29,29 @@
                 <!-- TODO: pick video input -->
                 <!-- TODO: video input settings -->
             </div>
-            <div v-if="its_my_turn">Your Turn</div>
-            <div v-else>Opponent's Turn</div>
+            <div class="turn-indicator">
+                <div class="my-turn" v-if="its_my_turn">Your Turn</div>
+                <div class="not-my-turn" v-else>Opponent's Turn</div>
+            </div>
+            <div class="scores-wrapper">
+                <div>Online: {{state?.client_ids?.length}}</div>
+                <div>Round {{state?.round_number}}</div>
+                <div class="scores" v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: <span class="hit">{{state?.player_scores?.[id]?.[0] ?? 0}}</span> / <span class="miss">{{state?.player_scores?.[id]?.[1] ?? 0}}</span> </div>
+            </div>
+        </div>
+        <div class="chat-box">
+            <div class="messages">
+                <div v-for="message in chat_messages" :key="message.timestamp">
+                    <div class="message-wrapper">
+                        <div class="message-sender">{{nameForClientID(message.client_id)}}</div>
+                        <div class="message-text">{{message.message}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" placeholder="Chat..." v-model="chat_input" @keyup.enter="sendChatMessage()" />
+                <input type="button" @click.prevent="sendChatMessage" />
+            </div>
         </div>
         <div class="debug-video">
             <audio id="sound_effects" src="./public/sounds/flip.mp3" />
@@ -66,11 +87,13 @@ export default {
         disableVideo:Function,
         openPauseMenu:Function,
         toggleMute:Function,
-        audio_muted:Boolean
+        audio_muted:Boolean,
+        chat_messages:Array
     },
     setup(){
         return {
-            client_mute_states:{}
+            client_mute_states:{},
+            chat_input: ''
         }
     },
     watch:{
@@ -82,7 +105,21 @@ export default {
             })
         }
     },
+    computed:{
+        nameForClientID(){
+            return(client_id)=>{
+                // TODO: server should send player_names
+                return this.state?.player_names?.[client_id] ?? 'player'
+            }
+        }
+    },
     methods:{
+        sendChatMessage(){
+            if(this.chat_input){
+                this.$emit('send-chat-message',this.chat_input)
+                this.chat_input = ''
+            }
+        },
         toggleOpponentMute(client_id){
             // this.$refs[`opponent_video_${client_id}`].muted = !this.$refs[`opponent_video_${client_id}`].muted
             this.client_mute_states[client_id] = !this.client_mute_states[client_id]

@@ -1,6 +1,5 @@
 <template>
-    <div id="debug" >
-
+    <div id="app">
         <div class="modal-wrapper" v-if="show_modal">
             <div class="modal-inner">
                 <LoginModal
@@ -16,12 +15,28 @@
                 <PauseMenuModal
 
                     v-if="show_pause_menu"
+
                     :submitModal="submitModal"
+
+                    :gameTypeName="gameTypeName"
+
+                    :isHostOfSelectedGame="isHostOfSelectedGame"
+
+                    @openWorldSelectModal="openWorldSelectModal"
+                    @closeModal="closeModal"
+
+                />
+
+                <WorldSelectModal
+
+                    v-if="show_world_select_modal"
+
                     :worlds="worlds"
                     :rooms="rooms"
                     :games="games"
                     :game_types="game_types"
                     :gameTypeName="gameTypeName"
+
                     :world_selection="world_selection"
                     :room_selection="room_selection"
                     :game_selection="game_selection"
@@ -30,6 +45,7 @@
                     @gameSelectionChanged="onGameSelectionChanged"
                     :isHostOfSelectedGame="isHostOfSelectedGame"
 
+                    @closeModal="closeModal"
                 />
 
                 <div class="game-in-progress-modal modal" v-if="show_game_in_progress_modal">
@@ -48,30 +64,36 @@
             <div class="modal-underlay"></div>
         </div>
 
-        <DebugOverlay
-            :calling="calling"
-            :state="state"
-            :game="game"
-            :round="round"
-            :im_game_host="im_game_host"
-            :its_my_turn="its_my_turn"
-            :messages="messages"
-            :show_end_call_button="show_end_call_button"
-            :show_debug_info="show_debug_info"
-            @toggleShowDebugInfo="toggleShowDebugInfo"
 
-            :mic_muted="mic_muted"
-            :video_enabled="video_enabled"
-            :video_muted="video_muted"
 
-            :startVideoChat="startVideoChat"
+        <div id="debug" >
+            <DebugOverlay
+                :calling="calling"
+                :state="state"
+                :game="game"
+                :round="round"
+                :im_game_host="im_game_host"
+                :its_my_turn="its_my_turn"
+                :messages="messages"
+                :show_end_call_button="show_end_call_button"
+                :show_debug_info="show_debug_info"
+                @toggleShowDebugInfo="toggleShowDebugInfo"
 
-            :camera_locked="camera_locked"
-            :resetCamera="resetCamera"
-            :toggleCameraLock="toggleCameraLock"
-            :restartGame="restartGame"
+                :mic_muted="mic_muted"
+                :video_enabled="video_enabled"
+                :video_muted="video_muted"
 
-        />
+                :startVideoChat="startVideoChat"
+
+                :camera_locked="camera_locked"
+                :resetCamera="resetCamera"
+                :toggleCameraLock="toggleCameraLock"
+                :restartGame="restartGame"
+
+            />
+        </div>
+
+
 
         <AVHud
 
@@ -89,6 +111,9 @@
             :openPauseMenu="openPauseMenu"
             :toggleMute="toggleMute"
 
+            @send-chat-message="sendChatMessage"
+            :chat_messages="chat_messages"
+
         />
     </div>
 </template>
@@ -99,7 +124,7 @@ import NameModal from './namemodal.vue'
 import PauseMenuModal from './PauseMenuModal.vue'
 import DebugOverlay from './DebugOverlay.vue'
 import AVHud from './AVHud.vue'
-
+import WorldSelectModal from './WorldSelectModal.vue'
 
 export default {
 
@@ -108,7 +133,8 @@ export default {
         NameModal,
         PauseMenuModal,
         DebugOverlay,
-        AVHud
+        AVHud,
+        WorldSelectModal
     },
 
     props:{
@@ -117,6 +143,8 @@ export default {
 
     setup(){
         return {
+            chat_messages: [],
+
             authenticated: false,
             show_login_loading: true,
             // key ourselves in the users{}
@@ -140,6 +168,7 @@ export default {
             show_login_modal: true,
             show_name_modal: false,
             show_pause_menu: false,
+            show_world_select_modal: false,
             show_player_request_modal: false,
             show_spectator_joined_modal: false,
             show_game_in_progress_modal: false,
@@ -210,12 +239,17 @@ export default {
 
                 // TODO constantly tween towards Zones, remove the need to explictly detect zone changes and manually trigger tweens
                 // console.log('last dealt?',new_state?.last_dealt,old_state?.last_dealt);
-                if(new_state?.shuffling && !old_state?.shuffling){
-                    t.deck.tweenCardsToDeck();
-                }
-                else if(new_state?.last_dealt !== old_state?.last_dealt){
-                    t.deck.tweenCardsToZones();
-                }
+                // if(new_state?.shuffling && !old_state?.shuffling){
+                //     t.deck.tweenCardsToDeck();
+                // }
+                // else if(new_state?.last_dealt !== old_state?.last_dealt){
+
+                    // this loops thru all cards,
+                    // so does the next block of this method
+                    // so, probably should combine them into a single loo
+                    // since this happens so frequently
+                    //t.deck.tweenCardsToZones();
+                // }
 
                 if(new_state?.client_ids?.length === 2 && old_state?.client_ids?.length === 1){
                     // we just went from 1 peer to 2, start a call
@@ -225,9 +259,9 @@ export default {
 
                 //console.log('flipped?',new_state.flipped,new_state.cards);
 
-                // todo: loop over all cards
-                // then animate flip based on flipped.indexOf(card.id) > -1
-                //for(var i=0; i<new_state.flipped.length; i++){
+                // animate flip based on flipped.indexOf(card.id) > -1
+                // TODO: there is something happening here where when the client flips the card, the server update takes a sec and causes a double-flip animation
+                // need to tweak this to account for that
                 for(var i=0; i<new_state?.cards?.length; i++){
                     //t.flipCard(i);
                     //let card_id = new_state.flipped[i];
@@ -251,12 +285,13 @@ export default {
                 t.updatePlayerCursors();
                 t.updatePlayerHeads();
 
+                /* (replacing with tweenCardsToZones)
                 // todo: if player hands have changed size, run this
                 // this basically just handles animating matched cards off the table into the players hands
                 // todo: need to animate other players cards into the OTHER players hand
                 if(JSON.stringify(new_state.player_hands)!==JSON.stringify(old_state.player_hands)){
                     t.updateCardsInHand();
-                }
+                } */
 
 
                 //console.log('debugger state changed', new_state);
@@ -295,6 +330,15 @@ export default {
         },
         closeModal(){
             this.show_modal = false;
+
+            this.show_login_modal = false;
+            this.show_name_modal = false;
+            this.show_pause_menu = false;
+            this.show_world_select_modal = false;
+            this.show_player_request_modal = false;
+            this.show_spectator_joined_modal = false;
+            this.show_game_in_progress_modal = false;
+
             t.client_ignore_clicks = false;
         },
         onNameUpdated(){
@@ -313,6 +357,14 @@ export default {
             }).catch(e=>{
                 console.error('error getting user',e);
             });
+
+            t.server.send({
+                type:'CONNECT_AS_USER',
+                user_id:this.user.id,
+                name:this.user?.first_name
+            })
+
+
 
             if(!this.user){
                 this.show_login_loading = false;
@@ -525,6 +577,16 @@ export default {
             }).catch((err)=>{
                 console.error(err);
             })
+        },
+        sendChatMessage(message){
+            t.server.send({
+                type: 'CHAT_MESSAGE',
+                message: message,
+            })
+        },
+        openWorldSelectModal(){
+            this.show_pause_menu = false;
+            this.show_world_select_modal = true
         }
     },
 
@@ -599,7 +661,7 @@ export default {
 #icon-video-enable, #icon-video-disable{
     position: absolute;
     bottom: 103px;
-    right: 20px;
+    left: 90px;
 }
 #icon-video-enable svg {
     width: 35px;
@@ -620,6 +682,7 @@ button {
 }
 .debug-inner {
     pointer-events: all;
+    margin-top: 100px;
 }
 .modal-wrapper {
     width: 100%;
@@ -703,9 +766,11 @@ input[type=text],input[type=password]{
     width: 100vw;
     height: 100vh;
 }
+#app {
+    color: #fff;
+}
 #debug {
     background: transparent;
-    color: #fff;
     position: fixed;
     top: 0;
     left: 0;
@@ -718,32 +783,26 @@ input[type=text],input[type=password]{
     // width: 30vw;
     height: 100vh;
     // pointer-events: none;
-
-    .details {
-        z-index: 2;
-        position: relative;
-
-        font-size: 11px;
-    }
-    .bg-blur {
-        z-index: 1;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        filter: blur(10px);
-        pointer-events: none;
-    }
-
-    .scores .hit {
-        color: green;
-    }
-    .scores .miss {
-        color: red;
-    }
 }
+.details {
+    z-index: 2;
+    position: relative;
+
+    font-size: 11px;
+}
+.bg-blur {
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    filter: blur(10px);
+    pointer-events: none;
+}
+
+
 .opponent_videos {
     display: flex;
     flex-direction: row;
@@ -766,5 +825,69 @@ input[type=text],input[type=password]{
     color: red;
     display: inline-block;
     margin: 10px 0;
+}
+.turn-indicator {
+    font-weight: bold;
+    font-size: 24px;
+    text-align: center;
+    position: absolute;
+    width: 300px;
+    margin: 0 auto;
+    top: 10px;
+    left: 50%;
+    margin-left: -150px;
+    .my-turn {
+        color: green;
+    }
+    .not-my-turn {
+        color: red;
+    }
+}
+
+.debug-toggle {
+    pointer-events: all;
+}
+
+
+
+.hud {
+    width: 100%;
+    height: 100vh;
+    pointer-events: none;
+    position: absolute;
+    display: block;
+}
+
+.scores-wrapper {
+    width: auto;
+    top: 30px;
+    position: absolute;
+    left: 10px;
+}
+
+.scores .hit {
+    color: green;
+}
+.scores .miss {
+    color: red;
+}
+
+.chat-box {
+    position: absolute;
+    right: 30px;
+    bottom: 100px;
+    pointer-events: all;
+    width: 300px;
+    max-height: 50vh;
+}
+.messages {
+    overflow-y: auto;
+}
+
+.message-wrapper {
+    background: rgba(0,0,0,0.5);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px;
 }
 </style>

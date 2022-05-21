@@ -2,80 +2,17 @@
     <div class="world-room-game-modal modal">
         <div class="modal-content">
             <h2 class="mb-4">Pause Menu</h2>
-            <h3>World</h3>
-            <select v-model="world_selection" @change="onWorldSelectionChanged" >
-                <option :key="world.id" v-for="world in worlds" :value="world.id">{{world.name}}</option>
-                <!-- <option selected value="jakes-world-uuid">Jake's World</option> -->
-                <!-- <option value="new-world">New World</option> -->
-            </select>
-            <!-- <div v-if="world_selection === 'new-world'">
-                <label>pick a name for your new world</label>
-                <input type="text" placeholder="My New World Name" v-model="new_world_name">
-            </div> -->
+
+            <!-- game settings -->
+            <button>Update Game Settings</button>
+            <button>Restart Game</button>
 
             <hr/>
-
-            <div :style="{
-                opacity: world_selection ? 1 : 0.5,
-                 pointerEvents: world_selection ? 'all' : 'none'
-            }">
-                <h3>Room</h3>
-                <select v-model="room_selection" :disabled="!world_selection" @change="onRoomSelectionChanged">
-                    <option :key="room.id" v-for="room in rooms" :value="room.id">{{room.name}}</option>
-                    <!-- <option value="new-room">New Room</option> -->
-                </select>
-                <div v-if="room_selection === 'new-room'">
-                    <label>pick a name for your new room</label>
-                    <input type="text" placeholder="My New Room Name" v-model="new_room_name">
-                </div>
-            </div>
+            <button @click="$emit('openWorldSelectModal')">Switch World/Room/Game</button>
+            <button @click="$emit('closeModal')">Close</button>
 
             <hr/>
-
-            <div :style="{
-                opacity: world_selection && room_selection ? 1 : 0.5,
-                 pointerEvents: world_selection && room_selection ? 'all' : 'none'
-                }">
-                <h3>Table / Game</h3>
-                <select v-model="game_selection" :disabled="!room_selection" @change="onRoomSelectionChanged">
-                    <option :key="game.id" v-for="game in games" :value="game.id">{{gameTypeName(game.game_type)}}</option>
-                    <!-- <option value="new-game">New Game</option> -->
-                </select>
-                <div v-if="game_selection === 'new-game'">
-                    <label>what would you like to call your new game?</label>
-                    <input type="text" placeholder="My New Game Name" v-model="new_game_name">
-                    <br/>
-                    <select v-model="new_game_mode">
-                        <!-- TODO loop game types -->
-                        <option disabled selected value="">Select Game Mode</option>
-                        <option value="memory">Memory Matching Game</option>
-                        <option value="klondike">Klondike Solitaire</option>
-                        <option value="new-game-mode">New Custom Game Mode...</option>
-                    </select>
-                    <div v-if="new_game_mode === 'new-game-mode'">
-                        <label>what would you like to call your new game?</label>
-                        <input type="text" placeholder="My New Game Mode Name" v-model="new_game_mode_name">
-                    </div>
-                </div>
-            </div>
-
-            <hr/>
-
-
-            <button v-if="game_selection !== 'new-game' && isHostOfSelectedGame" @click.prevent="restart_game">Restart Game</button>
-            <button
-            :style="{
-                opacity:
-                world_selection &&
-                room_selection &&
-                game_selection ? 1 : 0.5,
-
-                pointerEvents:
-                    world_selection &&
-                    room_selection &&
-                    game_selection ? 'all' : 'none'
-                }"
-            @click.prevent="submitModal" :disabled="!world_selection ||!room_selection || !game_selection">Continue</button>
+            <button @click="$emit('logout')">Logout</button>
         </div>
     </div>
 </template>

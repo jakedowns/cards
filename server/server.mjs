@@ -14,13 +14,14 @@ const SSL_CERT_PATH = process.env?.SSL_CERT_PATH ?? '../ssl/server.crt';
 const SSL_KEY_PATH = process.env?.SSL_KEY_PATH ?? '../ssl/server.key';
 const SSL_CA_CERT_PATH = process.env?.SSL_CA_CERT_PATH ?? '../ssl/ca.crt';
 const LOCAL = process.env?.LOCAL ?? false;
+const SERVER_ID = process.env?.SERVER_ID ?? 1;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 console.log('__dirname',__dirname);
 
 import ServerAPI from './shared/server-api.mjs';
-const SERVER_API = new ServerAPI();
+const SERVER_API = new ServerAPI(SERVER_ID);
 
 const hostname = HOSTNAME;
 const port = HTTP_PORT;
@@ -122,9 +123,11 @@ server.on('upgrade', function upgrade(request, socket, head) {
 // Creating a new websocket server
 wss = new WebSocketServer({ noServer: true })
 
-// maybe rename this to ServerRoomManager
-import ServerGame from './3d-client/server-game.mjs';
-const game = new ServerGame();
+// TODO: rename to WorldServer
+import WorldServer from './3d-client/WorldServer.mjs';
+global.worldServer = new WorldServer();
+global.worldServer.attachAPI_andBoot(SERVER_API);
+
 
 import {
     performance
@@ -136,13 +139,13 @@ wss.on("connection", ws => {
     // TODO: prevent client id collisions
 
     // register client
-    game.onClientJoin(client_id,ws);
+    global.worldServer.onClientJoin(client_id,ws);
 
 
     // listen to client messages
     ws.on("message", data => {
         //console.log(`Client has sent us: ${data}`)
-        game.onClientMessage(client_id,data);
+        global.worldServer.onClientMessage(client_id,data);
         //ws.send('server says thanks!');
     });
 
@@ -150,14 +153,14 @@ wss.on("connection", ws => {
     // handle disconnects
     ws.on("close", () => {
         //console.log("the client has disconnected");
-        game.onClientLeave(client_id);
+        global.worldServer.onClientLeave(client_id);
     });
 
 
     // handling client connection error
     ws.onerror = function (err) {
         //console.log("Some Error occurred")
-        game.onClientError(client_id,err);
+        global.worldServer.onClientError(client_id,err);
     }
 });
 console.log(`The WebSocket server is running on port ${WS_PORT}`);

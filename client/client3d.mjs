@@ -121,6 +121,10 @@ class SocketConnection{
       // todo: switch on type not message
       switch(decoded?.type){
 
+          case 'CHAT_MESSAGE':
+            t.root.chat_messages.push(decoded);
+            break;
+
           case 'mediaOffer':
             t.peers.onMediaOffer(decoded);
             break;
@@ -229,6 +233,28 @@ class Player {
         // this.cards = []; // server tells us what cards the player is holding (t.app.state.player_hands)
         this.pointer = new PlayerPointer(player_id);
         this.head = new PlayerHead(player_id);
+
+        this.hand = new THREE.Group();
+        this.hand.name = 'hand_'+player_id;
+        t.scene.add(this.hand);
+
+        let handZone = {
+          group: this.hand,
+          name: 'hand_'+player_id,
+        }
+        Object.defineProperty(handZone,'origin',{
+          get:function(){
+            return this.group.position;
+          }
+        })
+
+        this.hand.position.x = 0;
+        this.hand.position.y = 5;
+        this.hand.position.z = -9;
+
+        this.hand.rotation.z = THREE.MathUtils.degToRad(180);
+
+        t.game.layout.named_zones['hand_'+player_id] = handZone;
     }
     destroy(){
         this.pointer.destroy();
@@ -308,14 +334,27 @@ class Tabletop{
         this.players = {}; // this is where we keep track of player-related stuff that the server DOESNT stream to us (references to meshes, etc);
 
         this.deckgroup = new THREE.Group();
+        // Object.defineProperty(this.deckgroup.userData,'cardOrigin',{
+        //   get:function(){
+        //     // cards should be offset by their index within the deck
+
+        //   }
+        // });
+        this.deckgroup.name = "DeckGroup";
+        this.deckgroup.position.x = 5;
         this.deckgroup.position.y = 5;
         this.deckgroup.position.z = -5;
         scene.add(this.deckgroup);
 
         // playfield cards (intersection group)
         this.zonegroup = new THREE.Group();
+        this.zonegroup.name = 'ZoneGroup';
         this.zonegroup.position.y = -0.8
         scene.add(this.zonegroup);
+    }
+
+    getMyPlayer(){
+      return this.players[t.app.state.my_client_id];
     }
 
     getCameraSet(){
@@ -406,6 +445,8 @@ class Tabletop{
             t.video.srcObject = stream;
             t.video.play();
 
+            t.players[t.app.state.my_client_id].head.assignVideoToHead(t.video);
+
             resolve();
 
           } ).catch( function ( error ) {
@@ -426,6 +467,7 @@ class Tabletop{
       });
     }
 
+    /*
     // animate the cards within the hand to maintain spacing
     // also handles animating cards from playfield to hand after a match is validated by the server
     updateCardsInHand(){
@@ -468,6 +510,7 @@ class Tabletop{
 
       // TODO: animate cards that are in OTHER players hand...
     }
+    */
 
     updatePlayerCursors(){
       for(let i in t.app.state.client_ids){
@@ -596,6 +639,13 @@ class Tabletop{
         return this.deck.cards;
     }
 
+    // debugging thing for host only
+    returnCardsToDeck(){
+      t.server.send({
+        type:'RETURN_CARDS_TO_DECK',
+      })
+    }
+
 
 
 
@@ -702,6 +752,10 @@ class PlayerHead extends TweenableMesh {
     // }
   }
   assignVideoToHead(video){
+    // video settings
+    let settings = video.srcObject.getVideoTracks()[0].getSettings()
+    let ar = settings.width / settings.height;
+    this.mesh.scale.set(ar, 1, 1)
     this.video_texture = new THREE.VideoTexture(video); // webcam stream
     this.video_texture.format = THREE.RGBAFormat;
     this.video_material = new THREE.MeshBasicMaterial({
@@ -709,8 +763,10 @@ class PlayerHead extends TweenableMesh {
       // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
       // wireframe: true,
       // transparent: this.player_is_me ? true : false,
-      // opacity: this.player_is_me ? 0.0 : 1.0,
+      opacity: this.player_is_me ? 0.0 : 1.0,
+      transparent: this.player_is_me ? true : false,
       map: this.video_texture,
+      side: THREE.DoubleSide,
     })
     this.mesh.material = this.video_material;
   }
@@ -722,8 +778,10 @@ class PlayerHead extends TweenableMesh {
         color: 0x000000,
         // color: this.player_id === t.app.state?.game_host ? 0x00ff00 : null, // yellow 0xffff00
         // wireframe: true,
+        side: THREE.DoubleSide,
         transparent: false,
-        opacity: 1.0,
+        opacity: this.player_is_me ? 0.0 : 1.0,
+        transparent: this.player_is_me ? true : false
         // map: this.video_texture,
       })
     )
@@ -736,6 +794,14 @@ class PlayerHead extends TweenableMesh {
       // let pos = new Vector3();
       // camera.getWorldPosition(pos);
       headUpdateFN(camera.position);
+
+      this.mesh.position.y = 17;
+      this.mesh.position.x = 0;
+      this.mesh.position.z = -15;
+
+      this.mesh.rotation.x = 0;
+      this.mesh.rotation.y = THREE.MathUtils.degToRad(180)
+      this.mesh.rotation.z = THREE.MathUtils.degToRad(0)
     }else{
       // this.mesh.position.set(camera.position);
       // this.mesh.position.x = camera.position.x * -1;
@@ -921,13 +987,13 @@ class Card {
         this.faceUpMaterial = new THREE.MeshBasicMaterial({
             color: colorDark,
             map: this.faceUpTexture,
-            shininess: 40,
+            // shininess: 40,
             side: THREE.FrontSide
         });
         this.faceDownMaterial = new THREE.MeshBasicMaterial({
             color: colorDark,
             map: this.faceDownTexture,
-            shininess: 40,
+            // shininess: 40,
             side: THREE.FrontSide
         });
     }
@@ -1034,7 +1100,9 @@ class Deck{
         ];
 
         for(var i=0; i<options?.card_count ?? 52; i++){
-            this.cards.push(new Card(i,this.card_types[i%2===0?i/2:(i-1)/2]));
+          const new_card = new Card(i,this.card_types[i%2===0?i/2:(i-1)/2])
+            this.cards.push(new_card);
+            t.deckgroup.add(new_card.mesh);
             this.available_cards.push(i);
         }
     }
@@ -1163,53 +1231,146 @@ class Deck{
     //       }
     //     }
     // }
-    async tweenCardsToDeck(){
-      for(let i in t.cards){
-        let card = t.cards[i];
-        if(card.mesh){
-          t.deckgroup.attach(card.mesh);
-          card?.tweenTo({
-            pos_x: t.deckgroup.position.x,
-            pos_y: t.deckgroup.position.y + (i*0.025),
-            pos_z: t.deckgroup.position.z
-          },{
-            duration: 1000,
-          });
-        }else{
-          // console.error('failed to tween card to deck',i)
-        }
-      }
-    }
+    // async tweenCardsToDeck(){
+    //   for(let i in t.cards){
+    //     let card = t.cards[i];
+    //     if(card.mesh){
+    //       t.deckgroup.attach(card.mesh);
+    //       card?.tweenTo({
+    //         pos_x: t.deckgroup.position.x,
+    //         pos_y: t.deckgroup.position.y + (i*0.025),
+    //         pos_z: t.deckgroup.position.z
+    //       },{
+    //         duration: 1000,
+    //       });
+    //     }else{
+    //       // console.error('failed to tween card to deck',i)
+    //     }
+    //   }
+    // }
+
+    // changing this to loop thru cards, rather than zones
+    // todo: how to handle delaying the animation of the cards moving from the deck to the playfield during "dealing?"
     async tweenCardsToZones(){
-      for(let i in t.game.layout.zones){
-        let zone = t.game.layout.zones[i];
-        let card = null;
-        //cardforzone
-        for(let j in t.app.state.cards){
-          let c = t.app.state.cards[j];
-          if(c.zone == i){
-            card = t.cards[j]; // our LOCAL card (not the server-managed representation)
-            card.zone = i;
-            break;
+      for(let i in t.app.state.cards){
+        let server_card = t.app.state.cards[i];
+        let card = t.cards[i];
+        if(card?.mesh){
+          let zone = getCardZone(server_card);
+          // console.log('zone?',server_card.zone);
+          // console.log(card.parent);
+          if(zone){
+            // console.log(zone.group.name,card.mesh.parent?.name)
+            if(card.mesh?.parent?.name !== zone.group.name){
+              console.log(card.mesh?.parent?.name,zone.group.name);
+              card.zone_last_changed = performance.now();
+              card.prev_zone_name = card.mesh?.parent?.name;
+
+              // when should we attach vs. add here?
+              zone.group.attach(card.mesh);
+
+              // why is this timeout needed
+              setTimeout(()=>{
+                // why is the card scale being affected?
+                card.mesh.scale.setScalar(1);
+              },10)
+
+              // what is our offset at switch time?
+              var v = new THREE.Vector3();
+              v.copy(card.mesh.position);
+              card.mesh.localToWorld(v);
+              zone.group.worldToLocal(v);
+              // console.log(v);
+            }
+            // debugger;
+
+            // zone.group.attach(card.mesh);
+
+            // wonder how we can do this locally
+            // like... we attach, then it'll be offset from teh group
+            // then, we just always tween to a zero position,
+            // to assume the parent groups world position
+            // our destination:
+            // let DEST_POS = {x: 0,y:0,z:0}
+            let DEST_POS = {...zone.origin};
+            if(zone.getCardOffset){
+              let offset = zone.getCardOffset(card);
+              DEST_POS.x += offset.x;
+              DEST_POS.y += offset.y;
+              DEST_POS.z += offset.z;
+            }
+
+            let distX = DEST_POS.x - card.mesh.position.x;
+            let distY = DEST_POS.y - card.mesh.position.y;
+            let distZ = DEST_POS.z - card.mesh.position.z;
+
+            // delay when going from deck to table ("dealing")
+            let delay =
+              card.prev_zone_name === 'DeckGroup'
+              && zone.group.name === 'ZoneGroup'
+              ? card.index * 100
+              : 0;
+            let delta = performance.now() - card.zone_last_changed;
+
+            if(Math.abs(distX)>0.01){
+              let speed = Math.max(0.01,Math.abs(distX)/2);
+              if(delay && delta>delay){
+                let _speed = speed > Math.abs(distX) ? Math.abs(distX) : speed;
+                card.mesh.position.x += distX > 0 ? _speed : -_speed;
+              }
+            }
+            if(Math.abs(distY)>0.01){
+              let speed = Math.max(0.01,Math.abs(distY)/2);
+              if(delay && delta>delay){
+                let _speed = speed > Math.abs(distY) ? Math.abs(distY) : speed;
+                card.mesh.position.y += distY > 0 ? _speed : -_speed;
+              }
+            }
+            if(Math.abs(distZ)>0.01){
+              let speed = Math.max(0.01,Math.abs(distZ)/2);
+              if(delay && delta>delay){
+                let _speed = speed > Math.abs(distZ) ? Math.abs(distZ) : speed;
+                card.mesh.position.z += distZ > 0 ? _speed : -_speed;
+              }
+            }
           }
+          // card.tweenTo({
+          //   pos_x: zone.origin.x,
+          //   pos_y: zone.origin.y,
+          //   pos_z: zone.origin.z
+          // },{
+          //   duration: 1000,
+          // });
         }
-        // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
-        if(!card?.mesh){
-          // console.error('failed to tween card to zone',i,card)
-        }else{
-          t.zonegroup.attach(card.mesh);
-        }
-        // console.log('tween card to zone',card);
-        card?.tweenTo({
-          pos_x: zone.origin.x,
-          pos_y: zone.origin.y,
-          pos_z: zone.origin.z
-        },{
-          duration: 1000,
-        });
-        await delay(150);
       }
     }
+    //   for(let i in t.game.layout.zones){
+    //     let zone = t.game.layout.zones[i];
+    //     let card = null;
+    //     //cardforzone
+    //     for(let j in t.app.state.cards){
+    //       let c = t.app.state.cards[j];
+    //       if(c.zone == i){
+    //         card = t.cards[j]; // our LOCAL card (not the server-managed representation)
+    //         card.zone = i;
+    //         break;
+    //       }
+    //     }
+    //     // remove card from deckgroup, attach it back to zonegroup (playfield group for mousemove intersections)
+    //     if(card?.mesh && zone.group){
+    //       zone.group.attach(card.mesh);
+    //     }
+    //     // console.log('tween card to zone',card);
+    //     card?.tweenTo({
+    //       pos_x: zone.origin.x,
+    //       pos_y: zone.origin.y,
+    //       pos_z: zone.origin.z
+    //     },{
+    //       duration: 1000,
+    //     });
+    //     await delay(150);
+    //   }
+    // }
 }
 class Move{
     constructor(payload){
@@ -1303,7 +1464,11 @@ class Round{
 }
 class Layout{
     constructor(options){
-        this.zones = [];
+        this.zones = []; // our grid of zones (main playfield)
+
+        // our special named zones
+        this.named_zones = {};
+
         // todo: subclass Grid Layout
         this.options = options;
         // distance between cards
@@ -1318,6 +1483,7 @@ class Layout{
                     row: r,
                     col: c,
                     card: null,
+                    group: t.zonegroup,
 
                     origin:{
                         x: (3.5*r)-this.spacing.x+(r*0.5)- 1,
@@ -1327,6 +1493,41 @@ class Layout{
                 });
             }
         }
+        // add a deckgroup zone
+        let deckZone = {
+          name: 'deck',
+          group: t.deckgroup,
+          getCardOffset(card){
+            let cards = t.app.state.available_cards;
+            let deck_position = cards.indexOf(card.index);
+            const CARD_THICKNESS = 0.025;
+            // console.log('getCardOffset deck_position',deck_position);
+            return {
+              x: 0,
+              // offset vertically based on card thickness
+              y: //( cards.length * CARD_THICKNESS ) -
+                 ( deck_position * CARD_THICKNESS ),
+              z: 0
+            }
+          }
+        };
+        Object.defineProperty(deckZone,'origin',{
+          get:function(){
+            return this.group.position;
+          }
+        })
+        this.named_zones.deck = deckZone;
+        // this.zones.push(deckZone)
+    }
+
+    convertClientHandsToUserHands(){
+      // convert hand client id to user id
+      t.players[t.app.state.my_client_id].user_id = t.root.user.id;
+      t.players[t.app.state.my_client_id].hand.name = 'hand_' + t.root.user.id;
+      let handZone = t.game.layout.named_zones['hand_'+t.app.state.my_client_id]
+      handZone.name = 'hand_' + t.root.user.id;
+      t.game.layout.named_zones['hand_'+t.root.user.id] = handZone;
+      t.game.layout.named_zones['hand_'+t.app.state.my_client_id] = null;
     }
 }
 class Game_PVPMemory{
@@ -1565,6 +1766,8 @@ function render(){
   // }
   TWEEN.update(); // update all tweens :)
 
+  t.deck.tweenCardsToZones();
+
   // update "hovered" status of cards
   // todo only run this loop if t.app.state.hovered has changed since last tick
   if(t?.app?.state?.hovered){
@@ -1636,9 +1839,23 @@ function initLights(){
   scene.add( dirLight , ambientLight );
 }
 
+function getCardZone(server_card){
+  if(server_card?.zone === undefined){
+    server_card = t.app.state.cards[server_card.index];
+  }
+  let zone = !isNaN(parseInt(server_card.zone))
+    ? t.game.layout.zones?.[parseInt(server_card.zone)]
+    : t.game.layout.named_zones?.[server_card.zone];
+    if(!zone){
+      // console.error('Error locating zone',server_card.zone,Object.keys(t.game.layout.named_zones),parseInt(server_card.zone));
+      // debugger;
+    }
+  return zone;
+}
+
 function getFlipTween(card, direction){
-  console.log('card?',card)
-  const initPos = t.game.layout.zones[card.zone].origin;
+  // console.log('card?',card)
+  const initPos = getCardZone(card)?.origin;
   var zAxis = new THREE.Vector3( 0, 0, 1 );
   var qInitial = new THREE.Quaternion().setFromAxisAngle( zAxis, direction === 'facedown' ? Math.PI : 0 );
   var qFinal = new THREE.Quaternion().setFromAxisAngle( zAxis, direction === 'faceup' ? Math.PI : 0 );
@@ -1982,9 +2199,10 @@ async function onMouseMove( evt ){
   updatePlayerHead();
   // t.players[getOpponentID()].head.mesh.lookAt(t.camera)
   // prevent looking under the table
-  if(camera.position.y <= 2){
-    camera.position.y = 2;
-  }
+  // NOTE: did this with maxPolarAngle instead on controls
+  // if(camera.position.y <= 2){
+  //   camera.position.y = 2;
+  // }
   // TODO: allow user to hover over matches in their hand,
   // but NOT the playfield cards, if it's not currently their turn
   // todo: move up to app-level
