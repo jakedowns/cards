@@ -78,7 +78,7 @@ class SocketConnection{
     }
     connectWS(){
       this.client_id = null;
-      window.t.app.state.my_client_id = null;
+      window.t.app.my_client_id = null;
       try{
           this.ws = new WebSocket(`wss://${WSHOSTNAME}:${WEB_PORT}`);
 
@@ -169,16 +169,14 @@ class SocketConnection{
                 delete t.players[this.client_id];
               }
               this.client_id = decoded.your_client_id;
-              window.t.app.state.my_client_id = this.client_id;
-              window.t.app.state.player_type = decoded.player_or_spectator;
-              console.log(
-                'server says my id is',
-                this.client_id,
-                decoded.your_client_id
-              );
-              // todo: separate spectators
-              t.players[decoded.your_client_id] = new Player(decoded.your_client_id);
-              console.log('t.players now',t.players);
+              window.t.app.my_client_id = this.client_id;
+              // window.t.app.state.player_type = decoded.player_or_spectator;
+              // console.log(
+              //   'server says my id is',
+              //   this.client_id,
+              //   decoded.your_client_id
+              // );
+
               // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
 
               // request video stream
@@ -209,13 +207,13 @@ class SocketConnection{
       }
     }
     send(data){
-      data.client_id = t.app.state.my_client_id;
+      data.client_id = t.app.my_client_id;
       if(
         data.type !== 'SET_PLAYER_CURSOR'
         && data.type !== 'SET_PLAYER_HEAD'
         && data.type !== 'HIGHLIGHT'
       ){
-        console.log('sending',data,this.client_id,t.app.state.my_client_id);
+        console.log('sending',data,this.client_id,t.app.my_client_id);
       }
       if(!this.ws.readyState === 1){
         console.warn('ws not ready');
@@ -226,21 +224,21 @@ class SocketConnection{
 }
 
 class Player {
-    constructor(player_id){
-        this.player_id = player_id;
+    constructor(user_id){
+        this.user_id = user_id;
         // todo support multiple hands
         // this.matches = [];
         // this.cards = []; // server tells us what cards the player is holding (t.app.state.player_hands)
-        this.pointer = new PlayerPointer(player_id);
-        this.head = new PlayerHead(player_id);
+        this.pointer = new PlayerPointer(user_id);
+        this.head = new PlayerHead(user_id);
 
         this.hand = new THREE.Group();
-        this.hand.name = 'hand_'+player_id;
+        this.hand.name = 'hand_'+user_id;
         t.scene.add(this.hand);
 
         let handZone = {
           group: this.hand,
-          name: 'hand_'+player_id,
+          name: 'hand_'+user_id,
         }
         Object.defineProperty(handZone,'origin',{
           get:function(){
@@ -254,7 +252,7 @@ class Player {
 
         this.hand.rotation.z = THREE.MathUtils.degToRad(180);
 
-        t.game.layout.named_zones['hand_'+player_id] = handZone;
+        t.game.layout.named_zones['hand_'+user_id] = handZone;
     }
     destroy(){
         this.pointer.destroy();
@@ -354,7 +352,7 @@ class Tabletop{
     }
 
     getMyPlayer(){
-      return this.players[t.app.state.my_client_id];
+      return this.players[t.app.my_client_id];
     }
 
     getCameraSet(){
@@ -364,7 +362,7 @@ class Tabletop{
     }
 
     get opponentIDs(){
-      return t.app.state.client_ids.filter(id => id !== t.app.state.my_client_id);
+      return t.app.state.client_ids.filter(id => id !== t.app.my_client_id);
     }
 
     setupGame(){
@@ -387,7 +385,7 @@ class Tabletop{
     // setupRTCPeerConnections(){
     //   for(var i = 0; i<t.app.state.client_ids.length; i++){
     //     let client_id = t.app.state.client_ids[i];
-    //     if(client_id !== t.app.state.my_client_id){
+    //     if(client_id !== t.app.my_client_id){
     //       if(!t.webrtc_peer_connections[client_id]){
     //         t.offerStreamToPeer(client_id);
     //       }
@@ -445,7 +443,7 @@ class Tabletop{
             t.video.srcObject = stream;
             t.video.play();
 
-            t.players[t.app.state.my_client_id].head.assignVideoToHead(t.video);
+            t.players[t.app.my_client_id].head.assignVideoToHead(t.video);
 
             resolve();
 
@@ -465,6 +463,26 @@ class Tabletop{
 
         }
       });
+    }
+
+    /* this gets called with every tick from the server */
+    // maybe we throttle it
+    updatePlayerInstances(){
+      // make sure we have a instance of a Player class
+      // to represent this player
+      for(let i in t.app.state.user_ids){
+        let user_id = t.app.state.user_ids[i];
+        if(!t.players?.[user_id]){
+          t.players[user_id] = new Player(user_id);
+        }
+      }
+      // destroy player if they left
+      for(let user_id in t.players){
+        if(t.app?.state?.user_id?.indexOf(user_id) === -1){
+          t.players[user_id].destroy();
+          delete t.players[user_id];
+        }
+      }
     }
 
     /*
@@ -495,7 +513,7 @@ class Tabletop{
           camera.attach(card.mesh); // todo: only run this once (if parent isnt already camera)
 
 
-          let updateTo = player_id === t.app.state.my_client_id
+          let updateTo = player_id === t.app.my_client_id
             ? this.getUpdateToPlayersHand(player_id,a)
             : this.getUpdateToOpponentsHand(player_id,a);
           console.log(updateTo);
@@ -513,22 +531,12 @@ class Tabletop{
     */
 
     updatePlayerCursors(){
-      for(let i in t.app.state.client_ids){
-        let player_id = t.app.state.client_ids[i];
-        if(!t.players?.[player_id]){
-          t.players[player_id] = new Player(player_id);
-        }
-      }
-      for(let b in t.players){
-        if(t.app?.state?.client_ids?.indexOf(b) === -1){
-          t.players[b].destroy();
-          delete t.players[b];
-        }
-      }
+      // TODO: change this to be a continuous tweening function like
+      // cardsToZones
       for(let i in t.app.state.player_cursors){
         let player_cursor_position = t.app.state.player_cursors[i];
         // console.log(i===t.app.,player_cursor_position);
-        if(i !== t.app.state.my_client_id){
+        if(i !== t.app.my_client_id){
           // console.log('update opponent cursor');
           // only update other players, let mousemove drive local players cursor so it doesn't fight with server-streaming values
           t?.players?.[i]?.pointer?.tweenTo({
@@ -540,10 +548,12 @@ class Tabletop{
       }
     }
 
+    // TODO: change this to be a continuous tweening function like
+    // cardsToZones
     updatePlayerHeads(){
       for(let player_id in t.app?.state?.player_heads){
         // let player_id = t.app.state.client_ids[i];
-        if(player_id !== t.app.state.my_client_id){
+        if(player_id !== t.app.my_client_id){
           // only render opponent heads
           let player_head_position = t.app.state.player_heads[player_id];
           const destination = {
@@ -577,60 +587,60 @@ class Tabletop{
       }
     }
 
-    getUpdateToPlayersHand(player_id,a){
-      const hand = t.app.state?.player_hands?.[player_id] ?? [];
-      let matches_count = hand.length/2;
-      let even = a % 2 == 0;
-      let lerp_max = .07 * matches_count
-      let updateTo = {}
-      updateTo.pos_x = lerp(
-        0, // 0 basis
-        lerp_max, // lerp max width
-        (1/matches_count)*(even?a+1:a+2)) // % of lerp
-        -(even?.1:.105) // slight offset for "paired" card
-        -(a*.01) // padding between cards
-        -(lerp_max) // center
-        +(.05)
-      updateTo.pos_y = -0.5 + (0.001 * a);
-      updateTo.pos_z = -1.0 + (0.001 * a);
+    // getUpdateToPlayersHand(player_id,a){
+    //   const hand = t.app.state?.player_hands?.[player_id] ?? [];
+    //   let matches_count = hand.length/2;
+    //   let even = a % 2 == 0;
+    //   let lerp_max = .07 * matches_count
+    //   let updateTo = {}
+    //   updateTo.pos_x = lerp(
+    //     0, // 0 basis
+    //     lerp_max, // lerp max width
+    //     (1/matches_count)*(even?a+1:a+2)) // % of lerp
+    //     -(even?.1:.105) // slight offset for "paired" card
+    //     -(a*.01) // padding between cards
+    //     -(lerp_max) // center
+    //     +(.05)
+    //   updateTo.pos_y = -0.5 + (0.001 * a);
+    //   updateTo.pos_z = -1.0 + (0.001 * a);
 
-      updateTo.rot_x = 0.5;//1;
-      updateTo.rot_y = Math.PI;
-      updateTo.rot_z = Math.PI;
+    //   updateTo.rot_x = 0.5;//1;
+    //   updateTo.rot_y = Math.PI;
+    //   updateTo.rot_z = Math.PI;
 
-      updateTo.scale_x = .09 * .65
-      updateTo.scale_y = .09
-      updateTo.scale_z = .09 //
-      return updateTo;
-    }
+    //   updateTo.scale_x = .09 * .65
+    //   updateTo.scale_y = .09
+    //   updateTo.scale_z = .09 //
+    //   return updateTo;
+    // }
 
-    getUpdateToOpponentsHand(player_id,a){
-      // let player = t.players[player_id];
-      const hand = t.app.state?.player_hands?.[player_id] ?? [];
-      let matches_count = hand.length/2;
-      let even = a % 2 == 0;
-      let lerp_max = .07 * matches_count
-      let updateTo = {}
-      updateTo.pos_x = lerp(
-        0, // 0 basis
-        lerp_max, // lerp max width
-        (1/matches_count)*(even?a+1:a+2)) // % of lerp
-        +(even?.1:.105) // slight offset for "paired" card
-        +(a*.01) // padding between cards
-        +(lerp_max) // center
-        -(.05)
-      updateTo.pos_y = 0.5 + (0.001 * a);
-      updateTo.pos_z = 1.0 + (0.001 * a);
+    // getUpdateToOpponentsHand(player_id,a){
+    //   // let player = t.players[player_id];
+    //   const hand = t.app.state?.player_hands?.[player_id] ?? [];
+    //   let matches_count = hand.length/2;
+    //   let even = a % 2 == 0;
+    //   let lerp_max = .07 * matches_count
+    //   let updateTo = {}
+    //   updateTo.pos_x = lerp(
+    //     0, // 0 basis
+    //     lerp_max, // lerp max width
+    //     (1/matches_count)*(even?a+1:a+2)) // % of lerp
+    //     +(even?.1:.105) // slight offset for "paired" card
+    //     +(a*.01) // padding between cards
+    //     +(lerp_max) // center
+    //     -(.05)
+    //   updateTo.pos_y = 0.5 + (0.001 * a);
+    //   updateTo.pos_z = 1.0 + (0.001 * a);
 
-      updateTo.rot_x = 0.5;//1;
-      updateTo.rot_y = Math.PI;
-      updateTo.rot_z = -Math.PI;
+    //   updateTo.rot_x = 0.5;//1;
+    //   updateTo.rot_y = Math.PI;
+    //   updateTo.rot_z = -Math.PI;
 
-      updateTo.scale_x = .09 * .65
-      updateTo.scale_y = .09
-      updateTo.scale_z = .09 //
-      return updateTo;
-    }
+    //   updateTo.scale_x = .09 * .65
+    //   updateTo.scale_y = .09
+    //   updateTo.scale_z = .09 //
+    //   return updateTo;
+    // }
 
     get deck(){
         return this.game.decks.default;
@@ -1265,6 +1275,7 @@ class Deck{
               console.log(card.mesh?.parent?.name,zone.group.name);
               card.zone_last_changed = performance.now();
               card.prev_zone_name = card.mesh?.parent?.name;
+              card.current_zone_name = zone.group.name;
 
               // when should we attach vs. add here?
               zone.group.attach(card.mesh);
@@ -1522,12 +1533,12 @@ class Layout{
 
     convertClientHandsToUserHands(){
       // convert hand client id to user id
-      t.players[t.app.state.my_client_id].user_id = t.root.user.id;
-      t.players[t.app.state.my_client_id].hand.name = 'hand_' + t.root.user.id;
-      let handZone = t.game.layout.named_zones['hand_'+t.app.state.my_client_id]
+      t.players[t.app.my_client_id].user_id = t.root.user.id;
+      t.players[t.app.my_client_id].hand.name = 'hand_' + t.root.user.id;
+      let handZone = t.game.layout.named_zones['hand_'+t.app.my_client_id]
       handZone.name = 'hand_' + t.root.user.id;
       t.game.layout.named_zones['hand_'+t.root.user.id] = handZone;
-      t.game.layout.named_zones['hand_'+t.app.state.my_client_id] = null;
+      t.game.layout.named_zones['hand_'+t.app.my_client_id] = null;
     }
 }
 class Game_PVPMemory{
@@ -1745,7 +1756,7 @@ function getOpponentID(){
   }else if(ids.length > 2){
     console.error('need to figure out multipeer connections');
   }else{
-    let my_index = ids.indexOf(t.app.state.my_client_id);
+    let my_index = ids.indexOf(t.app.my_client_id);
     ids.splice(my_index,1);
     console.warn('attempting media offer to peer:',ids[0],ids);
   }
@@ -2331,6 +2342,8 @@ function updateServer(type,data){
   t.server.send({
     type,
     data,
+    user_id: t.root.user.id,
+    game_id: t.root.game_selection
   })
 }
 
@@ -2342,7 +2355,7 @@ function updateClientCursor(){
   // mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   // Toggle rotation bool for meshes that we clicked
-  const pointer = t.players?.[t.app.state.my_client_id]?.pointer?.mesh;
+  const pointer = t.players?.[t.app.my_client_id]?.pointer?.mesh;
   if(pointer){
     var intersects = intersectsGroup( [t.tableMesh,...t.zonegroup.children] );
     // console.log('intersects',intersects);
@@ -2432,6 +2445,12 @@ function onMouseClick( evt ){
   if(t.app.state.ignore_clicks || t.client_ignore_clicks || t.deck.shuffling){
     return;
   }
+
+  // if we're not logged in, ignore it
+  if(!t?.root?.player?.id){
+    return;
+  }
+
   mouseClickCoord = {
       x: evt.clientX,
       y: evt.clientY
@@ -2446,10 +2465,10 @@ function onMouseClick( evt ){
   //   drag_distance
   // })
   // console.log('is it my turn?',{
-  //   my_id:t.app.state.my_client_id,
+  //   my_id:t.app.my_client_id,
   //   player_turn:t.app.state.player_turn
   // })
-  if(t.app.state.my_client_id !== t.app.state.player_turn){
+  if(t.app.my_client_id !== t.app.state.player_turn){
     console.error('its not your turn');
     // TODO: visual feedback (pulse cursor red or something)
     return;
@@ -2469,7 +2488,7 @@ function onMouseClick( evt ){
 
     // TODO: we need to only react to the card that is closest to the camera
     // need to account for occluders too :/
-    let player_id = t.app.state.my_client_id
+    let user_id = t.root.player.id; // t.app.my_client_id
     const intersects = intersectsGroup(t.debug_inspect_objects ? t.scene.children : t.zonegroup.children)
     let card_id = intersects?.[0]?.object?.userData?.card_id;
     // console.log('click intersects',{intersects,card_id});
@@ -2487,7 +2506,7 @@ function onMouseClick( evt ){
         // ignore if we already flipped this card over
         t.app.state.flipped.indexOf(card_id)>-1
         // or if it's in the player hand
-        || t.app.state.player_hands[player_id].indexOf(card_id)>-1
+        || t.app.state.player_hands[user_id].indexOf(card_id)>-1
         // todo: or if it's in opponents hand
         // todo: or if it's not in a zone (intersecting only zonegroup.children kind of solves this one)
        ){
