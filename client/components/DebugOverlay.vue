@@ -5,38 +5,40 @@
         </div>
         <div class="debug-inner" v-if="show_debug">
 
+            <div class="actions">
 
-            <!-- have to enable video or mic first before this option becomes available -->
-            <!-- <div v-if="
-                !calling
-                && !show_end_call_button
-                && (video_enabled || !mic_muted)
-            "
-                @click.prevent="startVideoChat"
-                style="pointer-events:all;">
-                <button class="video-chat-call-start">Join Chat</button>
-            </div> -->
-            <div v-if="show_end_call_button"
-                @click.prevent="end_video_chat"
-                style="pointer-events:all;">
-                <button class="video-chat-call-end">Leave Chat</button>
+                <!-- have to enable video or mic first before this option becomes available -->
+                <!-- <div v-if="
+                    !calling
+                    && !show_end_call_button
+                    && (video_enabled || !mic_muted)
+                "
+                    @click.prevent="startVideoChat"
+                    style="pointer-events:all;">
+                    <button class="video-chat-call-start">Join Chat</button>
+                </div> -->
+                <div v-if="show_end_call_button"
+                    @click.prevent="end_video_chat"
+                    style="pointer-events:all;">
+                    <button class="video-chat-call-end">Leave Chat</button>
+                </div>
+
+                <button @click="toggleWireframe" style="pointer-events:all;">Wireframe</button>
+
+                <div
+                    @click.prevent="resetCamera"
+                    style="pointer-events:all;">
+                    <button class="">Reset Camera</button>
+                </div>
+                <div
+                    @click.prevent="toggleCameraLock"
+                    style="pointer-events:all;">
+                    <button class="">{{camera_locked ? 'Unlock' : 'Lock'}} Camera</button>
+                </div>
+
+                <br/>
+                <button @click="$emit('toggleShowDebugInfo')">{{show_debug_info?'Hide':'Show Debug Info'}}</button>
             </div>
-
-            <button @click="toggleWireframe" style="pointer-events:all;">Wireframe</button>
-
-            <div
-                @click.prevent="resetCamera"
-                style="pointer-events:all;">
-                <button class="">Reset Camera</button>
-            </div>
-            <div
-                @click.prevent="toggleCameraLock"
-                style="pointer-events:all;">
-                <button class="">{{camera_locked ? 'Unlock' : 'Lock'}} Camera</button>
-            </div>
-
-            <br/>
-            <button @click="$emit('toggleShowDebugInfo')">{{show_debug_info?'Hide':'Show Debug Info'}}</button>
             <div class="inner" v-show="show_debug_info">
                 <ul class="details">
                     <li class="my_client_id">My Client ID:

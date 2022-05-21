@@ -87,7 +87,6 @@
                 :im_game_host="im_game_host"
                 :its_my_turn="its_my_turn"
                 :messages="messages"
-                :show_end_call_button="show_end_call_button"
                 :show_debug_info="show_debug_info"
                 @toggleShowDebugInfo="toggleShowDebugInfo"
 
@@ -95,7 +94,6 @@
                 :video_enabled="video_enabled"
                 :video_muted="video_muted"
 
-                :startVideoChat="startVideoChat"
 
                 :camera_locked="camera_locked"
                 :resetCamera="resetCamera"
@@ -194,10 +192,9 @@ export default {
             show_game_in_progress_modal: false,
 
             show_debug_info: ref(false),
-            calling: false,
+            calling: ref(false),
             is_streaming: ref(false),
-            show_end_call_button: false,
-            camera_locked: false,
+            camera_locked: ref(false),
             messages: [],
             mic_muted: true,
             video_enabled: false,
@@ -240,15 +237,6 @@ export default {
             // todo: should i detect deck<->zone<->hand movement implicitly / reactively?
             // or do i need to say ON_MATCH_PASS, ON_MATCH_FAIL to trigger next steps?
             handler(new_state,old_state){
-
-                // if we have an active webrtc connection, give user option to end it
-                this.show_end_call_button = false;
-                // at least one active peer?
-                Object.values(t?.peers?.remote_peers??{})?.forEach((conn)=>{
-                    if(conn.connectionState === 'connected'){
-                        this.show_end_call_button = true;
-                    }
-                })
 
                 // if(new_state?.client_ids?.length > old_state?.client_ids?.length){
                 //     t.setupRTCPeerConnections();
@@ -333,7 +321,12 @@ export default {
 
     methods:{
         toggleStream(){
-
+            this.is_streaming = !this.is_streaming;
+            if(this.is_streaming){
+                this.startVideoChat();
+            }else{
+                this.endVideoChat();
+            }
         },
         resetCamera(){
             t.cameraman.goToView('overhead');
@@ -402,6 +395,7 @@ export default {
                 this.show_login_loading = false;
                 return;
             }
+            t.app.state.my_user_id = this.user.id;
 
             console.log('this user?', this.user);
 
@@ -444,15 +438,7 @@ export default {
             this.room_selection = this.user_session?.current_room
             this.game_selection = this.user_session?.current_game
 
-            t.server.send({
-                type:'SET_USER_SESSION',
-                user_id:this.user.id,
-                session:{
-                    world_selection:this.world_selection,
-                    room_selection:this.room_selection,
-                    game_selection:this.game_selection
-                }
-            })
+            this.SET_USER_SESSION();
 
             // TODO: make game->room->world a single query
             if(this.game_selection){
@@ -474,6 +460,17 @@ export default {
                     this.closePauseMenu()
                 }
             }
+        },
+        SET_USER_SESSION(){
+            t.server.send({
+                type:'SET_USER_SESSION',
+                user_id:this?.user?.id,
+                session:{
+                    world_selection:this?.world_selection,
+                    room_selection:this?.room_selection,
+                    game_selection:this?.game_selection
+                }
+            })
         },
         // Sound FX Mute Toggle
         toggleMute(){
@@ -507,50 +504,42 @@ export default {
         // toggle_vid_mute(){
         //     this.video_muted = !this.video_muted;
         // },
-        startVideoChat(){
+        async startVideoChat(){
+            if(this.calling || this.has_active_peers){
+                return;
+            }
             this.calling = true;
-            window.t.setupVideoStream();
-            window.t.call()
-        },
-        end_video_chat(){
-            // window.t?.peer?.close();
-            // if(window.t.peer){
-            //     window.t.peer = null;
-            // }
-            window.t.peers.closeAll();
-            /*
-            window.t.webrtc_peer_connections.forEach((conn)=>{
-                conn.close();
-            })
-            window.t.webrtc_peer_connections = {};
-            window.t.peers.setupRTCPeerConnections();
-            */
-            this.show_end_call_button = false;
+            // todo: await
+            await window.t.setupVideoStream();
+            await window.t.call()
             this.calling = false;
         },
-        new_room() {
-            // request new room
-            window.t.server.send({
-                type: 'NEW_ROOM',
-            })
+        endVideoChat(){
+            window.t.peers.closeAll();
         },
-        new_game() {
-            // request new game
-            window.t.server.send({
-                type: 'NEW_GAME',
-            })
-        },
-        new_round() {
-            window.t.server.send({
-                type: 'NEW_ROUND',
-            })
-        },
-        start_game() {
-            window.t.server.send({
-                type: 'START_GAME',
-                //game_id: this.state.game_id, // server should know based on client id
-            })
-        },
+        // createRoom() {
+        //     // request new room
+        //     window.t.server.send({
+        //         type: 'NEW_ROOM',
+        //     })
+        // },
+        // newGame() {
+        //     // request new game
+        //     window.t.server.send({
+        //         type: 'NEW_GAME',
+        //     })
+        // },
+        // newRound() {
+        //     window.t.server.send({
+        //         type: 'NEW_ROUND',
+        //     })
+        // },
+        // startGame() {
+        //     window.t.server.send({
+        //         type: 'START_GAME',
+        //         //game_id: this.state.game_id, // server should know based on client id
+        //     })
+        // },
         restartGame(){
             this.closePauseMenu()
             window.t.server.send({
@@ -663,32 +652,30 @@ export default {
             //return this.state.rounds?.[this.state.round_id];
         },
         its_my_turn(){
-            return this.state.player_turn === this.state.my_client_id;
+            return this.state.player_turn === this.state.my_user_id;
         },
         im_game_host(){
-            return this.state.game_host === this.state.my_client_id
+            return this.state.game_host === this.state.my_user_id
         },
         game_started(){
             return this.game?.started;
+        },
+        has_active_peers(){
+            // cb ref
+            let state = this.state; // TODO: this updates multiple times a second TODO: use a less frequently updated prop // or just put this check on a 1s interval
+            let has_active_peers = false;
+            Object.values(t?.peers?.remote_peers??{})?.forEach((conn)=>{
+                if(conn.connectionState === 'connected'){
+                    has_active_peers = true;
+                }
+            })
+            return has_active_peers;
         }
     }
 }
 </script>
 
 <style lang="scss">
-.mute-video {
-    position: absolute;
-    width: 40px;
-    bottom: 103px;
-    left: 30px;
-    pointer-events: all;
-
-    svg {
-        cursor: pointer;
-        width: 100%;
-        height: auto;
-    }
-}
 .game-modal-toggle-icon {
     z-index: 2;
     cursor: pointer;
@@ -702,11 +689,6 @@ export default {
         height: auto;
     }
 }
-.toggle-video{
-    position: absolute;
-    right: 21px;
-    bottom: 103px;
-}
 select {
     background: #000;
 }
@@ -716,11 +698,33 @@ button {
     margin: 3px;
     border-radius: 20px;
 }
+.debug-toggle {
+    z-index: 2;
+}
 .debug-inner {
     pointer-events: all;
-    margin-top: 170px;
+    padding-top: 50px;
     text-align: right;
     margin-right: 15px;
+    .actions {
+        position: absolute;
+        right: 10px;
+        top: 150px;
+        z-index: 2;
+    }
+    .details {
+        padding-right: 200px;
+        max-width: 470px;
+        word-break: break-all;
+        font-family: monospace;
+        pointer-events: none;
+    }
+    .actions,.details {
+        z-index: 2;
+    }
+    .inner,.bg-blur {
+        z-index: 1;
+    }
 }
 .modal-wrapper {
     width: 100%;
@@ -773,6 +777,18 @@ button {
 canvas {
     z-index: 1;
 }
+.hud-inner {
+    position: absolute;
+    bottom: 200px;
+    width: 100%;
+    .svg-button {
+        position: relative;
+        display: inline-block;
+        margin-left: 20px;
+        width: 30px;
+        height: 30px;
+    }
+}
 #vue-layer {
     z-index: 2;
     position: absolute;
@@ -818,7 +834,7 @@ input[type=text],input[type=password]{
     width: auto;
     // right: auto;
 
-    width: 200px;
+    // width: 200px;
     height: auto;
     // pointer-events: none;
 
@@ -831,6 +847,7 @@ input[type=text],input[type=password]{
     position: relative;
 
     font-size: 11px;
+    text-align: left;
 }
 .bg-blur {
     z-index: 1;
@@ -844,7 +861,11 @@ input[type=text],input[type=password]{
     pointer-events: none;
 }
 
-
+.videos {
+    bottom: 100px;
+    position: absolute;
+    width: 100%;
+}
 .opponent_videos {
     display: flex;
     flex-direction: row;
@@ -854,7 +875,7 @@ input[type=text],input[type=password]{
     right: 0;
     height: 100px;
     width: 100vw;
-    bottom: 0;
+    bottom: 100px;
 }
 .opponent_video {
     border: 1px solid yellow;
@@ -902,21 +923,28 @@ input[type=text],input[type=password]{
 }
 
 .mic-toggle {
-    position: absolute;
-    bottom: 100px;
-    left: 140px;
+    // position: absolute;
+    // bottom: 100px;
+    // left: 140px;
 }
 
 .video-toggle {
-    position: absolute;
-    left: 80px;
-    bottom: 106px;
+    // position: absolute;
+    // left: 80px;
+    // bottom: 106px;
+}
+
+.toggle-video{
+}
+.mute-video {
+    // position: absolute;
+    width: 40px;
 }
 
 .stream-toggle {
-    position: absolute;
-    bottom: 90px;
-    left: 190px;
+    // position: absolute;
+    // bottom: 90px;
+    // left: 190px;
     width: 50px;
 }
 
@@ -950,8 +978,8 @@ svg {
 
 .chat-box {
     position: absolute;
-    right: 30px;
-    bottom: 100px;
+    right: 0px;
+    bottom: 220px;
     pointer-events: all;
     width: 300px;
     max-height: 50vh;
@@ -965,5 +993,13 @@ svg {
     border-radius: 10px;
     padding: 10px;
     margin: 10px;
+    &.me {
+        background: rgba(0,0,0,0.3);
+        text-align: right;
+    }
+}
+
+.message-sender {
+    opacity: 0.5;
 }
 </style>

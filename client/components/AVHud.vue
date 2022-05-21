@@ -41,8 +41,8 @@
 
             <!-- STREAMING TOGGLE -->
             <div class="svg-button stream-toggle" title="Toggle Streaming" @click.prevent="$emit('toggleStream')">
-                <svg v-if="!streaming" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><rect x="0" y="0" width="24" height="24" fill="none" stroke="none" /><path fill="currentColor" d="M6.343 4.938a1 1 0 0 1 0 1.415a8.003 8.003 0 0 0 0 11.317a1 1 0 1 1-1.415 1.414c-3.906-3.906-3.906-10.24 0-14.146a1 1 0 0 1 1.415 0Zm12.731 0c3.906 3.907 3.906 10.24 0 14.146a1 1 0 0 1-1.414-1.414a8.003 8.003 0 0 0 0-11.317a1 1 0 0 1 1.414-1.415ZM9.31 7.812a1 1 0 0 1 0 1.414a3.92 3.92 0 0 0 0 5.544a1 1 0 1 1-1.414 1.414a5.92 5.92 0 0 1 0-8.372a1 1 0 0 1 1.414 0Zm6.959 0a5.92 5.92 0 0 1 0 8.372a1 1 0 0 1-1.415-1.414a3.92 3.92 0 0 0 0-5.544a1 1 0 0 1 1.415-1.414Zm-4.187 2.77a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Z"/></svg>
-                <svg v-if="streaming" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><rect x="0" y="0" width="24" height="24" fill="none" stroke="none" /><path fill="currentColor" d="M3.28 2.22a.75.75 0 1 0-1.06 1.06l2.202 2.203c-3.392 3.93-3.223 9.872.506 13.601a1 1 0 0 0 1.415-1.414A8.004 8.004 0 0 1 5.84 6.902l1.521 1.52a5.922 5.922 0 0 0 .533 7.763A1 1 0 0 0 9.31 14.77a3.922 3.922 0 0 1-.513-4.913l1.836 1.836a1.5 1.5 0 0 0 1.838 1.838l8.25 8.25a.75.75 0 0 0 1.06-1.061L3.28 2.22Zm15.748 13.626l1.461 1.462c2.414-3.861 1.943-9.012-1.415-12.37a1 1 0 1 0-1.414 1.415a8.006 8.006 0 0 1 1.368 9.493Zm-3.098-3.098l1.59 1.591a5.922 5.922 0 0 0-1.252-6.527a1 1 0 1 0-1.415 1.414a3.916 3.916 0 0 1 1.077 3.522Z"/></svg>
+                <svg v-if="!is_streaming" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><rect x="0" y="0" width="24" height="24" fill="none" stroke="none" /><path fill="currentColor" d="M6.343 4.938a1 1 0 0 1 0 1.415a8.003 8.003 0 0 0 0 11.317a1 1 0 1 1-1.415 1.414c-3.906-3.906-3.906-10.24 0-14.146a1 1 0 0 1 1.415 0Zm12.731 0c3.906 3.907 3.906 10.24 0 14.146a1 1 0 0 1-1.414-1.414a8.003 8.003 0 0 0 0-11.317a1 1 0 0 1 1.414-1.415ZM9.31 7.812a1 1 0 0 1 0 1.414a3.92 3.92 0 0 0 0 5.544a1 1 0 1 1-1.414 1.414a5.92 5.92 0 0 1 0-8.372a1 1 0 0 1 1.414 0Zm6.959 0a5.92 5.92 0 0 1 0 8.372a1 1 0 0 1-1.415-1.414a3.92 3.92 0 0 0 0-5.544a1 1 0 0 1 1.415-1.414Zm-4.187 2.77a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Z"/></svg>
+                <svg v-if="is_streaming" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><rect x="0" y="0" width="24" height="24" fill="none" stroke="none" /><path fill="currentColor" d="M3.28 2.22a.75.75 0 1 0-1.06 1.06l2.202 2.203c-3.392 3.93-3.223 9.872.506 13.601a1 1 0 0 0 1.415-1.414A8.004 8.004 0 0 1 5.84 6.902l1.521 1.52a5.922 5.922 0 0 0 .533 7.763A1 1 0 0 0 9.31 14.77a3.922 3.922 0 0 1-.513-4.913l1.836 1.836a1.5 1.5 0 0 0 1.838 1.838l8.25 8.25a.75.75 0 0 0 1.06-1.061L3.28 2.22Zm15.748 13.626l1.461 1.462c2.414-3.861 1.943-9.012-1.415-12.37a1 1 0 1 0-1.414 1.415a8.006 8.006 0 0 1 1.368 9.493Zm-3.098-3.098l1.59 1.591a5.922 5.922 0 0 0-1.252-6.527a1 1 0 1 0-1.415 1.414a3.916 3.916 0 0 1 1.077 3.522Z"/></svg>
             </div>
 
 
@@ -50,8 +50,8 @@
         <div class="chat-box">
             <div class="messages">
                 <div v-for="message in chat_messages" :key="message.timestamp">
-                    <div class="message-wrapper">
-                        <div class="message-sender">{{nameForUserID(message.user_id)}}</div>
+                    <div class="message-wrapper" :class="{'me':message.client_id===state.my_client_id}">
+                        <div class="message-sender" >{{nameForUserID(message.user_id)}}</div>
                         <div class="message-text">{{message.message}}</div>
                     </div>
                 </div>
@@ -70,16 +70,16 @@
             <!-- opponent video streams -->
             <div class="opponent_videos">
             <video class="opponent_video"
-                v-for="user_id in (state?.user_ids ?? []).filter((id)=>{return id!==my_user_id})"
-                :key="user_id"
-                :class="{'muted':client_mute_states[user_id]}"
+                v-for="client_ids in (state?.client_ids ?? []).filter((id)=>{return id!==state.my_client_id})"
+                :key="client_ids"
+                :class="{'muted':client_mute_states[client_ids]}"
                 autoplay
                 title="Tap To Mute"
-                :ref="`opponent_video_${user_id}`"
+                :ref="`opponent_video_${client_ids}`"
                 playsinline
-                @click="toggleOpponentMute(user_id)"
-                :muted="client_mute_states?.[user_id] ?? false"
-                :data-client-id="user_id" />
+                @click="toggleOpponentMute(client_ids)"
+                :muted="client_mute_states?.[client_ids] ?? false"
+                :data-client-id="client_ids" />
             </div>
         </div>
     </div>
@@ -95,7 +95,6 @@ export default {
         audio_muted:Boolean,
         is_streaming:Boolean,
 
-        client_id:String,
 
         enableVideo:Function,
         disableVideo:Function,
@@ -123,7 +122,7 @@ export default {
     },
     computed:{
         my_user_id(){
-            return t?.app?.user?.id
+            return t?.root?.user?.id
         },
         nameForUserID(){
             return(user_id)=>{

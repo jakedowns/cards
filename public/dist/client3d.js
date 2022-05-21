@@ -16873,7 +16873,6 @@ __webpack_require__.r(__webpack_exports__);
     mic_muted: Boolean,
     audio_muted: Boolean,
     is_streaming: Boolean,
-    client_id: String,
     enableVideo: Function,
     disableVideo: Function,
     openPauseMenu: Function,
@@ -16902,9 +16901,9 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     my_user_id: function my_user_id() {
-      var _t, _t$app, _t$app$user;
+      var _t, _t$root, _t$root$user;
 
-      return (_t = t) === null || _t === void 0 ? void 0 : (_t$app = _t.app) === null || _t$app === void 0 ? void 0 : (_t$app$user = _t$app.user) === null || _t$app$user === void 0 ? void 0 : _t$app$user.id;
+      return (_t = t) === null || _t === void 0 ? void 0 : (_t$root = _t.root) === null || _t$root === void 0 ? void 0 : (_t$root$user = _t$root.user) === null || _t$root$user === void 0 ? void 0 : _t$root$user.id;
     },
     nameForUserID: function nameForUserID() {
       var _this2 = this;
@@ -17287,10 +17286,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       show_spectator_joined_modal: false,
       show_game_in_progress_modal: false,
       show_debug_info: (0,vue__WEBPACK_IMPORTED_MODULE_9__.ref)(false),
-      calling: false,
+      calling: (0,vue__WEBPACK_IMPORTED_MODULE_9__.ref)(false),
       is_streaming: (0,vue__WEBPACK_IMPORTED_MODULE_9__.ref)(false),
-      show_end_call_button: false,
-      camera_locked: false,
+      camera_locked: (0,vue__WEBPACK_IMPORTED_MODULE_9__.ref)(false),
       messages: [],
       mic_muted: true,
       video_enabled: false,
@@ -17326,27 +17324,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       // todo: should i detect deck<->zone<->hand movement implicitly / reactively?
       // or do i need to say ON_MATCH_PASS, ON_MATCH_FAIL to trigger next steps?
       handler: function handler(new_state, old_state) {
-        var _Object$values,
-            _t$peers$remote_peers,
-            _t,
-            _t$peers,
-            _this2 = this,
-            _new_state$game,
-            _old_state$game,
-            _new_state$client_ids,
-            _old_state$client_ids;
+        var _new_state$game, _old_state$game, _new_state$client_ids, _old_state$client_ids;
 
-        // if we have an active webrtc connection, give user option to end it
-        this.show_end_call_button = false; // at least one active peer?
-
-        (_Object$values = Object.values((_t$peers$remote_peers = (_t = t) === null || _t === void 0 ? void 0 : (_t$peers = _t.peers) === null || _t$peers === void 0 ? void 0 : _t$peers.remote_peers) !== null && _t$peers$remote_peers !== void 0 ? _t$peers$remote_peers : {})) === null || _Object$values === void 0 ? void 0 : _Object$values.forEach(function (conn) {
-          if (conn.connectionState === 'connected') {
-            _this2.show_end_call_button = true;
-          }
-        }); // if(new_state?.client_ids?.length > old_state?.client_ids?.length){
+        // if(new_state?.client_ids?.length > old_state?.client_ids?.length){
         //     t.setupRTCPeerConnections();
         // }
-
         if (new_state !== null && new_state !== void 0 && (_new_state$game = new_state.game) !== null && _new_state$game !== void 0 && _new_state$game.started && !(old_state !== null && old_state !== void 0 && (_old_state$game = old_state.game) !== null && _old_state$game !== void 0 && _old_state$game.started)) {
           t.startGame();
         } // TODO constantly tween towards Zones, remove the need to explictly detect zone changes and manually trigger tweens
@@ -17420,7 +17402,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
   },
   methods: {
-    toggleStream: function toggleStream() {},
+    toggleStream: function toggleStream() {
+      this.is_streaming = !this.is_streaming;
+
+      if (this.is_streaming) {
+        this.startVideoChat();
+      } else {
+        this.endVideoChat();
+      }
+    },
     resetCamera: function resetCamera() {
       t.cameraman.goToView('overhead');
     },
@@ -17462,14 +17452,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.openPauseMenu();
     },
     onLoginNotAuthenticated: function onLoginNotAuthenticated() {
-      var _this3 = this;
+      var _this2 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _this3.show_login_loading = false;
+                _this2.show_login_loading = false;
 
               case 1:
               case "end":
@@ -17480,10 +17470,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     onLoginAuthenticated: function onLoginAuthenticated() {
-      var _this4 = this;
+      var _this3 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
-        var _this4$user, _result$data, _this4$user_session, _this4$user_session$c, _this4$user_session2, _this4$user_session3, _this4$user2, _this4$user2$first_na;
+        var _this3$user, _result$data, _this3$user_session, _this3$user_session$c, _this3$user_session2, _this3$user_session3, _this3$user2, _this3$user2$first_na;
 
         var result;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
@@ -17499,47 +17489,48 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 3:
-                _this4.user = _context2.sent;
+                _this3.user = _context2.sent;
                 t.server.send({
                   type: 'CONNECT_AS_USER',
-                  user_id: _this4.user.id,
-                  name: (_this4$user = _this4.user) === null || _this4$user === void 0 ? void 0 : _this4$user.first_name
+                  user_id: _this3.user.id,
+                  name: (_this3$user = _this3.user) === null || _this3$user === void 0 ? void 0 : _this3$user.first_name
                 });
 
-                if (_this4.user) {
+                if (_this3.user) {
                   _context2.next = 8;
                   break;
                 }
 
-                _this4.show_login_loading = false;
+                _this3.show_login_loading = false;
                 return _context2.abrupt("return");
 
               case 8:
-                console.log('this user?', _this4.user);
-                _context2.next = 11;
+                t.app.state.my_user_id = _this3.user.id;
+                console.log('this user?', _this3.user);
+                _context2.next = 12;
                 return t.server.directus.items('Sessions').readByQuery({
                   limit: 1,
                   filter: {
-                    user: _this4.user.id
+                    user: _this3.user.id
                   }
                 });
 
-              case 11:
+              case 12:
                 result = _context2.sent;
-                _this4.user_session = null; // reset
+                _this3.user_session = null; // reset
 
                 if (result !== null && result !== void 0 && (_result$data = result.data) !== null && _result$data !== void 0 && _result$data.length) {
-                  _this4.user_session = result.data[0];
+                  _this3.user_session = result.data[0];
                 }
 
-                console.log('servers user_session:', _this4.user_session); // if the user does not have a session, created one
+                console.log('servers user_session:', _this3.user_session); // if the user does not have a session, created one
 
-                if (_this4.user_session) {
-                  _context2.next = 19;
+                if (_this3.user_session) {
+                  _context2.next = 20;
                   break;
                 }
 
-                _this4.user_session = {
+                _this3.user_session = {
                   current_world: 2,
                   // todo: use uuid // jakes world by default
                   current_room: 'bbce1345-0718-4faf-812d-e8c9040e1341',
@@ -17547,63 +17538,70 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   current_game: 'f9222054-ea60-436f-9199-75b97781ec53' // food memory by default
 
                 };
-                _context2.next = 19;
+                _context2.next = 20;
                 return t.server.directus.items('Sessions').createOne({
                   user: {
-                    id: _this4.user.id
+                    id: _this3.user.id
                   },
-                  current_world: _this4.user_session.current_world,
-                  current_room: _this4.user_session.current_room,
-                  current_game: _this4.user_session.current_game
+                  current_world: _this3.user_session.current_world,
+                  current_room: _this3.user_session.current_room,
+                  current_game: _this3.user_session.current_game
                 }).then(function (res) {
                   console.log('user session created', res); // this.user_session = res;
                 })["catch"](function (e) {
                   console.error('error creating user session on server', e);
                 });
 
-              case 19:
-                _this4.world_selection = (_this4$user_session = _this4.user_session) === null || _this4$user_session === void 0 ? void 0 : (_this4$user_session$c = _this4$user_session.current_world) === null || _this4$user_session$c === void 0 ? void 0 : _this4$user_session$c.toString();
-                _this4.room_selection = (_this4$user_session2 = _this4.user_session) === null || _this4$user_session2 === void 0 ? void 0 : _this4$user_session2.current_room;
-                _this4.game_selection = (_this4$user_session3 = _this4.user_session) === null || _this4$user_session3 === void 0 ? void 0 : _this4$user_session3.current_game;
-                t.server.send({
-                  type: 'SET_USER_SESSION',
-                  user_id: _this4.user.id,
-                  session: {
-                    world_selection: _this4.world_selection,
-                    room_selection: _this4.room_selection,
-                    game_selection: _this4.game_selection
-                  }
-                }); // TODO: make game->room->world a single query
+              case 20:
+                _this3.world_selection = (_this3$user_session = _this3.user_session) === null || _this3$user_session === void 0 ? void 0 : (_this3$user_session$c = _this3$user_session.current_world) === null || _this3$user_session$c === void 0 ? void 0 : _this3$user_session$c.toString();
+                _this3.room_selection = (_this3$user_session2 = _this3.user_session) === null || _this3$user_session2 === void 0 ? void 0 : _this3$user_session2.current_room;
+                _this3.game_selection = (_this3$user_session3 = _this3.user_session) === null || _this3$user_session3 === void 0 ? void 0 : _this3$user_session3.current_game;
 
-                if (_this4.game_selection) {
-                  _this4.getGamesForRoom(_this4.room_selection);
+                _this3.SET_USER_SESSION(); // TODO: make game->room->world a single query
 
-                  _this4.getRoomsForWorld(_this4.world_selection);
-                } else if (_this4.room_selection) {
-                  _this4.getRoomsForWorld(_this4.world_selection);
+
+                if (_this3.game_selection) {
+                  _this3.getGamesForRoom(_this3.room_selection);
+
+                  _this3.getRoomsForWorld(_this3.world_selection);
+                } else if (_this3.room_selection) {
+                  _this3.getRoomsForWorld(_this3.world_selection);
                 }
 
-                _this4.show_login_modal = false;
+                _this3.show_login_modal = false;
 
-                if (!((_this4$user2 = _this4.user) !== null && _this4$user2 !== void 0 && (_this4$user2$first_na = _this4$user2.first_name) !== null && _this4$user2$first_na !== void 0 && _this4$user2$first_na.length)) {
+                if (!((_this3$user2 = _this3.user) !== null && _this3$user2 !== void 0 && (_this3$user2$first_na = _this3$user2.first_name) !== null && _this3$user2$first_na !== void 0 && _this3$user2$first_na.length)) {
                   // give us a name!
-                  _this4.show_name_modal = true;
+                  _this3.show_name_modal = true;
                 } else {
-                  if (!_this4.game_selection) {
+                  if (!_this3.game_selection) {
                     // need to pick a game
-                    _this4.openPauseMenu();
+                    _this3.openPauseMenu();
                   } else {
-                    _this4.closePauseMenu();
+                    _this3.closePauseMenu();
                   }
                 }
 
-              case 26:
+              case 27:
               case "end":
                 return _context2.stop();
             }
           }
         }, _callee2);
       }))();
+    },
+    SET_USER_SESSION: function SET_USER_SESSION() {
+      var _this$user;
+
+      t.server.send({
+        type: 'SET_USER_SESSION',
+        user_id: this === null || this === void 0 ? void 0 : (_this$user = this.user) === null || _this$user === void 0 ? void 0 : _this$user.id,
+        session: {
+          world_selection: this === null || this === void 0 ? void 0 : this.world_selection,
+          room_selection: this === null || this === void 0 ? void 0 : this.room_selection,
+          game_selection: this === null || this === void 0 ? void 0 : this.game_selection
+        }
+      });
     },
     // Sound FX Mute Toggle
     toggleMute: function toggleMute() {
@@ -17637,50 +17635,67 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     //     this.video_muted = !this.video_muted;
     // },
     startVideoChat: function startVideoChat() {
-      this.calling = true;
-      window.t.setupVideoStream();
-      window.t.call();
+      var _this4 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (!(_this4.calling || _this4.has_active_peers)) {
+                  _context3.next = 2;
+                  break;
+                }
+
+                return _context3.abrupt("return");
+
+              case 2:
+                _this4.calling = true; // todo: await
+
+                _context3.next = 5;
+                return window.t.setupVideoStream();
+
+              case 5:
+                _context3.next = 7;
+                return window.t.call();
+
+              case 7:
+                _this4.calling = false;
+
+              case 8:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }))();
     },
-    end_video_chat: function end_video_chat() {
-      // window.t?.peer?.close();
-      // if(window.t.peer){
-      //     window.t.peer = null;
-      // }
+    endVideoChat: function endVideoChat() {
       window.t.peers.closeAll();
-      /*
-      window.t.webrtc_peer_connections.forEach((conn)=>{
-          conn.close();
-      })
-      window.t.webrtc_peer_connections = {};
-      window.t.peers.setupRTCPeerConnections();
-      */
-
-      this.show_end_call_button = false;
-      this.calling = false;
     },
-    new_room: function new_room() {
-      // request new room
-      window.t.server.send({
-        type: 'NEW_ROOM'
-      });
-    },
-    new_game: function new_game() {
-      // request new game
-      window.t.server.send({
-        type: 'NEW_GAME'
-      });
-    },
-    new_round: function new_round() {
-      window.t.server.send({
-        type: 'NEW_ROUND'
-      });
-    },
-    start_game: function start_game() {
-      window.t.server.send({
-        type: 'START_GAME' //game_id: this.state.game_id, // server should know based on client id
-
-      });
-    },
+    // createRoom() {
+    //     // request new room
+    //     window.t.server.send({
+    //         type: 'NEW_ROOM',
+    //     })
+    // },
+    // newGame() {
+    //     // request new game
+    //     window.t.server.send({
+    //         type: 'NEW_GAME',
+    //     })
+    // },
+    // newRound() {
+    //     window.t.server.send({
+    //         type: 'NEW_ROUND',
+    //     })
+    // },
+    // startGame() {
+    //     window.t.server.send({
+    //         type: 'START_GAME',
+    //         //game_id: this.state.game_id, // server should know based on client id
+    //     })
+    // },
     restartGame: function restartGame() {
       this.closePauseMenu();
       window.t.server.send({
@@ -17700,23 +17715,23 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     updateSessionOnServer: function updateSessionOnServer() {
       var _this6 = this;
 
-      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
         var _this6$user_session, _this6$user_session2;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 if ((_this6$user_session = _this6.user_session) !== null && _this6$user_session !== void 0 && _this6$user_session.id) {
-                  _context3.next = 3;
+                  _context4.next = 3;
                   break;
                 }
 
                 console.error('user has no session. create one?');
-                return _context3.abrupt("return");
+                return _context4.abrupt("return");
 
               case 3:
-                _context3.next = 5;
+                _context4.next = 5;
                 return t.server.directus.items('Sessions').updateOne((_this6$user_session2 = _this6.user_session) === null || _this6$user_session2 === void 0 ? void 0 : _this6$user_session2.id, {
                   // user: {id:this.user.id},
                   current_world: _this6.user_session.current_world,
@@ -17730,10 +17745,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 5:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3);
+        }, _callee4);
       }))();
     },
     onGameSelectionChanged: function onGameSelectionChanged(game_id) {
@@ -17815,15 +17830,29 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return (_this$state2 = this.state) === null || _this$state2 === void 0 ? void 0 : _this$state2.round; //return this.state.rounds?.[this.state.round_id];
     },
     its_my_turn: function its_my_turn() {
-      return this.state.player_turn === this.state.my_client_id;
+      return this.state.player_turn === this.state.my_user_id;
     },
     im_game_host: function im_game_host() {
-      return this.state.game_host === this.state.my_client_id;
+      return this.state.game_host === this.state.my_user_id;
     },
     game_started: function game_started() {
       var _this$game;
 
       return (_this$game = this.game) === null || _this$game === void 0 ? void 0 : _this$game.started;
+    },
+    has_active_peers: function has_active_peers() {
+      var _Object$values, _t$peers$remote_peers, _t, _t$peers;
+
+      // cb ref
+      var state = this.state; // TODO: this updates multiple times a second TODO: use a less frequently updated prop // or just put this check on a 1s interval
+
+      var has_active_peers = false;
+      (_Object$values = Object.values((_t$peers$remote_peers = (_t = t) === null || _t === void 0 ? void 0 : (_t$peers = _t.peers) === null || _t$peers === void 0 ? void 0 : _t$peers.remote_peers) !== null && _t$peers$remote_peers !== void 0 ? _t$peers$remote_peers : {})) === null || _Object$values === void 0 ? void 0 : _Object$values.forEach(function (conn) {
+        if (conn.connectionState === 'connected') {
+          has_active_peers = true;
+        }
+      });
+      return has_active_peers;
     }
   }
 });
@@ -18422,19 +18451,16 @@ var _hoisted_33 = {
   "class": "messages"
 };
 var _hoisted_34 = {
-  "class": "message-wrapper"
-};
-var _hoisted_35 = {
   "class": "message-sender"
 };
-var _hoisted_36 = {
+var _hoisted_35 = {
   "class": "message-text"
 };
-var _hoisted_37 = {
+var _hoisted_36 = {
   "class": "chat-input"
 };
 
-var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "sounds"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("audio", {
   id: "sound_effects",
@@ -18443,21 +18469,21 @@ var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_39 = {
+var _hoisted_38 = {
   "class": "videos"
 };
-var _hoisted_40 = {
+var _hoisted_39 = {
   id: "video",
   autoplay: "",
   playsinline: "",
   muted: ""
 };
-var _hoisted_41 = {
+var _hoisted_40 = {
   "class": "opponent_videos"
 };
-var _hoisted_42 = ["onClick", "muted", "data-client-id"];
+var _hoisted_41 = ["onClick", "muted", "data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state$user_id, _$props$state;
+  var _$props$state$client_, _$props$state;
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Bottom Hud "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" SOUND FX MUTE TOGGLE "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "mute-video svg-button",
@@ -18495,17 +18521,23 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return _ctx.$emit('toggleStream');
     }, ["prevent"]))
-  }, [!_ctx.streaming ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_24, _hoisted_27)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.streaming ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_28, _hoisted_31)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.chat_messages, function (message) {
+  }, [!$props.is_streaming ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_24, _hoisted_27)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.is_streaming ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_28, _hoisted_31)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.chat_messages, function (message) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: message.timestamp
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.nameForUserID(message.user_id)), 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+      "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["message-wrapper", {
+        'me': message.client_id === $props.state.my_client_id
+      }])
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.nameForUserID(message.user_id)), 1
     /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.message), 1
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.message), 1
     /* TEXT */
-    )])]);
+    )], 2
+    /* CLASS */
+    )]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_37, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  ))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_36, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "text",
     placeholder: "Chat...",
     "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
@@ -18520,31 +18552,31 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.sendChatMessage && $options.sendChatMessage.apply($options, arguments);
     }, ["prevent"]))
-  }, "Send")])]), _hoisted_38, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_39, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_40, null, 512
+  }, "Send")])]), _hoisted_37, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_38, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_39, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_41, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$user_id = (_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.user_ids) !== null && _$props$state$user_id !== void 0 ? _$props$state$user_id : []).filter(function (id) {
-    return id !== $options.my_user_id;
-  }), function (user_id) {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_ = (_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.client_ids) !== null && _$props$state$client_ !== void 0 ? _$props$state$client_ : []).filter(function (id) {
+    return id !== $props.state.my_client_id;
+  }), function (client_ids) {
     var _$setup$client_mute_s, _$setup$client_mute_s2;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("video", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["opponent_video", {
-        'muted': $setup.client_mute_states[user_id]
+        'muted': $setup.client_mute_states[client_ids]
       }]),
-      key: user_id,
+      key: client_ids,
       autoplay: "",
       title: "Tap To Mute",
       ref_for: true,
-      ref: "opponent_video_".concat(user_id),
+      ref: "opponent_video_".concat(client_ids),
       playsinline: "",
       onClick: function onClick($event) {
-        return $options.toggleOpponentMute(user_id);
+        return $options.toggleOpponentMute(client_ids);
       },
-      muted: (_$setup$client_mute_s = (_$setup$client_mute_s2 = $setup.client_mute_states) === null || _$setup$client_mute_s2 === void 0 ? void 0 : _$setup$client_mute_s2[user_id]) !== null && _$setup$client_mute_s !== void 0 ? _$setup$client_mute_s : false,
-      "data-client-id": user_id
+      muted: (_$setup$client_mute_s = (_$setup$client_mute_s2 = $setup.client_mute_states) === null || _$setup$client_mute_s2 === void 0 ? void 0 : _$setup$client_mute_s2[client_ids]) !== null && _$setup$client_mute_s !== void 0 ? _$setup$client_mute_s : false,
+      "data-client-id": client_ids
     }, null, 10
     /* CLASS, PROPS */
-    , _hoisted_42);
+    , _hoisted_41);
   }), 128
   /* KEYED_FRAGMENT */
   ))])])])], 2112
@@ -18598,127 +18630,130 @@ var _hoisted_4 = {
   key: 0,
   "class": "debug-inner"
 };
+var _hoisted_5 = {
+  "class": "actions"
+};
 
-var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "video-chat-call-end"
 }, "Leave Chat", -1
 /* HOISTED */
 );
 
-var _hoisted_6 = [_hoisted_5];
+var _hoisted_7 = [_hoisted_6];
 
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": ""
 }, "Reset Camera", -1
 /* HOISTED */
 );
 
-var _hoisted_8 = [_hoisted_7];
-var _hoisted_9 = {
+var _hoisted_9 = [_hoisted_8];
+var _hoisted_10 = {
   "class": ""
 };
 
-var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_11 = {
+var _hoisted_12 = {
   "class": "inner"
 };
-var _hoisted_12 = {
+var _hoisted_13 = {
   "class": "details"
 };
-var _hoisted_13 = {
+var _hoisted_14 = {
   "class": "my_client_id"
 };
 
-var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("My Client ID: ");
 
-var _hoisted_15 = {
+var _hoisted_16 = {
   "class": "value"
 };
-var _hoisted_16 = {
+var _hoisted_17 = {
   "class": "room_id"
 };
 
-var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
+var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Room ID: ");
 
-var _hoisted_18 = {
+var _hoisted_19 = {
   "class": "value"
 };
-var _hoisted_19 = {
+var _hoisted_20 = {
   "class": "game_id"
 };
 
-var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
+var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Game ID: ");
 
-var _hoisted_21 = {
+var _hoisted_22 = {
   "class": "value"
 };
 
-var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_23 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
-var _hoisted_23 = {
-  "class": "value"
-};
 var _hoisted_24 = {
+  "class": "value"
+};
+var _hoisted_25 = {
   "class": "host_id"
 };
 
-var _hoisted_25 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
+var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Host ID: ");
 
-var _hoisted_26 = {
+var _hoisted_27 = {
   "class": "value"
 };
 
-var _hoisted_27 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
-var _hoisted_28 = {
+var _hoisted_29 = {
   "class": "round_id"
 };
 
-var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
+var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Current Round ID: ");
 
-var _hoisted_30 = {
+var _hoisted_31 = {
   "class": "value"
 };
 
-var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
+var _hoisted_32 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("   ");
 
-var _hoisted_32 = {
-  "class": "value"
-};
 var _hoisted_33 = {
+  "class": "value"
+};
+var _hoisted_34 = {
   "class": "clients"
 };
 
-var _hoisted_34 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
+var _hoisted_35 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clients: ");
 
-var _hoisted_35 = {
+var _hoisted_36 = {
   "class": "value"
 };
 
-var _hoisted_36 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
+var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player hands: ");
 
-var _hoisted_37 = {
+var _hoisted_38 = {
   key: 0
 };
 
-var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_39 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "new-game"
 }, "Restart Game", -1
 /* HOISTED */
 );
 
-var _hoisted_39 = [_hoisted_38];
-var _hoisted_40 = {
+var _hoisted_40 = [_hoisted_39];
+var _hoisted_41 = {
   "class": "messages"
 };
-var _hoisted_41 = {
+var _hoisted_42 = {
   "class": "message-text"
 };
 
-var _hoisted_42 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_43 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "bg-blur"
 }, null, -1
 /* HOISTED */
@@ -18732,7 +18767,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[0] || (_cache[0] = function ($event) {
       return $setup.show_debug = !$setup.show_debug;
     })
-  }, _hoisted_3), $setup.show_debug ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" have to enable video or mic first before this option becomes available "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <div v-if=\"\n                !calling\n                && !show_end_call_button\n                && (video_enabled || !mic_muted)\n            \"\n                @click.prevent=\"startVideoChat\"\n                style=\"pointer-events:all;\">\n                <button class=\"video-chat-call-start\">Join Chat</button>\n            </div> "), $props.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, _hoisted_3), $setup.show_debug ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" have to enable video or mic first before this option becomes available "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <div v-if=\"\n                    !calling\n                    && !show_end_call_button\n                    && (video_enabled || !mic_muted)\n                \"\n                    @click.prevent=\"startVideoChat\"\n                    style=\"pointer-events:all;\">\n                    <button class=\"video-chat-call-start\">Join Chat</button>\n                </div> "), $props.show_end_call_button ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
     onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return _ctx.end_video_chat && _ctx.end_video_chat.apply(_ctx, arguments);
@@ -18740,7 +18775,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_6)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  }, _hoisted_7)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     onClick: _cache[2] || (_cache[2] = function () {
       return $options.toggleWireframe && $options.toggleWireframe.apply($options, arguments);
     }),
@@ -18754,42 +18789,42 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     style: {
       "pointer-events": "all"
     }
-  }, _hoisted_8), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }, _hoisted_9), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     onClick: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.toggleCameraLock && $props.toggleCameraLock.apply($props, arguments);
     }, ["prevent"])),
     style: {
       "pointer-events": "all"
     }
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.camera_locked ? 'Unlock' : 'Lock') + " Camera", 1
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.camera_locked ? 'Unlock' : 'Lock') + " Camera", 1
   /* TEXT */
-  )]), _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  )]), _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     onClick: _cache[5] || (_cache[5] = function ($event) {
       return _ctx.$emit('toggleShowDebugInfo');
     })
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.show_debug_info ? 'Hide' : 'Show Debug Info'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_13, [_hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.my_client_id), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_14, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : _$props$state.my_client_id), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_16, [_hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_17, [_hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$room_id = (_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.room_id) !== null && _$props$state$room_id !== void 0 ? _$props$state$room_id : 'server-lobby'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_19, [_hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_20, [_hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_id = (_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.game_id) !== null && _$props$state$game_id !== void 0 ? _$props$state$game_id : 'no-game'), 1
   /* TEXT */
-  ), _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$game = $props.game) !== null && _$props$game !== void 0 && _$props$game.started ? 'started' : 'not-started'), 1
+  ), _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$game = $props.game) !== null && _$props$game !== void 0 && _$props$game.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_24, [_hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : _$props$state4.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_25, [_hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$game_ho = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : _$props$state4.game_host) !== null && _$props$state$game_ho !== void 0 ? _$props$state$game_ho : 'no-host'), 1
   /* TEXT */
-  ), _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  ), _hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
       color: $props.im_game_host ? 'green' : 'red'
     })
   }, "You're " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.im_game_host ? '' : 'NOT') + " the game host!", 5
   /* TEXT, STYLE */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_28, [_hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : _$props$state5.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_29, [_hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$round_i = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : _$props$state5.round_id) !== null && _$props$state$round_i !== void 0 ? _$props$state$round_i : 'no-round'), 1
   /* TEXT */
-  ), _hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$round = $props.round) !== null && _$props$round !== void 0 && _$props$round.started ? 'started' : 'not-started'), 1
+  ), _hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$round = $props.round) !== null && _$props$round !== void 0 && _$props$round.started ? 'started' : 'not-started'), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_33, [_hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_34, [_hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify($props.state.client_ids)), 1
   /* TEXT */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("player turn id: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.state.player_turn) + " ", 1
   /* TEXT */
@@ -18801,12 +18836,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT, STYLE */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = $props.state.player_type) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'connecting'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.user_ids, function (user_id) {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_37, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.user_ids, function (user_id) {
     var _$props$state$player_2, _$props$state$player_3, _$props$state6, _$props$state6$player;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
       key: user_id
-    }, [!((_$props$state$player_2 = $props.state.player_hands) !== null && _$props$state$player_2 !== void 0 && (_$props$state$player_3 = _$props$state$player_2[user_id]) !== null && _$props$state$player_3 !== void 0 && _$props$state$player_3.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_37, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_hands) === null || _$props$state6$player === void 0 ? void 0 : _$props$state6$player[user_id])), 1
+    }, [!((_$props$state$player_2 = $props.state.player_hands) !== null && _$props$state$player_2 !== void 0 && (_$props$state$player_3 = _$props$state$player_2[user_id]) !== null && _$props$state$player_3 !== void 0 && _$props$state$player_3.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_38, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_hands) === null || _$props$state6$player === void 0 ? void 0 : _$props$state6$player[user_id])), 1
     /* TEXT */
     )]);
   }), 128
@@ -18818,16 +18853,16 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $props.restartGame && $props.restartGame.apply($props, arguments);
     }, ["prevent"]))
-  }, _hoisted_39)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                        @click.prevent=\"start_game\">\n                        <button class=\"start-game\">Start Game</button>\n                    </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.messages, function (message, i) {
+  }, _hoisted_40)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <li v-if=\"state?.room_id && state?.game_id && !state?.game?.started\"\n                        @click.prevent=\"start_game\">\n                        <button class=\"start-game\">Start Game</button>\n                    </li> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_41, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.messages, function (message, i) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "message",
       key: i
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_41, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.type), 1
     /* TEXT */
     )]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])])]), _hoisted_42], 512
+  ))])])]), _hoisted_43], 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.show_debug_info]])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
 }
@@ -18863,23 +18898,23 @@ var _hoisted_5 = {
   "class": "miss"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state, _$props$state$user_id, _$props$state2, _$props$state3;
+  var _$props$state, _$props$state$client_, _$props$state2, _$props$state2$user_i, _$props$state3, _$props$state4;
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$user_id = _$props$state.user_ids) === null || _$props$state$user_id === void 0 ? void 0 : _$props$state$user_id.length), 1
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online (Clients/Users): " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length) + "(" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : (_$props$state2$user_i = _$props$state2.user_ids) === null || _$props$state2$user_i === void 0 ? void 0 : _$props$state2$user_i.length) + ")", 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.round_number), 1
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.round_number), 1
   /* TEXT */
-  ), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)((_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.user_ids, function (user_id) {
-    var _$props$state$user_na, _$props$state4, _$props$state4$user_n, _$props$state$player_, _$props$state5, _$props$state5$player, _$props$state5$player2, _$props$state$player_2, _$props$state6, _$props$state6$player, _$props$state6$player2;
+  ), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)((_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : _$props$state4.user_ids, function (user_id) {
+    var _$props$state$user_na, _$props$state5, _$props$state5$user_n, _$props$state$player_, _$props$state6, _$props$state6$player, _$props$state6$player2, _$props$state$player_2, _$props$state7, _$props$state7$player, _$props$state7$player2;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "scores",
       key: user_id
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$user_na = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$user_n = _$props$state4.user_names) === null || _$props$state4$user_n === void 0 ? void 0 : _$props$state4$user_n[user_id]) !== null && _$props$state$user_na !== void 0 ? _$props$state$user_na : 'player') + ": ", 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$user_na = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$user_n = _$props$state5.user_names) === null || _$props$state5$user_n === void 0 ? void 0 : _$props$state5$user_n[user_id]) !== null && _$props$state$user_na !== void 0 ? _$props$state$user_na : 'player') + ": ", 1
     /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[user_id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 0), 1
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[user_id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[0]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 0), 1
     /* TEXT */
-    ), _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[user_id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
+    ), _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : (_$props$state7$player = _$props$state7.player_scores) === null || _$props$state7$player === void 0 ? void 0 : (_$props$state7$player2 = _$props$state7$player[user_id]) === null || _$props$state7$player2 === void 0 ? void 0 : _$props$state7$player2[1]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
     /* TEXT */
     )]);
   }), 128
@@ -19411,20 +19446,18 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     im_game_host: $options.im_game_host,
     its_my_turn: $options.its_my_turn,
     messages: $setup.messages,
-    show_end_call_button: $setup.show_end_call_button,
     show_debug_info: $setup.show_debug_info,
     onToggleShowDebugInfo: $options.toggleShowDebugInfo,
     mic_muted: $setup.mic_muted,
     video_enabled: $setup.video_enabled,
     video_muted: $setup.video_muted,
-    startVideoChat: $options.startVideoChat,
     camera_locked: $setup.camera_locked,
     resetCamera: $options.resetCamera,
     toggleCameraLock: $options.toggleCameraLock,
     restartGame: $options.restartGame
   }, null, 8
   /* PROPS */
-  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_end_call_button", "show_debug_info", "onToggleShowDebugInfo", "mic_muted", "video_enabled", "video_muted", "startVideoChat", "camera_locked", "resetCamera", "toggleCameraLock", "restartGame"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" BottomHUD "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
+  , ["calling", "state", "game", "round", "im_game_host", "its_my_turn", "messages", "show_debug_info", "onToggleShowDebugInfo", "mic_muted", "video_enabled", "video_muted", "camera_locked", "resetCamera", "toggleCameraLock", "restartGame"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" BottomHUD "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AVHud, {
     ref: "AVHud",
     state: $props.state,
     its_my_turn: $options.its_my_turn,
@@ -19686,7 +19719,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".mute-video {\n  position: absolute;\n  width: 40px;\n  bottom: 103px;\n  left: 30px;\n  pointer-events: all;\n}\n.mute-video svg {\n  cursor: pointer;\n  width: 100%;\n  height: auto;\n}\n.game-modal-toggle-icon {\n  z-index: 2;\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\n.toggle-video {\n  position: absolute;\n  right: 21px;\n  bottom: 103px;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-inner {\n  pointer-events: all;\n  margin-top: 170px;\n  text-align: right;\n  margin-right: 15px;\n}\n.modal-wrapper {\n  width: 100%;\n}\n.modal-wrapper .modal-inner {\n  width: 320px;\n  margin: 0 auto;\n  position: relative;\n}\n.modal {\n  position: relative;\n  pointer-events: all;\n  top: 60px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#app {\n  color: #fff;\n}\n#debug {\n  background: transparent;\n  position: fixed;\n  top: 0;\n  bottom: auto;\n  width: auto;\n  width: 200px;\n  height: auto;\n  right: 0;\n  left: auto;\n}\n.details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n}\n.bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 0;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n  pointer-events: all;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}\n.turn-indicator {\n  font-weight: bold;\n  font-size: 24px;\n  text-align: center;\n  position: absolute;\n  width: 300px;\n  margin: 0 auto;\n  top: 10px;\n  left: 50%;\n  margin-left: -150px;\n}\n.turn-indicator .my-turn {\n  color: green;\n}\n.turn-indicator .not-my-turn {\n  color: red;\n}\n.svg-button {\n  pointer-events: all;\n  width: 30px;\n  cursor: pointer;\n}\n.debug-toggle {\n  top: 100px;\n  right: 20px;\n  position: absolute;\n  height: 30px;\n  cursor: pointer;\n}\n.mic-toggle {\n  position: absolute;\n  bottom: 100px;\n  left: 140px;\n}\n.video-toggle {\n  position: absolute;\n  left: 80px;\n  bottom: 106px;\n}\n.stream-toggle {\n  position: absolute;\n  bottom: 90px;\n  left: 190px;\n  width: 50px;\n}\nsvg {\n  width: 100%;\n  height: auto;\n}\n.hud {\n  width: 100%;\n  height: 100vh;\n  pointer-events: none;\n  position: absolute;\n  display: block;\n}\n.scores-wrapper {\n  width: auto;\n  top: 30px;\n  position: absolute;\n  left: 10px;\n}\n.scores .hit {\n  color: green;\n}\n.scores .miss {\n  color: red;\n}\n.chat-box {\n  position: absolute;\n  right: 30px;\n  bottom: 100px;\n  pointer-events: all;\n  width: 300px;\n  max-height: 50vh;\n}\n.messages {\n  overflow-y: auto;\n}\n.message-wrapper {\n  background: rgba(0, 0, 0, 0.5);\n  border-radius: 10px;\n  padding: 10px;\n  margin: 10px;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".game-modal-toggle-icon {\n  z-index: 2;\n  cursor: pointer;\n  pointer-events: all;\n  position: fixed;\n  top: 40px;\n  right: 20px;\n  width: 32px;\n}\n.game-modal-toggle-icon svg {\n  width: 100%;\n  height: auto;\n}\nselect {\n  background: #000;\n}\nbutton {\n  border: 1px solid #eee;\n  padding: 5px 10px;\n  margin: 3px;\n  border-radius: 20px;\n}\n.debug-toggle {\n  z-index: 2;\n}\n.debug-inner {\n  pointer-events: all;\n  padding-top: 50px;\n  text-align: right;\n  margin-right: 15px;\n}\n.debug-inner .actions {\n  position: absolute;\n  right: 10px;\n  top: 150px;\n  z-index: 2;\n}\n.debug-inner .details {\n  padding-right: 200px;\n  max-width: 470px;\n  word-break: break-all;\n  font-family: monospace;\n  pointer-events: none;\n}\n.debug-inner .actions, .debug-inner .details {\n  z-index: 2;\n}\n.debug-inner .inner, .debug-inner .bg-blur {\n  z-index: 1;\n}\n.modal-wrapper {\n  width: 100%;\n}\n.modal-wrapper .modal-inner {\n  width: 320px;\n  margin: 0 auto;\n  position: relative;\n}\n.modal {\n  position: relative;\n  pointer-events: all;\n  top: 60px;\n  background-color: rgba(0, 0, 0, 0.8);\n  padding: 20px;\n  border-radius: 20px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  box-sizing: border-box;\n  z-index: 2;\n}\n.modal h2 {\n  text-align: center;\n}\n.modal hr {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.modal input, .modal select, .modal label {\n  pointer-events: auto;\n}\n.modal-underlay {\n  pointer-events: none;\n  background-color: rgba(0, 0, 0, 0.1);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n  position: fixed;\n  z-index: 1;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  height: 100%;\n}\ncanvas {\n  z-index: 1;\n}\n.hud-inner {\n  position: absolute;\n  bottom: 200px;\n  width: 100%;\n}\n.hud-inner .svg-button {\n  position: relative;\n  display: inline-block;\n  margin-left: 20px;\n  width: 30px;\n  height: 30px;\n}\n#vue-layer {\n  z-index: 2;\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  pointer-events: none;\n}\n.modal-content a {\n  text-decoration: underline;\n}\ninput[type=text], input[type=password] {\n  border: 1px solid white;\n  background: transparent;\n  color: #fff;\n  border-radius: 20px;\n  padding: 5px 10px;\n  margin: 3px;\n  outline: none !important;\n  transition: border 0.2s ease-out, margin 0.2s ease-out;\n}\ninput[type=text]:hover, input[type=text]:active, input[type=text]:focus, input[type=password]:hover, input[type=password]:active, input[type=password]:focus {\n  margin: 0;\n  border: 3px solid #fff;\n}\n.modal-wrapper {\n  position: absolute;\n  left: 0;\n  right: 0;\n  width: 100vw;\n  height: 100vh;\n}\n#app {\n  color: #fff;\n}\n#debug {\n  background: transparent;\n  position: fixed;\n  top: 0;\n  bottom: auto;\n  width: auto;\n  height: auto;\n  right: 0;\n  left: auto;\n}\n.details {\n  z-index: 2;\n  position: relative;\n  font-size: 11px;\n  text-align: left;\n}\n.bg-blur {\n  z-index: 1;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.5);\n  filter: blur(10px);\n  pointer-events: none;\n}\n.videos {\n  bottom: 100px;\n  position: absolute;\n  width: 100%;\n}\n.opponent_videos {\n  display: flex;\n  flex-direction: row;\n  justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  height: 100px;\n  width: 100vw;\n  bottom: 100px;\n}\n.opponent_video {\n  border: 1px solid yellow;\n  position: relative;\n  display: inline-block;\n  background: black;\n  pointer-events: all;\n}\n.modal-error {\n  color: red;\n  display: inline-block;\n  margin: 10px 0;\n}\n.turn-indicator {\n  font-weight: bold;\n  font-size: 24px;\n  text-align: center;\n  position: absolute;\n  width: 300px;\n  margin: 0 auto;\n  top: 10px;\n  left: 50%;\n  margin-left: -150px;\n}\n.turn-indicator .my-turn {\n  color: green;\n}\n.turn-indicator .not-my-turn {\n  color: red;\n}\n.svg-button {\n  pointer-events: all;\n  width: 30px;\n  cursor: pointer;\n}\n.debug-toggle {\n  top: 100px;\n  right: 20px;\n  position: absolute;\n  height: 30px;\n  cursor: pointer;\n}\n.mute-video {\n  width: 40px;\n}\n.stream-toggle {\n  width: 50px;\n}\nsvg {\n  width: 100%;\n  height: auto;\n}\n.hud {\n  width: 100%;\n  height: 100vh;\n  pointer-events: none;\n  position: absolute;\n  display: block;\n}\n.scores-wrapper {\n  width: auto;\n  top: 30px;\n  position: absolute;\n  left: 10px;\n}\n.scores .hit {\n  color: green;\n}\n.scores .miss {\n  color: red;\n}\n.chat-box {\n  position: absolute;\n  right: 0px;\n  bottom: 220px;\n  pointer-events: all;\n  width: 300px;\n  max-height: 50vh;\n}\n.messages {\n  overflow-y: auto;\n}\n.message-wrapper {\n  background: rgba(0, 0, 0, 0.5);\n  border-radius: 10px;\n  padding: 10px;\n  margin: 10px;\n}\n.message-wrapper.me {\n  background: rgba(0, 0, 0, 0.3);\n  text-align: right;\n}\n.message-sender {\n  opacity: 0.5;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -27453,7 +27486,7 @@ var PeerConnections = /*#__PURE__*/function () {
                 t.server.send({
                   type: 'mediaOffer',
                   offer: localPeerOffer,
-                  from: t.app.my_client_id,
+                  from: t.app.state.my_client_id,
                   to: peer_id,
                   // extras
                   stream_settings: t.stream.getVideoTracks()[0].getSettings()
@@ -27485,7 +27518,7 @@ var PeerConnections = /*#__PURE__*/function () {
       t.app.state.client_ids.forEach(function (client_id) {
         var _this$remote_peers;
 
-        if (client_id !== t.app.my_client_id && !((_this$remote_peers = _this.remote_peers) !== null && _this$remote_peers !== void 0 && _this$remote_peers[client_id])) {
+        if (client_id !== t.app.state.my_client_id && !((_this$remote_peers = _this.remote_peers) !== null && _this$remote_peers !== void 0 && _this$remote_peers[client_id])) {
           // one connection per peer
           _this.remote_peers[client_id] = _this.setupRTCPeerConnection(client_id); // offer the stream to the peer
 
@@ -27496,7 +27529,9 @@ var PeerConnections = /*#__PURE__*/function () {
   }, {
     key: "closeAll",
     value: function closeAll() {
-      console.warn('todo close all');
+      for (var i in this.local_peers) {
+        this.local_peers[i].close();
+      }
     }
     /* handler for when a peer offers a video/audio stream */
 
@@ -27529,7 +27564,9 @@ var PeerConnections = /*#__PURE__*/function () {
                 console.error('error setting up outbound stream');
 
               case 9:
-                _context2.prev = 9;
+                t.root.is_streaming = true; // console.log('onMediaOffer',decoded);
+
+                _context2.prev = 10;
                 FROM_PEER_ID = decoded.from;
                 /* make sure we have a "remote peer" object for this client */
 
@@ -27543,7 +27580,7 @@ var PeerConnections = /*#__PURE__*/function () {
                 }
 
                 if (peer_remote) {
-                  _context2.next = 16;
+                  _context2.next = 17;
                   break;
                 }
 
@@ -27551,26 +27588,26 @@ var PeerConnections = /*#__PURE__*/function () {
                 console.error("error with peer_remote", decoded);
                 return _context2.abrupt("return");
 
-              case 16:
-                _context2.next = 18;
+              case 17:
+                _context2.next = 19;
                 return peer_remote.setRemoteDescription(new RTCSessionDescription(decoded.offer));
 
-              case 18:
+              case 19:
                 // offer our audio, video tracks to the peer connection
                 t.stream.getTracks().forEach(function (track) {
                   peer_remote.addTrack(track, t.stream);
                 });
                 /* create an answer to the offer */
 
-                _context2.next = 21;
+                _context2.next = 22;
                 return peer_remote.createAnswer();
 
-              case 21:
+              case 22:
                 peerAnswer = _context2.sent;
-                _context2.next = 24;
+                _context2.next = 25;
                 return peer_remote.setLocalDescription(new RTCSessionDescription(peerAnswer));
 
-              case 24:
+              case 25:
                 // save call initiators stream settings (for aspect ratio calculations)
                 this.peer_video_settings[FROM_PEER_ID] = decoded.stream_settings;
 
@@ -27586,25 +27623,25 @@ var PeerConnections = /*#__PURE__*/function () {
                 t.server.send({
                   type: "mediaAnswer",
                   answer: peerAnswer,
-                  from: t.app.my_client_id,
+                  from: t.app.state.my_client_id,
                   to: FROM_PEER_ID,
                   // extras
                   stream_settings: t.stream.getVideoTracks()[0].getSettings()
                 });
-                _context2.next = 32;
+                _context2.next = 33;
                 break;
 
-              case 29:
-                _context2.prev = 29;
-                _context2.t1 = _context2["catch"](9);
+              case 30:
+                _context2.prev = 30;
+                _context2.t1 = _context2["catch"](10);
                 console.error("onMediaOffer", _context2.t1);
 
-              case 32:
+              case 33:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[1, 6], [9, 29]]);
+        }, _callee2, this, [[1, 6], [10, 30]]);
       }));
 
       function onMediaOffer(_x2) {
@@ -27672,7 +27709,8 @@ var PeerConnections = /*#__PURE__*/function () {
 
       peer_connection.onicecandidate = function (event) {
         _this2.onIceCandidateEvent(event, client_id);
-      }; // callback for remote stream available, where we bind it to a video output object
+      }; // const user_id = t.userIDForClientID(client_id);
+      // callback for remote stream available, where we bind it to a video output object
 
 
       var gotRemoteStream = function gotRemoteStream(event) {
@@ -27685,14 +27723,15 @@ var PeerConnections = /*#__PURE__*/function () {
 
         _this2.peer_streams[client_id] = stream;
         var video = (_t$root$$refs$AVHud$$ = t.root.$refs.AVHud.$refs) === null || _t$root$$refs$AVHud$$ === void 0 ? void 0 : _t$root$$refs$AVHud$$["opponent_video_".concat(client_id)];
-        console.log("video?", video);
+
+        if (!video || !video.length || video.length > 1) {
+          console.error("video not found", video);
+          return;
+        } // assign stream to debug object
+
 
         if (video && video.length) {
           video[0].srcObject = stream;
-        }
-
-        if (!video || !video.length || video.length > 1) {
-          console.warn("huh?", video);
         }
 
         var playerHead = (_t$players2 = t.players) === null || _t$players2 === void 0 ? void 0 : (_t$players2$client_id = _t$players2[client_id]) === null || _t$players2$client_id === void 0 ? void 0 : _t$players2$client_id.head;
@@ -27709,7 +27748,7 @@ var PeerConnections = /*#__PURE__*/function () {
     key: "onIceCandidateEvent",
     value: function onIceCandidateEvent(event, client_id) {
       // const ids = t.app.state.client_ids.slice();
-      // let my_index = ids.indexOf(t.app.my_client_id);
+      // let my_index = ids.indexOf(t.app.state.my_client_id);
       // ids.splice(my_index, 1);
       if (event.candidate) {
         // should we send to all peers or just one by one?
@@ -27916,21 +27955,21 @@ function delay(_x) {
 }
 
 function _delay() {
-  _delay = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9(t) {
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
+  _delay = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8(t) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context9.prev = _context9.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
-            return _context9.abrupt("return", new Promise(function (resolve) {
+            return _context8.abrupt("return", new Promise(function (resolve) {
               return setTimeout(resolve, t);
             }));
 
           case 1:
           case "end":
-            return _context9.stop();
+            return _context8.stop();
         }
       }
-    }, _callee9);
+    }, _callee8);
   }));
   return _delay.apply(this, arguments);
 }
@@ -27965,12 +28004,18 @@ var SocketConnection = /*#__PURE__*/function () {
       var _this = this;
 
       this.client_id = null;
-      window.t.app.my_client_id = null;
+      window.t.app.state.my_client_id = null;
 
       try {
         this.ws = new WebSocket("wss://".concat(WSHOSTNAME, ":").concat(WEB_PORT));
         this.ws.addEventListener("open", function () {
           console.log("We are connected"); //this.ws.send("How are you?");
+          // NOTE: this will fire if the server restarts
+
+          if (t.app.state.my_user_id) {
+            // if we've already got our user id, re-send it to the server
+            t.root.SET_USER_SESSION();
+          }
         });
         this.ws.addEventListener('error', function (event) {
           console.error('error', event);
@@ -28044,15 +28089,22 @@ var SocketConnection = /*#__PURE__*/function () {
         //     break;
 
         case 'WELCOME':
-          // delete old player if we had a previous connection that got reset
+          var prev_client_id = this.client_id; // delete old player if we had a previous connection that got reset
           // TODO: player accounts, IP addresses, cookies or something to persist client_ids longer
           // if(t.players?.[this.client_id]){
           //   t.players[this.client_id].destroy()
           //   delete t.players[this.client_id];
           // }
           // note we don't alter t.players until user is read() from directus later in onLoginAuthenticated
+
           this.client_id = decoded.your_client_id;
-          window.t.app.my_client_id = this.client_id; // window.t.app.state.player_type = decoded.player_or_spectator;
+          window.t.app.state.my_client_id = this.client_id;
+
+          if (prev_client_id && prev_client_id !== this.client_id) {
+            console.warn('MY CLIENT ID CHANGED (SERVER RESTARTED?) NEED TO UPDATE OLD REFERENCES TO THE PREV ID');
+            this.players[this.client_id] = this.players[prev_client_id];
+            delete this.players[prev_client_id];
+          } // window.t.app.state.player_type = decoded.player_or_spectator;
           // console.log(
           //   'server says my id is',
           //   this.client_id,
@@ -28061,6 +28113,7 @@ var SocketConnection = /*#__PURE__*/function () {
           // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
           // request video stream
           // setupVideoStream();
+
 
           break;
         // case 'GAME_STATE_UPDATE':
@@ -28088,10 +28141,13 @@ var SocketConnection = /*#__PURE__*/function () {
   }, {
     key: "send",
     value: function send(data) {
-      data.client_id = t.app.my_client_id;
+      var _t, _t$root, _t$root$user;
+
+      data.client_id = t.app.state.my_client_id;
+      data.user_id = (_t = t) === null || _t === void 0 ? void 0 : (_t$root = _t.root) === null || _t$root === void 0 ? void 0 : (_t$root$user = _t$root.user) === null || _t$root$user === void 0 ? void 0 : _t$root$user.id;
 
       if (data.type !== 'SET_PLAYER_CURSOR' && data.type !== 'SET_PLAYER_HEAD' && data.type !== 'HIGHLIGHT') {
-        console.log('sending', data, this.client_id, t.app.my_client_id);
+        console.log('sending', data, this.client_id, t.app.state.my_client_id);
       }
 
       if (!this.ws.readyState === 1) {
@@ -28285,7 +28341,7 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "getMyPlayer",
     value: function getMyPlayer() {
-      return this.players[t.app.my_client_id];
+      return this.players[t.app.state.my_client_id];
     }
   }, {
     key: "getCameraSet",
@@ -28298,7 +28354,7 @@ var Tabletop = /*#__PURE__*/function () {
     key: "opponentIDs",
     get: function get() {
       return t.app.state.client_ids.filter(function (id) {
-        return id !== t.app.my_client_id;
+        return id !== t.app.state.my_client_id;
       });
     }
   }, {
@@ -28319,7 +28375,7 @@ var Tabletop = /*#__PURE__*/function () {
     // setupRTCPeerConnections(){
     //   for(var i = 0; i<t.app.state.client_ids.length; i++){
     //     let client_id = t.app.state.client_ids[i];
-    //     if(client_id !== t.app.my_client_id){
+    //     if(client_id !== t.app.state.my_client_id){
     //       if(!t.webrtc_peer_connections[client_id]){
     //         t.offerStreamToPeer(client_id);
     //       }
@@ -28330,21 +28386,21 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "closeVideoStream",
     value: function closeVideoStream() {
-      var _t, _t$stream, _t$stream$getVideoTra;
+      var _t2, _t2$stream, _t2$stream$getVideoTr;
 
       // t?.stream?.getTracks()?.forEach(function(track){
       //   track?.stop();
       // })
-      (_t = t) === null || _t === void 0 ? void 0 : (_t$stream = _t.stream) === null || _t$stream === void 0 ? void 0 : (_t$stream$getVideoTra = _t$stream.getVideoTracks()) === null || _t$stream$getVideoTra === void 0 ? void 0 : _t$stream$getVideoTra.forEach(function (track) {
+      (_t2 = t) === null || _t2 === void 0 ? void 0 : (_t2$stream = _t2.stream) === null || _t2$stream === void 0 ? void 0 : (_t2$stream$getVideoTr = _t2$stream.getVideoTracks()) === null || _t2$stream$getVideoTr === void 0 ? void 0 : _t2$stream$getVideoTr.forEach(function (track) {
         track.stop();
       });
     }
   }, {
     key: "closeAudioStream",
     value: function closeAudioStream() {
-      var _t2, _t2$stream, _t2$stream$getAudioTr;
+      var _t3, _t3$stream, _t3$stream$getAudioTr;
 
-      (_t2 = t) === null || _t2 === void 0 ? void 0 : (_t2$stream = _t2.stream) === null || _t2$stream === void 0 ? void 0 : (_t2$stream$getAudioTr = _t2$stream.getAudioTracks()) === null || _t2$stream$getAudioTr === void 0 ? void 0 : _t2$stream$getAudioTr.forEach(function (track) {
+      (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$stream = _t3.stream) === null || _t3$stream === void 0 ? void 0 : (_t3$stream$getAudioTr = _t3$stream.getAudioTracks()) === null || _t3$stream$getAudioTr === void 0 ? void 0 : _t3$stream$getAudioTr.forEach(function (track) {
         track.stop();
       });
     } // loop through ALL peers and send them the stream
@@ -28407,8 +28463,10 @@ var Tabletop = /*#__PURE__*/function () {
             // apply the stream to the video element used in the texture
             t.stream = stream;
             t.video.srcObject = stream;
-            t.video.play();
-            t.players[t.root.user.id].head.assignVideoToHead(t.video);
+            t.video.play(); // t.players[t.root.user.id].head.assignVideoToHead(t.video);
+            // client id vs user id here allows joining from multiple windows/tabs/devices
+
+            t.players[t.app.state.my_client_id].head.assignVideoToHead(t.video);
             resolve();
           })["catch"](function (error) {
             console.error('Unable to access the camera/webcam.', error);
@@ -28423,7 +28481,9 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "userIDForClientID",
     value: function userIDForClientID(client_id) {
-      return t.app.state.client_ids.indexOf(client_id);
+      var _t$app$state$client_u;
+
+      return (_t$app$state$client_u = t.app.state.client_user_ids) === null || _t$app$state$client_u === void 0 ? void 0 : _t$app$state$client_u[client_id];
     }
     /* this gets called with every tick from the server */
     // maybe we throttle it
@@ -28433,24 +28493,24 @@ var Tabletop = /*#__PURE__*/function () {
     value: function updatePlayerInstances() {
       // make sure we have a instance of a Player class
       // to represent this player
-      for (var i in t.app.state.user_ids) {
+      for (var i in t.app.state.client_ids) {
         var _t$players;
 
-        var user_id = t.app.state.user_ids[i];
+        var client_id = t.app.state.client_ids[i];
 
-        if (!((_t$players = t.players) !== null && _t$players !== void 0 && _t$players[user_id])) {
-          t.players[user_id] = new Player(user_id);
+        if (!((_t$players = t.players) !== null && _t$players !== void 0 && _t$players[client_id])) {
+          t.players[client_id] = new Player(client_id);
         }
       } // destroy player if they left
 
 
-      for (var _user_id in t.players) {
-        var _t$app, _t$app$state, _t$app$state$user_id;
+      for (var _client_id in t.players) {
+        var _t$app, _t$app$state, _t$app$state$client_i;
 
-        if (((_t$app = t.app) === null || _t$app === void 0 ? void 0 : (_t$app$state = _t$app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$user_id = _t$app$state.user_id) === null || _t$app$state$user_id === void 0 ? void 0 : _t$app$state$user_id.indexOf(_user_id)) === -1) {
-          t.players[_user_id].destroy();
+        if (((_t$app = t.app) === null || _t$app === void 0 ? void 0 : (_t$app$state = _t$app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$client_i = _t$app$state.client_ids) === null || _t$app$state$client_i === void 0 ? void 0 : _t$app$state$client_i.indexOf(_client_id)) === -1) {
+          t.players[_client_id].destroy();
 
-          delete t.players[_user_id];
+          delete t.players[_client_id];
         }
       }
     }
@@ -28478,7 +28538,7 @@ var Tabletop = /*#__PURE__*/function () {
           let i_card = hand[a];
           let card = t.cards[i_card];
           camera.attach(card.mesh); // todo: only run this once (if parent isnt already camera)
-            let updateTo = player_id === t.app.my_client_id
+            let updateTo = player_id === t.app.state.my_client_id
             ? this.getUpdateToPlayersHand(player_id,a)
             : this.getUpdateToOpponentsHand(player_id,a);
           console.log(updateTo);
@@ -28502,12 +28562,12 @@ var Tabletop = /*#__PURE__*/function () {
       for (var i in t.app.state.player_cursors) {
         var player_cursor_position = t.app.state.player_cursors[i]; // console.log(i===t.app.,player_cursor_position);
 
-        if (i !== t.app.my_client_id) {
-          var _t3, _t3$players, _t3$players$i, _t3$players$i$pointer;
+        if (i !== t.app.state.my_client_id) {
+          var _t4, _t4$players, _t4$players$i, _t4$players$i$pointer;
 
           // console.log('update opponent cursor');
           // only update other players, let mousemove drive local players cursor so it doesn't fight with server-streaming values
-          (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$players = _t3.players) === null || _t3$players === void 0 ? void 0 : (_t3$players$i = _t3$players[i]) === null || _t3$players$i === void 0 ? void 0 : (_t3$players$i$pointer = _t3$players$i.pointer) === null || _t3$players$i$pointer === void 0 ? void 0 : _t3$players$i$pointer.tweenTo({
+          (_t4 = t) === null || _t4 === void 0 ? void 0 : (_t4$players = _t4.players) === null || _t4$players === void 0 ? void 0 : (_t4$players$i = _t4$players[i]) === null || _t4$players$i === void 0 ? void 0 : (_t4$players$i$pointer = _t4$players$i.pointer) === null || _t4$players$i$pointer === void 0 ? void 0 : _t4$players$i$pointer.tweenTo({
             pos_x: player_cursor_position.x,
             pos_y: player_cursor_position.y,
             pos_z: player_cursor_position.z
@@ -28526,8 +28586,8 @@ var Tabletop = /*#__PURE__*/function () {
         var _t$app2, _t$app2$state;
 
         // let player_id = t.app.state.client_ids[i];
-        if (player_id !== t.app.my_client_id) {
-          var _t4, _t4$players, _t4$players$player_id;
+        if (player_id !== t.app.state.my_client_id) {
+          var _t5, _t5$players, _t5$players$player_id;
 
           // only render opponent heads
           var player_head_position = t.app.state.player_heads[player_id];
@@ -28541,7 +28601,7 @@ var Tabletop = /*#__PURE__*/function () {
           // destination.rot_y = vector.y;
           // destination.rot_z = vector.z;
 
-          var head = (_t4 = t) === null || _t4 === void 0 ? void 0 : (_t4$players = _t4.players) === null || _t4$players === void 0 ? void 0 : (_t4$players$player_id = _t4$players[player_id]) === null || _t4$players$player_id === void 0 ? void 0 : _t4$players$player_id.head;
+          var head = (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : (_t5$players$player_id = _t5$players[player_id]) === null || _t5$players$player_id === void 0 ? void 0 : _t5$players$player_id.head;
 
           if (!(head !== null && head !== void 0 && head.player_is_me)) {
             head === null || head === void 0 ? void 0 : head.mesh.lookAt(camera.position);
@@ -29590,89 +29650,81 @@ var Round = /*#__PURE__*/function () {
   }, {
     key: "current_player",
     get: function get() {
-      var _t5, _t5$players, _t$app$state5;
+      var _t6, _t6$players, _t$app$state5;
 
-      return (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : _t5$players[(_t$app$state5 = t.app.state) === null || _t$app$state5 === void 0 ? void 0 : _t$app$state5.player_turn];
+      return (_t6 = t) === null || _t6 === void 0 ? void 0 : (_t6$players = _t6.players) === null || _t6$players === void 0 ? void 0 : _t6$players[(_t$app$state5 = t.app.state) === null || _t$app$state5 === void 0 ? void 0 : _t$app$state5.player_turn];
     }
   }]);
 
   return Round;
 }();
 
-var Layout = /*#__PURE__*/function () {
-  function Layout(options) {
-    _classCallCheck(this, Layout);
+var Layout = /*#__PURE__*/_createClass(function Layout(options) {
+  _classCallCheck(this, Layout);
 
-    this.zones = []; // our grid of zones (main playfield)
-    // our special named zones
+  this.zones = []; // our grid of zones (main playfield)
+  // our special named zones
 
-    this.named_zones = {}; // todo: subclass Grid Layout
+  this.named_zones = {}; // todo: subclass Grid Layout
 
-    this.options = options; // distance between cards
+  this.options = options; // distance between cards
 
-    this.spacing = {
-      x: 3,
-      y: 3
-    };
+  this.spacing = {
+    x: 3,
+    y: 3
+  };
 
-    for (var r = 0; r < options.rows; r++) {
-      for (var c = 0; c < options.cols; c++) {
-        // todo: define x,y,z origin coords of zone
-        this.zones.push({
-          row: r,
-          col: c,
-          card: null,
-          group: t.zonegroup,
-          origin: {
-            x: 3.5 * r - this.spacing.x + r * 0.5 - 1,
-            y: 9.8,
-            z: 3.5 * c - this.spacing.y + c * 0.5 - 2
-          }
-        });
-      }
-    } // add a deckgroup zone
-
-
-    var deckZone = {
-      name: 'deck',
-      group: t.deckgroup,
-      getCardOffset: function getCardOffset(card) {
-        var cards = t.app.state.available_cards;
-        var deck_position = cards.indexOf(card.index);
-        var CARD_THICKNESS = 0.025; // console.log('getCardOffset deck_position',deck_position);
-
-        return {
-          x: 0,
-          // offset vertically based on card thickness
-          y: //( cards.length * CARD_THICKNESS ) -
-          deck_position * CARD_THICKNESS,
-          z: 0
-        };
-      }
-    };
-    Object.defineProperty(deckZone, 'origin', {
-      get: function get() {
-        return this.group.position;
-      }
-    });
-    this.named_zones.deck = deckZone; // this.zones.push(deckZone)
-  }
-
-  _createClass(Layout, [{
-    key: "convertClientHandsToUserHands",
-    value: function convertClientHandsToUserHands() {
-      // convert hand client id to user id
-      t.players[t.app.my_client_id].user_id = t.root.user.id;
-      t.players[t.app.my_client_id].hand.name = 'hand_' + t.root.user.id;
-      var handZone = t.game.layout.named_zones['hand_' + t.app.my_client_id];
-      handZone.name = 'hand_' + t.root.user.id;
-      t.game.layout.named_zones['hand_' + t.root.user.id] = handZone;
-      t.game.layout.named_zones['hand_' + t.app.my_client_id] = null;
+  for (var r = 0; r < options.rows; r++) {
+    for (var c = 0; c < options.cols; c++) {
+      // todo: define x,y,z origin coords of zone
+      this.zones.push({
+        row: r,
+        col: c,
+        card: null,
+        group: t.zonegroup,
+        origin: {
+          x: 3.5 * r - this.spacing.x + r * 0.5 - 1,
+          y: 9.8,
+          z: 3.5 * c - this.spacing.y + c * 0.5 - 2
+        }
+      });
     }
-  }]);
+  } // add a deckgroup zone
 
-  return Layout;
-}();
+
+  var deckZone = {
+    name: 'deck',
+    group: t.deckgroup,
+    getCardOffset: function getCardOffset(card) {
+      var cards = t.app.state.available_cards;
+      var deck_position = cards.indexOf(card.index);
+      var CARD_THICKNESS = 0.025; // console.log('getCardOffset deck_position',deck_position);
+
+      return {
+        x: 0,
+        // offset vertically based on card thickness
+        y: //( cards.length * CARD_THICKNESS ) -
+        deck_position * CARD_THICKNESS,
+        z: 0
+      };
+    }
+  };
+  Object.defineProperty(deckZone, 'origin', {
+    get: function get() {
+      return this.group.position;
+    }
+  });
+  this.named_zones.deck = deckZone; // this.zones.push(deckZone)
+} // convertClientHandsToUserHands(){
+//   // convert hand client id to user id
+//   t.players[t.app.state.my_client_id].user_id = t.root.user.id;
+//   t.players[t.app.state.my_client_id].hand.name = 'hand_' + t.root.user.id;
+//   let handZone = t.game.layout.named_zones['hand_'+t.app.state.my_client_id]
+//   handZone.name = 'hand_' + t.root.user.id;
+//   t.game.layout.named_zones['hand_'+t.root.user.id] = handZone;
+//   t.game.layout.named_zones['hand_'+t.app.state.my_client_id] = null;
+// }
+);
 
 var Game_PVPMemory = /*#__PURE__*/function () {
   function Game_PVPMemory() {
@@ -29747,7 +29799,8 @@ var Game_PVPMemory = /*#__PURE__*/function () {
 
         __card.current_tween.start();
       }
-    }
+    } // todo: read from state.rounds instead?
+
   }, {
     key: "current_round",
     get: function get() {
@@ -29755,7 +29808,8 @@ var Game_PVPMemory = /*#__PURE__*/function () {
 
       // console.log('current round?',this.rounds,this.round);
       return this === null || this === void 0 ? void 0 : (_this$rounds = this.rounds) === null || _this$rounds === void 0 ? void 0 : _this$rounds[this === null || this === void 0 ? void 0 : this.round];
-    }
+    } // do we use this?
+
   }, {
     key: "current_player",
     get: function get() {
@@ -29765,48 +29819,30 @@ var Game_PVPMemory = /*#__PURE__*/function () {
       return this === null || this === void 0 ? void 0 : (_this$current_round = this.current_round) === null || _this$current_round === void 0 ? void 0 : _this$current_round.current_player;
     } // todo move this server side
 
-  }, {
-    key: "checkForMatches",
-    value: function () {
-      var _checkForMatches = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee8() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee8$(_context8) {
-          while (1) {
-            switch (_context8.prev = _context8.next) {
-              case 0:
-                // we've flipped 2+ cards,
-                t.game.ignore_clicks = true; // server is checking for matches
-                // temp: 50/50
-                //let match = Math.random() >= 0.5;
-                // TODO: flippedCardsMatch()
-                // check for matches
-                // if(match){
-                //     // move cards to players hand
-                //     await delay(animationDuration*1000);
-                //     moveFlippedToPlayersHand();
-                //     await delay(1000);
-                //     // deal more cards
-                //     // console.warn('todo: if out of cards, reset')
-                //     //t.deck.dealToLayout(t.game.layout);
-                // }else{
-                //     // set a timer, and then flip them back
-                //     // reset cards
-                //     resetCards();
-                // }
+    /*
+    async checkForMatches(){
+        // we've flipped 2+ cards,
+        t.game.ignore_clicks = true; // server is checking for matches
+        // temp: 50/50
+        //let match = Math.random() >= 0.5;
+        // TODO: flippedCardsMatch()
+        // check for matches
+        // if(match){
+        //     // move cards to players hand
+        //     await delay(animationDuration*1000);
+        //     moveFlippedToPlayersHand();
+        //     await delay(1000);
+        //     // deal more cards
+        //     // console.warn('todo: if out of cards, reset')
+        //     //t.deck.dealToLayout(t.game.layout);
+         // }else{
+        //     // set a timer, and then flip them back
+        //     // reset cards
+        //     resetCards();
+        // }
+    }
+    */
 
-              case 1:
-              case "end":
-                return _context8.stop();
-            }
-          }
-        }, _callee8);
-      }));
-
-      function checkForMatches() {
-        return _checkForMatches.apply(this, arguments);
-      }
-
-      return checkForMatches;
-    }()
   }]);
 
   return Game_PVPMemory;
@@ -29911,25 +29947,23 @@ function init() {
 // todo: filter thru clients, return other player(s) who aren't you
 // skip spectators
 
-
-function getOpponentID() {
-  var ids = t.app.state.client_ids.slice();
-
-  if (ids.length < 2) {
+/* function getOpponentID(){
+  const ids = t.app.state.client_ids.slice();
+  if(ids.length<2){
     console.error('no one to call');
-  } else if (ids.length > 2) {
+  }else if(ids.length > 2){
     console.error('need to figure out multipeer connections');
-  } else {
-    var my_index = ids.indexOf(t.app.my_client_id);
-    ids.splice(my_index, 1);
-    console.warn('attempting media offer to peer:', ids[0], ids);
+  }else{
+    let my_index = ids.indexOf(t.app.state.my_client_id);
+    ids.splice(my_index,1);
+    console.warn('attempting media offer to peer:',ids[0],ids);
   }
-
   return ids[0];
-}
+} */
+
 
 function render() {
-  var _t6, _t6$app, _t6$app$state;
+  var _t7, _t7$app, _t7$app$state;
 
   if (resize(renderer)) {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -29945,7 +29979,7 @@ function render() {
   t.deck.tweenCardsToZones(); // update "hovered" status of cards
   // todo only run this loop if t.app.state.hovered has changed since last tick
 
-  if ((_t6 = t) !== null && _t6 !== void 0 && (_t6$app = _t6.app) !== null && _t6$app !== void 0 && (_t6$app$state = _t6$app.state) !== null && _t6$app$state !== void 0 && _t6$app$state.hovered) {
+  if ((_t7 = t) !== null && _t7 !== void 0 && (_t7$app = _t7.app) !== null && _t7$app !== void 0 && (_t7$app$state = _t7$app.state) !== null && _t7$app$state !== void 0 && _t7$app$state.hovered) {
     // TODO: this check is probably wasteful, find a better way
     // like .last_hovered_at dirty flag
     if (JSON.stringify(t.app.state.hovered) !== JSON.stringify(t.app.state.hovered_prev)) {
@@ -30310,19 +30344,19 @@ function onMouseMove(_x9) {
 }
 
 function _onMouseMove() {
-  _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10(evt) {
+  _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee9(evt) {
     var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i;
 
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
             if (!t.root.show_modal) {
-              _context10.next = 2;
+              _context9.next = 2;
               break;
             }
 
-            return _context10.abrupt("return");
+            return _context9.abrupt("return");
 
           case 2:
             updateClientCursor();
@@ -30415,10 +30449,10 @@ function _onMouseMove() {
 
           case 7:
           case "end":
-            return _context10.stop();
+            return _context9.stop();
         }
       }
-    }, _callee10);
+    }, _callee9);
   }));
   return _onMouseMove.apply(this, arguments);
 }
@@ -30488,13 +30522,13 @@ var cusorUpdateFN = getThrottledUpdateServer('SET_PLAYER_CURSOR', 128);
 var headUpdateFN = getThrottledUpdateServer('SET_PLAYER_HEAD', 128);
 
 function updateClientCursor() {
-  var _t$players2, _t$players2$t$app$my_, _t$players2$t$app$my_2;
+  var _t$players2, _t$players2$t$app$sta, _t$players2$t$app$sta2;
 
   // hit test to position pointer
   // mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
   // mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   // Toggle rotation bool for meshes that we clicked
-  var pointer = (_t$players2 = t.players) === null || _t$players2 === void 0 ? void 0 : (_t$players2$t$app$my_ = _t$players2[t.app.my_client_id]) === null || _t$players2$t$app$my_ === void 0 ? void 0 : (_t$players2$t$app$my_2 = _t$players2$t$app$my_.pointer) === null || _t$players2$t$app$my_2 === void 0 ? void 0 : _t$players2$t$app$my_2.mesh;
+  var pointer = (_t$players2 = t.players) === null || _t$players2 === void 0 ? void 0 : (_t$players2$t$app$sta = _t$players2[t.app.state.my_client_id]) === null || _t$players2$t$app$sta === void 0 ? void 0 : (_t$players2$t$app$sta2 = _t$players2$t$app$sta.pointer) === null || _t$players2$t$app$sta2 === void 0 ? void 0 : _t$players2$t$app$sta2.mesh;
 
   if (pointer) {
     var intersects = intersectsGroup([t.tableMesh].concat(_toConsumableArray(t.zonegroup.children))); // console.log('intersects',intersects);
@@ -30562,7 +30596,7 @@ function onTouchEnd(evt) {
 }
 
 function onMouseClick(evt) {
-  var _t7, _t7$root, _t7$root$user, _intersects$, _intersects$$object, _intersects$$object$u, _t$cards;
+  var _t8, _t8$root, _t8$root$user, _intersects$, _intersects$$object, _intersects$$object$u, _t$cards;
 
   if (t.root.show_modal) {
     return;
@@ -30578,7 +30612,7 @@ function onMouseClick(evt) {
   } // if we're not logged in, ignore it
 
 
-  if (!((_t7 = t) !== null && _t7 !== void 0 && (_t7$root = _t7.root) !== null && _t7$root !== void 0 && (_t7$root$user = _t7$root.user) !== null && _t7$root$user !== void 0 && _t7$root$user.id)) {
+  if (!((_t8 = t) !== null && _t8 !== void 0 && (_t8$root = _t8.root) !== null && _t8$root !== void 0 && (_t8$root$user = _t8$root.user) !== null && _t8$root$user !== void 0 && _t8$root$user.id)) {
     return;
   }
 
@@ -30592,11 +30626,11 @@ function onMouseClick(evt) {
   //   drag_distance
   // })
   // console.log('is it my turn?',{
-  //   my_id:t.app.my_client_id,
+  //   my_id:t.app.state.my_client_id,
   //   player_turn:t.app.state.player_turn
   // })
 
-  if (t.app.my_client_id !== t.app.state.player_turn) {
+  if (t.app.state.my_user_id !== t.app.state.player_turn) {
     console.error('its not your turn'); // TODO: visual feedback (pulse cursor red or something)
 
     return;
@@ -30616,8 +30650,7 @@ function onMouseClick(evt) {
   // need to account for occluders too :/
 
 
-  var user_id = t.root.player.id; // t.app.my_client_id
-
+  var user_id = t.app.state.my_user_id;
   var intersects = intersectsGroup(t.debug_inspect_objects ? t.scene.children : t.zonegroup.children);
   var card_id = intersects === null || intersects === void 0 ? void 0 : (_intersects$ = intersects[0]) === null || _intersects$ === void 0 ? void 0 : (_intersects$$object = _intersects$.object) === null || _intersects$$object === void 0 ? void 0 : (_intersects$$object$u = _intersects$$object.userData) === null || _intersects$$object$u === void 0 ? void 0 : _intersects$$object$u.card_id; // console.log('click intersects',{intersects,card_id});
   // card is on the play field
@@ -30646,16 +30679,17 @@ function onMouseClick(evt) {
     // console.log('faceUp?',__card.face_up)
 
 
-    if (__card.face_up) {
-      // card faceup
-      t.game.flipCard(card_id, false);
-      t.server.send({
-        type: 'FLIP',
-        direction: 'facedown',
-        card_id: card_id
-      });
+    if (__card.face_up) {// card faceup
+      // we don't allow the user to flip back in this game mode
+      // t.game.flipCard(card_id,false);
+      // t.server.send({
+      //     type: 'FLIP',
+      //     direction: 'facedown',
+      //     card_id
+      // })
     } else if (!__card.face_up) {
       // card facedown
+      // TODO: block double-flipping
       // so turn it faceup
       t.game.flipCard(card_id, true);
       t.app.state.flipped.push(card_id);
@@ -30667,15 +30701,15 @@ function onMouseClick(evt) {
       t.server.send({
         type: 'FLIP',
         direction: 'faceup',
-        card_id: card_id
+        card_id: card_id,
+        game_id: t.root.game_selection
       });
     }
   } // }
+  // if(t.app.state.flipped.length > 1){
+  //   t.game.checkForMatches();
+  // }
 
-
-  if (t.app.state.flipped.length > 1) {
-    t.game.checkForMatches();
-  }
 }
 
 function lerp(v0, v1, t) {

@@ -34,7 +34,7 @@ class PeerConnections {
     t.server.send({
       type:'mediaOffer',
       offer: localPeerOffer,
-      from: t.app.my_client_id,
+      from: t.app.state.my_client_id,
       to: peer_id,
 
       // extras
@@ -49,7 +49,7 @@ class PeerConnections {
   //      we need to send them an offer to connect to each other
   setupRTCPeerConnections() {
 	t.app.state.client_ids.forEach((client_id)=>{
-        if(client_id !== t.app.my_client_id && !this.remote_peers?.[client_id]){
+        if(client_id !== t.app.state.my_client_id && !this.remote_peers?.[client_id]){
             // one connection per peer
             this.remote_peers[client_id] = this.setupRTCPeerConnection(client_id);
             // offer the stream to the peer
@@ -58,7 +58,9 @@ class PeerConnections {
     })
   }
   closeAll() {
-      console.warn('todo close all');
+      for(let i in this.local_peers){
+          this.local_peers[i].close();
+      }
   }
   /* handler for when a peer offers a video/audio stream */
   async onMediaOffer(decoded) {
@@ -69,6 +71,7 @@ class PeerConnections {
             console.error('error setting up outbound stream');
         }
     }
+    t.root.is_streaming = true;
     // console.log('onMediaOffer',decoded);
     try {
       const FROM_PEER_ID = decoded.from;
@@ -116,7 +119,7 @@ class PeerConnections {
       t.server.send({
         type: "mediaAnswer",
         answer: peerAnswer,
-        from: t.app.my_client_id,
+        from: t.app.state.my_client_id,
         to: FROM_PEER_ID,
 
         // extras
@@ -164,18 +167,22 @@ class PeerConnections {
         this.onIceCandidateEvent(event, client_id);
     };
 
+    // const user_id = t.userIDForClientID(client_id);
+
     // callback for remote stream available, where we bind it to a video output object
     const gotRemoteStream = (event) => {
       console.log("gotRemoteStream", event);
       const [stream] = event.streams;
       this.peer_streams[client_id] = stream;
       let video = t.root.$refs.AVHud.$refs?.[`opponent_video_${client_id}`];
-      console.log("video?", video);
+      if (!video || !video.length || video.length > 1) {
+        console.error("video not found", video);
+        return;
+      }
+
+      // assign stream to debug object
       if (video && video.length) {
         video[0].srcObject = stream;
-      }
-      if (!video || !video.length || video.length > 1) {
-        console.warn("huh?", video);
       }
 
       let playerHead = t.players?.[client_id]?.head;
@@ -192,7 +199,7 @@ class PeerConnections {
 
   onIceCandidateEvent(event, client_id) {
     // const ids = t.app.state.client_ids.slice();
-    // let my_index = ids.indexOf(t.app.my_client_id);
+    // let my_index = ids.indexOf(t.app.state.my_client_id);
     // ids.splice(my_index, 1);
     if (event.candidate) {
       // should we send to all peers or just one by one?

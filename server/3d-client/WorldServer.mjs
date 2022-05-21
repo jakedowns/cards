@@ -45,6 +45,16 @@ class WorldServer{
 
         // heartbeat
         this.ping_interval = setInterval(this.ping.bind(this),256);
+
+        // orphan client cleanup
+        setInterval(()=>{
+            // every 10 seconds, clean up any clients that haven't sent a WS message in the past... 60 seconds?
+            for(let i in this.clients){
+                if(Date.now() - this.clients[i].last_seen > 60*1000){
+                    this.onClientLeave(i);
+                }
+            }
+        },10*1000)
     }
 
     getDefaultRoomState(){
@@ -98,33 +108,29 @@ class WorldServer{
     // TODO: externalize class
     getDefaultMatchingGameState(){
         const DEFAULT_GAME = {
-            world_id: null,
-            room_id: null,
-            game_type: 1, // food matching 2===solitaire
-
-            // TODO NEST UNDER GAMES
-            game_host: null,
-            rounds: {},
-            round_number: 1,
-            last_dealt: null, // trigger "dealing" tween
-
-            // TODO: nest these under games[]
-            cards: [],
-            zones: [],
             available_cards: [],
-            shuffling: false,
+            cards: [],
             flipped: [],
+            game_host: null,
+            game_type: 1, // food matching 2===solitaire
             hovered: [],
-            player_turn: null,
+            ignore_clicks: false,
+            last_dealt: null, // trigger "dealing" tween
             match_checks: [],
             player_cursors: {},
-            ignore_clicks: false,
-
-            user_ids: [], // array of ids
+            player_cursors: {},
             player_hands: {},
             player_heads: {},
-            player_scores: {},
             player_names: {},
+            player_scores: {},
+            player_turn: null,
+            room_id: null,
+            round_number: 1,
+            rounds: {},
+            shuffling: false,
+            user_ids: [], // array of ids
+            world_id: null,
+            zones: [],
         }
         return DEFAULT_GAME;
     }
@@ -140,6 +146,7 @@ class WorldServer{
             public_id: client_id, // todo public id vs. private id
             // otherwise players could impersonate other players
             ws,
+            last_seen: Date.now(),
             // hand: [],
         }
 
@@ -168,7 +175,8 @@ class WorldServer{
         // maybe just do things based on last_seen
         // TODO: update player.last_seen when player sends any message
 
-        // delete this.clients?.[client_id];
+        // drop from client_id list
+        delete this.clients?.[client_id];
         // delete this.player_hands?.[client_id];
         // delete this.player_heads?.[client_id];
         // delete this.player_scores?.[client_id];
@@ -236,6 +244,7 @@ class WorldServer{
         if(['HIGHLIGHT','SET_PLAYER_CURSOR','SET_PLAYER_HEAD'].indexOf(decoded.type) === -1){
             console.log('client says',decoded);
         }
+        this.clients[client_id].last_seen = Date.now();
         switch(decoded.type){
 
             // todo:
@@ -295,6 +304,10 @@ class WorldServer{
 
             case 'SET_PLAYER_HEAD':
                 let game = this.gameById(decoded.game_id)
+                if(!game){
+                    console.warn('game not found',decoded.game_id);
+                    return;
+                }
                 if(!game?.player_heads?.[decoded.user_id]){
                     game.player_heads[decoded.user_id] = {};
                 }
@@ -303,9 +316,8 @@ class WorldServer{
                 break;
 
             case 'RESTART_GAME':
-                if(this.game_host === client_id
-                    // already validated above
-                    //&& decoded.client_id === client_id
+                if(
+                    this.game_host === this?.client_user_ids?.[client_id]
                 ){
                     this.restartGame(client_id,decoded.game_id);
                 }
@@ -328,7 +340,7 @@ class WorldServer{
             case 'FLIP':
                 //this.games[this.game_id].flipped.push(decoded.card_id);
                 this.flipped.push(decoded.card_id);
-                this.checkForMatch();
+                this.checkForMatch(decoded.game_id);
 
 
                 break;
@@ -346,6 +358,7 @@ class WorldServer{
                     type:'CHAT_MESSAGE',
                     message: decoded.message,
                     client_id: decoded.client_id,
+                    user_id: decoded.user_id,
                     timestamp: Date.now()
                 });
                 break;
@@ -426,7 +439,7 @@ class WorldServer{
 
     }
 
-    async checkForMatch(){
+    async checkForMatch(game){
         console.log('check for match',this.flipped.length);
         if(this.flipped.length > 1){
             this.ignore_clicks = true;
@@ -540,6 +553,7 @@ class WorldServer{
         for(let i in game.user_ids){
             // console.log('i',game.user_ids,this.user_client_ids)
             let client_id = this.user_client_ids?.[game.user_ids[i]];
+            // console.log('     @@@@     CLIENT ID?',client_id);
             if(client_id){
                 this.notifyClient(client_id,message)
             }
@@ -601,6 +615,12 @@ class WorldServer{
         // TODO: loop thru games and send states to clients
         for(var game_id in this.games){
             let game = this.games[game_id];
+
+            console.log('GAME',game);
+
+            if(!game){
+                continue;
+            }
 
             this.notifyGameClients(game_id,{
                 type:'PING',
@@ -755,24 +775,11 @@ class WorldServer{
                 let room = world.rooms[room_id]
                 rooms_flat[room_id] = room
                 for(let game_id in room.games){
-                    let game = room.games[game_id]
-                    if(!game.user_ids){
-                        game.user_ids = []
-                    }
-                    if(!game.player_cursors){
-                        game.player_cursors = {}
-                    }
-                    if(!game.player_hands){
-                        game.player_hands = {}
-                    }
-                    if(!game.player_heads){
-                        game.player_heads = {}
-                    }
-                    if(!game.player_scores){
-                        game.player_scores = {}
-                    }
-                    if(!game.player_turn){
-                        game.player_turn = null
+                    // todo: switch on game type
+                    const DEFAULT = this.getDefaultMatchingGameState();
+                    let game = {...DEFAULT,...room.games[game_id]};
+                    if(!game.game_host){
+                        game.game_host = '0ad69be5-fa96-4511-bebe-eb81d72db381'
                     }
                     games_flat[game_id] = game
                 }
@@ -812,7 +819,7 @@ class WorldServer{
             // players: [], //Object.keys(this.clients),
         }
 
-        this.game_host = client_id;
+        // this.game_host = client_id;
         this.player_turn = client_id;
 
         // this.games[new_game_id] = {
@@ -834,7 +841,21 @@ class WorldServer{
         // })
     }
 
-    async newRound(){
+    async newRound(game_id){
+        let game = this.games?.[game_id];
+        if(!game){
+            console.error('error fetching game',game_id);
+            return;
+        }
+
+        // TODO: cap max rounds
+
+        // TODO: insert into directus and get id
+        let new_round = {
+            sort: game.round_number + 1
+        };
+        game.round_number = new_round.sort;
+        let result = this.api
         let new_round_id = "round_"+performance.now();
         this.round_id = new_round_id;
 
