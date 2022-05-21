@@ -34,7 +34,7 @@ class PeerConnections {
     t.server.send({
       type:'mediaOffer',
       offer: localPeerOffer,
-      from: t.app.state.my_client_id,
+      from: t.app.my_client_id,
       to: peer_id,
 
       // extras
@@ -49,7 +49,7 @@ class PeerConnections {
   //      we need to send them an offer to connect to each other
   setupRTCPeerConnections() {
 	t.app.state.client_ids.forEach((client_id)=>{
-        if(client_id !== t.app.state.my_client_id && !this.remote_peers?.[client_id]){
+        if(client_id !== t.app.my_client_id && !this.remote_peers?.[client_id]){
             // one connection per peer
             this.remote_peers[client_id] = this.setupRTCPeerConnection(client_id);
             // offer the stream to the peer
@@ -116,7 +116,7 @@ class PeerConnections {
       t.server.send({
         type: "mediaAnswer",
         answer: peerAnswer,
-        from: t.app.state.my_client_id,
+        from: t.app.my_client_id,
         to: FROM_PEER_ID,
 
         // extras
@@ -192,7 +192,7 @@ class PeerConnections {
 
   onIceCandidateEvent(event, client_id) {
     // const ids = t.app.state.client_ids.slice();
-    // let my_index = ids.indexOf(t.app.state.my_client_id);
+    // let my_index = ids.indexOf(t.app.my_client_id);
     // ids.splice(my_index, 1);
     if (event.candidate) {
       // should we send to all peers or just one by one?

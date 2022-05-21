@@ -34,16 +34,16 @@
                 <div class="not-my-turn" v-else>Opponent's Turn</div>
             </div>
             <div class="scores-wrapper">
-                <div>Online: {{state?.client_ids?.length}}</div>
+                <div>Online: {{state?.user_ids?.length}}</div>
                 <div>Round {{state?.round_number}}</div>
-                <div class="scores" v-for="id in state?.client_ids" :key="id">{{state?.player_names?.[id] ?? 'player'}}: <span class="hit">{{state?.player_scores?.[id]?.[0] ?? 0}}</span> / <span class="miss">{{state?.player_scores?.[id]?.[1] ?? 0}}</span> </div>
+                <div class="scores" v-for="user_id in state?.user_ids" :key="user_id">{{state?.user_names?.[user_id] ?? 'player'}}: <span class="hit">{{state?.player_scores?.[user_id]?.[0] ?? 0}}</span> / <span class="miss">{{state?.player_scores?.[user_id]?.[1] ?? 0}}</span> </div>
             </div>
         </div>
         <div class="chat-box">
             <div class="messages">
                 <div v-for="message in chat_messages" :key="message.timestamp">
                     <div class="message-wrapper">
-                        <div class="message-sender">{{nameForClientID(message.client_id)}}</div>
+                        <div class="message-sender">{{nameForUserID(message.user_id)}}</div>
                         <div class="message-text">{{message.message}}</div>
                     </div>
                 </div>
@@ -106,10 +106,10 @@ export default {
         }
     },
     computed:{
-        nameForClientID(){
-            return(client_id)=>{
-                // TODO: server should send player_names
-                return this.state?.player_names?.[client_id] ?? 'player'
+        nameForUserID(){
+            return(user_id)=>{
+                // TODO: server should send user_names
+                return this.state?.user_names?.[user_id] ?? 'player'
             }
         }
     },

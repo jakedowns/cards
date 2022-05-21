@@ -281,7 +281,7 @@ export default {
                         }
                     }
                 }
-
+                t.updatePlayerInstances();
                 t.updatePlayerCursors();
                 t.updatePlayerHeads();
 
@@ -326,7 +326,7 @@ export default {
             this.show_modal = true;
             this.show_pause_menu = true;
             t.client_ignore_clicks = true;
-            t.controls.enabled = true;
+            t.controls.enabled = false;
         },
         closeModal(){
             this.show_modal = false;
@@ -340,6 +340,7 @@ export default {
             this.show_game_in_progress_modal = false;
 
             t.client_ignore_clicks = false;
+            t.controls.enabled = true;
         },
         onNameUpdated(){
             this.show_name_modal = false;
@@ -411,6 +412,16 @@ export default {
             this.world_selection = this.user_session?.current_world?.toString()
             this.room_selection = this.user_session?.current_room
             this.game_selection = this.user_session?.current_game
+
+            t.server.send({
+                type:'SET_USER_SESSION',
+                user_id:this.user.id,
+                session:{
+                    world_selection:this.world_selection,
+                    room_selection:this.room_selection,
+                    game_selection:this.game_selection
+                }
+            })
 
             // TODO: make game->room->world a single query
             if(this.game_selection){
@@ -512,7 +523,7 @@ export default {
             this.closePauseMenu()
             window.t.server.send({
                 type: 'RESTART_GAME',
-                //game_id: this.state.game_id // server should know based on client id
+                game_id: t.root.game_selection
             })
         },
 

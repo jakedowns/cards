@@ -76,9 +76,9 @@
                     <li>player type: {{state.player_type ?? 'connecting'}}</li>
                     <li>player hands:
                         <ul>
-                            <li v-for="player_id in state.client_ids" :key="player_id">
-                                <span v-if="!state.player_hands?.[player_id]?.length">Empty</span>
-                                {{JSON.stringify(state?.player_hands?.[player_id])}}
+                            <li v-for="user_id in state.user_ids" :key="user_id">
+                                <span v-if="!state.player_hands?.[user_id]?.length">Empty</span>
+                                {{JSON.stringify(state?.player_hands?.[user_id])}}
                             </li>
                         </ul>
 

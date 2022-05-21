@@ -7,11 +7,22 @@ function delay(ms) {
 }
 class WorldServer{
     constructor(){
+
+        this.users = {};
+
+        // todo: just nest under users?
+        this.user_names = {};
+
+        this.user_sessions = {};
+
         this.client_user_ids = {}; // local <-> directus
+
         this.user_client_ids = {}; // directus <-> local
 
         this.chat_messages = [];
 
+        // this is a node-WS thing only
+        // for most of the code, focus on user_id instead of client_id
         this.clients = {};
 
         // worlds are created by clients
@@ -26,32 +37,14 @@ class WorldServer{
                 started:false,
             }
         };
-        this.game_host = null;
-        this.rounds = {};
-        this.round_number = 1;
-        this.last_dealt = null; // trigger "dealing" tween
-
-        // TODO: nest these under games[]
-        this.cards = [];
-        this.zones = [];
-        this.available_cards = [];
-        this.shuffling = false;
-        this.flipped = [];
-        this.hovered = [];
-        this.player_turn = null;
-        this.match_checks = [];
-        this.player_cursors = {};
-        this.ignore_clicks = false;
-        this.player_hands = {};
-        this.player_heads = {};
-        this.player_scores = {};
-        this.player_names = {};
 
         // heartbeat
         this.ping_interval = setInterval(this.ping.bind(this),256);
+    }
 
+    getDefaultRoomState(){
         // create a default room for now
-        this.rooms.default = {
+        const DEFAULT_ROOM = {
             players: [], // client ids
             scene: {
                 camera: {
@@ -94,6 +87,37 @@ class WorldServer{
 
             }
         }
+        return DEFAULT_ROOM;
+    }
+
+    // TODO: externalize class
+    getDefaultMatchingGameState(){
+        const DEFAULT_GAME = {
+            // TODO NEST UNDER GAMES
+            game_host: null,
+            rounds: {},
+            round_number: 1,
+            last_dealt: null, // trigger "dealing" tween
+
+            // TODO: nest these under games[]
+            cards: [],
+            zones: [],
+            available_cards: [],
+            shuffling: false,
+            flipped: [],
+            hovered: [],
+            player_turn: null,
+            match_checks: [],
+            player_cursors: {},
+            ignore_clicks: false,
+
+            players: [], // array of ids
+            player_hands: {},
+            player_heads: {},
+            player_scores: {},
+            player_names: {},
+        }
+        return DEFAULT_GAME;
     }
 
     attachAPI_andBoot(API){
@@ -107,28 +131,17 @@ class WorldServer{
             public_id: client_id, // todo public id vs. private id
             // otherwise players could impersonate other players
             ws,
-            hand: [],
+            // hand: [],
         }
-        if(!this.room_id){
-            this.newRoomGameRound(client_id);
-        }
-        // add player to room
-        const room = this.rooms[this.room_id];
-        room.players.push(client_id);
-        this.player_cursors[client_id] = {x:0,y:0,z:0};
-        this.player_hands[client_id] = [];
-        this.player_heads[client_id] = [];
-        this.player_scores[client_id] = [0,0]; // matches, misses
-        this.player_names[client_id] = 'player '+room.players.length; // matches, rounds won
-        const player_or_spectator = room.players.length <= 2 ? 'player' : 'spectator';
-        console.log('players?',room.players.length)
-        if(room.players.indexOf(room.player_turn) === -1){
-            room.player_turn = room.players[0];
-        }
+
+        // updating this to use server-side state
+        // if(!this.room_id){
+        //     this.newRoomGameRound(client_id);
+        // }
+
         this.notifyClient(client_id,{
             type: 'WELCOME',
             your_client_id: client_id,
-            player_or_spectator,
         })
         // this.notifyAllClients({
         //     type:"NEW_CLIENT_CONNECTED",
@@ -139,49 +152,56 @@ class WorldServer{
 
     onClientLeave(client_id){
         console.log('client disconnected',client_id)
-        delete this.clients?.[client_id];
-        delete this.player_hands?.[client_id];
-        delete this.player_heads?.[client_id];
-        delete this.player_scores?.[client_id];
-        delete this.player_names?.[client_id];
+
+        console.warn('re-implement host switching when room host leaves?')
+        console.warn('todo: tag room.player pivot as disconnected')
+        // what if player is still in another tab/device?
+        // maybe just do things based on last_seen
+        // TODO: update player.last_seen when player sends any message
+
+        // delete this.clients?.[client_id];
+        // delete this.player_hands?.[client_id];
+        // delete this.player_heads?.[client_id];
+        // delete this.player_scores?.[client_id];
+        // delete this.user_names?.[client_id];
 
         // todo: get room(s) for player and loop
-        const room = this.rooms[this.room_id];
+        // const room = this.rooms[this.room_id];
 
         // remove from room
-        let room_player_index = room.players.indexOf(client_id);
-        if(room_player_index>-1){
-            room.players.splice(room_player_index,1);
-        }
-        console.log('clients remaining',Object.keys(this.clients).length);
-        console.log('room.players remaining',room.players.length);
-        // if player was host, change host to next remaining player in room
-        if(room.game_host === client_id){
-            if(room.players.length){
-                // assign new host
-                room.game_host = room.players[0];
-                // make it this players turn
-                if(room.players.indexOf(room.player_turn) === -1){
-                    room.player_turn = room.players[0];
-                }
-            }else{
-                room.game_host = null;
-            }
-        }
+        // let room_player_index = room.players.indexOf(client_id);
+        // if(room_player_index>-1){
+        //     room.players.splice(room_player_index,1);
+        // }
+        // console.log('clients remaining',Object.keys(this.clients).length);
+        // console.log('room.players remaining',room.players.length);
+        // // if player was host, change host to next remaining player in room
+        // if(room.game_host === client_id){
+        //     if(room.players.length){
+        //         // assign new host
+        //         room.game_host = room.players[0];
+        //         // make it this players turn
+        //         if(room.players.indexOf(room.player_turn) === -1){
+        //             room.player_turn = room.players[0];
+        //         }
+        //     }else{
+        //         room.game_host = null;
+        //     }
+        // }
 
-        if(!room.game_host && !room.players.length){
-            // no players left, remove rounds,game,room
-            delete this.games[this.game_id];
-            this.game_id = null;
+        // if(!room.game_host && !room.players.length){
+        //     // no players left, remove rounds,game,room
+        //     delete this.games[this.game_id];
+        //     this.game_id = null;
 
-            delete this.rounds[this.round_id];
-            this.round_id = null;
+        //     delete this.rounds[this.round_id];
+        //     this.round_id = null;
 
-            delete this.rooms[this.room_id];
-            this.room_id = null;
+        //     delete this.rooms[this.room_id];
+        //     this.room_id = null;
 
-            console.log('last player left, closing game TODO: clean up on timeout to allow last player time to reconnect');
-        }
+        //     console.log('last player left, closing game TODO: clean up on timeout to allow last player time to reconnect');
+        // }
         // if all players have left, set host to null; so that the next player to join can become host
         // if last player in a room, end game, delete room
     }
@@ -208,6 +228,8 @@ class WorldServer{
             console.log('client says',decoded);
         }
         switch(decoded.type){
+
+            // todo:
             // case 'NEW_ROOM':
             //     this.newRoomGameRound(client_id)
             //     break;
@@ -215,7 +237,7 @@ class WorldServer{
             case 'CONNECT_AS_USER':
                 // TODO: verify that user is authenticated as this user id
                 // otherwise, users could spoof being someone else.
-                this.connectAsUser(client_id,decoded);
+                this.CONNECT_AS_USER(client_id,decoded);
                 break;
 
             case 'iceCandidate':
@@ -258,11 +280,13 @@ class WorldServer{
 
             /** pattern emergining: set_player_mesh_position // record_mesh_position */
             case 'SET_PLAYER_CURSOR':
-                this.player_cursors[client_id] = decoded.data;
+                // this.player_cursors[client_id] = decoded.data;
+                this.gameById(decoded.game_id).player_cursors[decoded.user_id] = decoded.data;
                 break;
 
             case 'SET_PLAYER_HEAD':
-                this.player_heads[client_id] = decoded.data;
+                this.gameById(decoded.game_id).player_heads[decoded.user_id] = decoded.data;
+                // this.player_heads[client_id] = decoded.data;
                 break;
 
             case 'RESTART_GAME':
@@ -270,7 +294,7 @@ class WorldServer{
                     // already validated above
                     //&& decoded.client_id === client_id
                 ){
-                    this.newRoomGameRound(client_id);
+                    this.restartGame(client_id,decoded.game_id);
                 }
                 break;
 
@@ -318,6 +342,10 @@ class WorldServer{
                     this.cards[i].zone = 'deck';
                 }
                 break;
+
+            case 'SET_USER_SESSION':
+                this.SET_USER_SESSION(client_id,decoded);
+                break;
         }
 
         let actionsToSave = [
@@ -334,10 +362,49 @@ class WorldServer{
         }
     }
 
-    connectAsUser(client_id,data){
+    gameById(game_id){
+        return this.games[game_id];
+    }
+
+    CONNECT_AS_USER(client_id,data){
         this.client_user_ids[client_id] = data.user_id;
         this.user_client_ids[data.user_id] = client_id;
-        this.player_names[client_id] = data.name;
+        this.user_names[data.user_id] = data.name;
+    }
+
+    SET_USER_SESSION(client_id,data){
+        console.log('SET_USER_SESSION',client_id,data)
+        this.user_sessions[data.user_id] = data.session;
+
+        if(data.session.game_selection){
+            // add player to room
+            // const room = this.rooms[data.session.room_selection];
+            // room.players.push(data.user_id)
+            const game = this.games?.[data.session?.game_selection]
+
+            if(!game){
+                console.error('error w/ SET_USER_SESSION game not found');
+                // todo: get different default depending on the gametype
+                this.games[data.session.game_selection] = this.getDefaultMatchingGameState()
+                // return;
+            }
+            // if(!game.players){
+            //     game.players = []
+            // }
+            game.players.push(data.user_id);
+            game.player_cursors[data.user_id] = {x:0,y:0,z:0};
+            game.player_hands[data.user_id] = [];
+            game.player_heads[data.user_id] = [];
+            // todo: by round
+            game.player_scores[data.user_id] = [0,0]; // matches, misses
+
+            // if the "current player" is missing,
+            // make the newest player the current player
+            if(game.players.indexOf(game.player_turn) === -1){
+                game.player_turn = data.user_id;
+            }
+        }
+
     }
 
     async checkForMatch(){
@@ -425,16 +492,16 @@ class WorldServer{
                     player:this.player_turn,
                     pass: false,
                 })
-                let client_ids = Object.keys(this.clients);
+                let user_ids = Object.keys(this.users);
                 // switch player turn
-                if(client_ids.length){
+                if(user_ids.length){
                     // multiplayer mode
-                    let current_player_index = client_ids.indexOf(this.player_turn);
+                    let current_player_index = user_ids.indexOf(this.player_turn);
                     let next_player_index = current_player_index+1;
-                    if(next_player_index >= client_ids.length){
+                    if(next_player_index >= user_ids.length){
                         next_player_index = 0;
                     }
-                    this.player_turn = client_ids[next_player_index];
+                    this.player_turn = user_ids[next_player_index];
                 }
             }
             await delay(300);
@@ -448,7 +515,12 @@ class WorldServer{
 
     // TOOD
     // notifyRoomClients()
-    // notifyGameClients()
+    notifyGameClients(game_id,message){
+        for(let player_id in game.players){
+            let client_id = null// get player_id from client_id
+            this.notifyClient(client_id,message)
+        }
+    }
 
     notifyAllClients(message){
         for(let client_id in this.clients){
@@ -493,70 +565,72 @@ class WorldServer{
 
         // TODO: investigate sending deltas on a per-client basis (let client send last known good hashes)
         // we compare last known hashes to the current hashes, and send deltas (or full state if corrupt / fresh);
-        this.notifyAllClients({
-            type:'PING',
-            time: performance.now(),
-            state: {
-                // is the deck currently being shuffled? tells client to animate the deck in a shuffle loop
-                shuffling: this?.shuffling,
-                // todo: do away with this in favor of automatic zone-switch tweens
-                // this basically tells the client the last time the server dealt cards, and if the client hasn't played a "deal" animation since it last saw the server deal cards, it should animate the cards
-                last_dealt: this?.last_dealt,
-                // the current room id that the client is currently playing in
-                // todo: server support multiple clients in different rooms
-                room_id: this.room_id,
-                // the list of client ids of other clients in the room
-                // todo: scope to room
-                client_ids: Object.keys(this.clients),
-                client_user_ids: this.client_user_ids,
-                // pvp-matching: player<->matched_cards mapping
-                player_hands: this?.player_hands,
-                // broadcasts the position of each client's camera
-                player_heads: this?.player_heads,
-                // keep track of current player scores (total, and per-round)
-                player_scores: this?.player_scores,
-                // names of current players
-                player_names: this?.player_names,
-                // player_id of the current player hosting the room (extra options available if host)
-                game_host: this?.game_host,
-                // only necessary once we allow clients to play multiple games simultaneously (mult-tab,multi-device)
-                game_id: this?.game_id,
-                // i like having a flat store instead of state.game.prop, state.game_prop
-                // this only holds {started:boolean}
-                // todo: drop this
-                // game: this.games?.[this?.game_id],
 
-                // the current round id
-                // i don't think the client needs this...
-                // round_id: this?.round_id,
+        // TODO: loop thru games and send states to clients
+        // this.notifyGameClients(game_id,{
+        //     type:'PING',
+        //     time: performance.now(),
+        //     state: {
+        //         // is the deck currently being shuffled? tells client to animate the deck in a shuffle loop
+        //         shuffling: this?.shuffling,
+        //         // todo: do away with this in favor of automatic zone-switch tweens
+        //         // this basically tells the client the last time the server dealt cards, and if the client hasn't played a "deal" animation since it last saw the server deal cards, it should animate the cards
+        //         last_dealt: this?.last_dealt,
+        //         // the current room id that the client is currently playing in
+        //         // todo: server support multiple clients in different rooms
+        //         room_id: this.room_id,
+        //         // the list of client ids of other clients in the room
+        //         // todo: scope to room
+        //         client_ids: Object.keys(this.clients),
+        //         client_user_ids: this.client_user_ids,
+        //         // pvp-matching: player<->matched_cards mapping
+        //         player_hands: this?.player_hands,
+        //         // broadcasts the position of each client's camera
+        //         player_heads: this?.player_heads,
+        //         // keep track of current player scores (total, and per-round)
+        //         player_scores: this?.player_scores,
+        //         // names of current players
+        //         user_names: this?.user_names,
+        //         // player_id of the current player hosting the room (extra options available if host)
+        //         game_host: this?.game_host,
+        //         // only necessary once we allow clients to play multiple games simultaneously (mult-tab,multi-device)
+        //         game_id: this?.game_id,
+        //         // i like having a flat store instead of state.game.prop, state.game_prop
+        //         // this only holds {started:boolean}
+        //         // todo: drop this
+        //         // game: this.games?.[this?.game_id],
 
-                // round.started (only prop):
-                // round: this.rounds?.[this?.round_id],
+        //         // the current round id
+        //         // i don't think the client needs this...
+        //         // round_id: this?.round_id,
 
-                // allow client to display current round number and detect round transitions
-                round_number: this.round_number,
+        //         // round.started (only prop):
+        //         // round: this.rounds?.[this?.round_id],
 
-                // cards[i].face_up is not used (we ref state.flipped[] instead)
-                // this object holds card shuffled order info & card-zone assignment
-                // (and pairing but the client doest really need to know that since server validates matches)
-                // will be needed once you can edit decks client-side #FUTURE
-                cards: this.cards,
-                // the remaining cards in the deck, in their SHUFFLED order
-                available_cards: this.available_cards,
-                // the ids of the max2 cards flipped over by current player+round+turn
-                flipped: this.flipped,
-                // PlayerID: who's turn is it
-                player_turn: this.player_turn,
-                // the ids of the cards being hovered over by the current player (i think i blocked hovering when it's not your turn)
-                hovered: this.hovered,
+        //         // allow client to display current round number and detect round transitions
+        //         round_number: this.round_number,
 
-                // the current position of players mouse cursor / pointer / "hands"
-                player_cursors: this.player_cursors,
+        //         // cards[i].face_up is not used (we ref state.flipped[] instead)
+        //         // this object holds card shuffled order info & card-zone assignment
+        //         // (and pairing but the client doest really need to know that since server validates matches)
+        //         // will be needed once you can edit decks client-side #FUTURE
+        //         cards: this.cards,
+        //         // the remaining cards in the deck, in their SHUFFLED order
+        //         available_cards: this.available_cards,
+        //         // the ids of the max2 cards flipped over by current player+round+turn
+        //         flipped: this.flipped,
+        //         // PlayerID: who's turn is it
+        //         player_turn: this.player_turn,
+        //         // the ids of the cards being hovered over by the current player (i think i blocked hovering when it's not your turn)
+        //         hovered: this.hovered,
 
-                // whether or not the server is currently ignoring clicks (to prevent actions while animating / processing)
-                ignore_clicks: this.ignore_clicks
-            }
-        })
+        //         // the current position of players mouse cursor / pointer / "hands"
+        //         player_cursors: this.player_cursors,
+
+        //         // whether or not the server is currently ignoring clicks (to prevent actions while animating / processing)
+        //         ignore_clicks: this.ignore_clicks
+        //     }
+        // })
     }
 
     saveServerState(){
@@ -572,11 +646,18 @@ class WorldServer{
                                 "f9222054-ea60-436f-9199-75b97781ec53":{
                                     shuffling: this?.shuffling,
                                     last_dealt: this?.last_dealt,
-                                    client_ids: Object.keys(this.clients),
-                                    client_user_ids: this.client_user_ids,
+
+                                    // moving away from sharing client ids to the client. it should only be the server that needs to know client id
+                                    // all other code should work based on directus user ids
+                                    // client_ids: Object.keys(this.clients),
+
+                                    // or object.values this.client_user_ids
+                                    user_ids: Object.keys(this?.users),
+                                    // client_user_ids: this.client_user_ids,
+
                                     player_hands: this?.player_hands,
                                     player_scores: this?.player_scores,
-                                    player_names: this?.player_names,
+                                    user_names: this?.user_names,
                                     game_host: this?.game_host,
                                     round_number: this.round_number,
                                     cards: this.cards,
@@ -596,6 +677,63 @@ class WorldServer{
                 }
             },
         });
+    }
+
+    // set remote state
+    setStateFromServer(state_worlds){
+        let worlds_flat = {};
+        let rooms_flat = {};
+        let games_flat = {};
+        for(let world_id in state_worlds){
+            let world = state_worlds[world_id]
+            worlds_flat[world_id] = world
+            for(let room_id in world.rooms){
+                let room = world.rooms[room_id]
+                rooms_flat[room_id] = room
+                for(let game_id in room.games){
+                    let game = room.games[game_id]
+                    if(!game.players){
+                        game.players = [] // player_ids
+                    }
+                    if(!game.player_cursors){
+                        game.player_cursors = {}
+                    }
+                    if(!game.player_hands){
+                        game.player_hands = {}
+                    }
+                    if(!game.player_heads){
+                        game.player_heads = {}
+                    }
+                    if(!game.player_scores){
+                        game.player_scores = {}
+                    }
+                    if(!game.player_turn){
+                        game.player_turn = null
+                    }
+                    games_flat[game_id] = game
+                }
+                delete rooms_flat[room_id].games
+            }
+            delete worlds_flat[world_id].rooms;
+        }
+
+        // console.log({
+        //     worlds_flat,
+        //     rooms_flat,
+        //     games_flat
+        // })
+        this.worlds = worlds_flat;
+        this.rooms = rooms_flat;
+        this.games = games_flat;
+    }
+
+    getGameReference(game_id){
+
+    }
+
+    restartGame(requesting_user,game_id){
+        // todo validate user has ability to restart this game
+
     }
 
     newRoomGameRound(client_id){

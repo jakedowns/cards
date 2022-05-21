@@ -28,7 +28,7 @@ class ServerAPI {
                 // TODO: write state to Memory
                 // console.warn('TODO: write state to memory',state);
                 if(state?.worlds){
-                    this.worldServer.worlds = state.worlds;
+                    this.worldServer.setStateFromServer(state.worlds)
                 }
                 this.booted = true;
             })

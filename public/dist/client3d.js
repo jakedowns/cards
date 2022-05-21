@@ -16900,14 +16900,14 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   computed: {
-    nameForClientID: function nameForClientID() {
+    nameForUserID: function nameForUserID() {
       var _this2 = this;
 
-      return function (client_id) {
-        var _this2$state$player_n, _this2$state, _this2$state$player_n2;
+      return function (user_id) {
+        var _this2$state$user_nam, _this2$state, _this2$state$user_nam2;
 
-        // TODO: server should send player_names
-        return (_this2$state$player_n = (_this2$state = _this2.state) === null || _this2$state === void 0 ? void 0 : (_this2$state$player_n2 = _this2$state.player_names) === null || _this2$state$player_n2 === void 0 ? void 0 : _this2$state$player_n2[client_id]) !== null && _this2$state$player_n !== void 0 ? _this2$state$player_n : 'player';
+        // TODO: server should send user_names
+        return (_this2$state$user_nam = (_this2$state = _this2.state) === null || _this2$state === void 0 ? void 0 : (_this2$state$user_nam2 = _this2$state.user_names) === null || _this2$state$user_nam2 === void 0 ? void 0 : _this2$state$user_nam2[user_id]) !== null && _this2$state$user_nam !== void 0 ? _this2$state$user_nam : 'player';
       };
     }
   },
@@ -17339,6 +17339,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           }
         }
 
+        t.updatePlayerInstances();
         t.updatePlayerCursors();
         t.updatePlayerHeads();
         /* (replacing with tweenCardsToZones)
@@ -17379,7 +17380,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.show_modal = true;
       this.show_pause_menu = true;
       t.client_ignore_clicks = true;
-      t.controls.enabled = true;
+      t.controls.enabled = false;
     },
     closeModal: function closeModal() {
       this.show_modal = false;
@@ -17391,6 +17392,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.show_spectator_joined_modal = false;
       this.show_game_in_progress_modal = false;
       t.client_ignore_clicks = false;
+      t.controls.enabled = true;
     },
     onNameUpdated: function onNameUpdated() {
       this.show_name_modal = false;
@@ -17499,7 +17501,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 19:
                 _this4.world_selection = (_this4$user_session = _this4.user_session) === null || _this4$user_session === void 0 ? void 0 : (_this4$user_session$c = _this4$user_session.current_world) === null || _this4$user_session$c === void 0 ? void 0 : _this4$user_session$c.toString();
                 _this4.room_selection = (_this4$user_session2 = _this4.user_session) === null || _this4$user_session2 === void 0 ? void 0 : _this4$user_session2.current_room;
-                _this4.game_selection = (_this4$user_session3 = _this4.user_session) === null || _this4$user_session3 === void 0 ? void 0 : _this4$user_session3.current_game; // TODO: make game->room->world a single query
+                _this4.game_selection = (_this4$user_session3 = _this4.user_session) === null || _this4$user_session3 === void 0 ? void 0 : _this4$user_session3.current_game;
+                t.server.send({
+                  type: 'SET_USER_SESSION',
+                  user_id: _this4.user.id,
+                  session: {
+                    world_selection: _this4.world_selection,
+                    room_selection: _this4.room_selection,
+                    game_selection: _this4.game_selection
+                  }
+                }); // TODO: make game->room->world a single query
 
                 if (_this4.game_selection) {
                   _this4.getGamesForRoom(_this4.room_selection);
@@ -17523,7 +17534,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   }
                 }
 
-              case 25:
+              case 26:
               case "end":
                 return _context2.stop();
             }
@@ -17609,8 +17620,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     restartGame: function restartGame() {
       this.closePauseMenu();
       window.t.server.send({
-        type: 'RESTART_GAME' //game_id: this.state.game_id // server should know based on client id
-
+        type: 'RESTART_GAME',
+        game_id: t.root.game_selection
       });
     },
     getWorlds: function getWorlds() {
@@ -18306,7 +18317,7 @@ var _hoisted_32 = {
 };
 var _hoisted_33 = ["onClick", "muted", "data-client-id"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _$props$state, _$props$state$client_, _$props$state2, _$props$state3, _$props$state$client_2, _$props$state7;
+  var _$props$state, _$props$state$user_id, _$props$state2, _$props$state3, _$props$state$client_, _$props$state7;
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     style: {
@@ -18339,21 +18350,21 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
       return $props.disableVideo();
     }, ["prevent"]))
-  }, _hoisted_15)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [$props.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$client_ = _$props$state.client_ids) === null || _$props$state$client_ === void 0 ? void 0 : _$props$state$client_.length), 1
+  }, _hoisted_15)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_mic_mute\">{{mic_muted?'Un':''}}Mute Mic</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick audio input settings "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <button @click=\"toggle_vid_mute\">{{video_muted?'Un':''}}Mute Video</button> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: pick video input "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" TODO: video input settings ")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [$props.its_my_turn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, "Your Turn")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, "Opponent's Turn"))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Online: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state = $props.state) === null || _$props$state === void 0 ? void 0 : (_$props$state$user_id = _$props$state.user_ids) === null || _$props$state$user_id === void 0 ? void 0 : _$props$state$user_id.length), 1
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, "Round " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state2 = $props.state) === null || _$props$state2 === void 0 ? void 0 : _$props$state2.round_number), 1
   /* TEXT */
-  ), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)((_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.client_ids, function (id) {
-    var _$props$state$player_, _$props$state4, _$props$state4$player, _$props$state$player_2, _$props$state5, _$props$state5$player, _$props$state5$player2, _$props$state$player_3, _$props$state6, _$props$state6$player, _$props$state6$player2;
+  ), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)((_$props$state3 = $props.state) === null || _$props$state3 === void 0 ? void 0 : _$props$state3.user_ids, function (user_id) {
+    var _$props$state$user_na, _$props$state4, _$props$state4$user_n, _$props$state$player_, _$props$state5, _$props$state5$player, _$props$state5$player2, _$props$state$player_2, _$props$state6, _$props$state6$player, _$props$state6$player2;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "scores",
-      key: id
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$player = _$props$state4.player_names) === null || _$props$state4$player === void 0 ? void 0 : _$props$state4$player[id]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'player') + ": ", 1
+      key: user_id
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$user_na = (_$props$state4 = $props.state) === null || _$props$state4 === void 0 ? void 0 : (_$props$state4$user_n = _$props$state4.user_names) === null || _$props$state4$user_n === void 0 ? void 0 : _$props$state4$user_n[user_id]) !== null && _$props$state$user_na !== void 0 ? _$props$state$user_na : 'player') + ": ", 1
     /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = (_$props$state5 = $props.state) === null || _$props$state5 === void 0 ? void 0 : (_$props$state5$player = _$props$state5.player_scores) === null || _$props$state5$player === void 0 ? void 0 : (_$props$state5$player2 = _$props$state5$player[user_id]) === null || _$props$state5$player2 === void 0 ? void 0 : _$props$state5$player2[0]) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 0), 1
     /* TEXT */
-    ), _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_3 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_3 !== void 0 ? _$props$state$player_3 : 0), 1
+    ), _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_2 = (_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_scores) === null || _$props$state6$player === void 0 ? void 0 : (_$props$state6$player2 = _$props$state6$player[user_id]) === null || _$props$state6$player2 === void 0 ? void 0 : _$props$state6$player2[1]) !== null && _$props$state$player_2 !== void 0 ? _$props$state$player_2 : 0), 1
     /* TEXT */
     )]);
   }), 128
@@ -18361,7 +18372,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.chat_messages, function (message) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: message.timestamp
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.nameForClientID(message.client_id)), 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.nameForUserID(message.user_id)), 1
     /* TEXT */
     ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.message), 1
     /* TEXT */
@@ -18386,7 +18397,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }, ["prevent"]))
   })])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_29, [_hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" players webcam feed "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("video", _hoisted_31, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_2 = (_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.client_ids) !== null && _$props$state$client_2 !== void 0 ? _$props$state$client_2 : []).filter(function (id) {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $props.video_enabled]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" opponent video streams "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(((_$props$state$client_ = (_$props$state7 = $props.state) === null || _$props$state7 === void 0 ? void 0 : _$props$state7.client_ids) !== null && _$props$state$client_ !== void 0 ? _$props$state$client_ : []).filter(function (id) {
     return id !== $props.state.my_client_id;
   }), function (client_id) {
     var _$setup$client_mute_s, _$setup$client_mute_s2;
@@ -18678,12 +18689,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT, STYLE */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "player type: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)((_$props$state$player_ = $props.state.player_type) !== null && _$props$state$player_ !== void 0 ? _$props$state$player_ : 'connecting'), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_38, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.client_ids, function (player_id) {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [_hoisted_38, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.state.user_ids, function (user_id) {
     var _$props$state$player_2, _$props$state$player_3, _$props$state6, _$props$state6$player;
 
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", {
-      key: player_id
-    }, [!((_$props$state$player_2 = $props.state.player_hands) !== null && _$props$state$player_2 !== void 0 && (_$props$state$player_3 = _$props$state$player_2[player_id]) !== null && _$props$state$player_3 !== void 0 && _$props$state$player_3.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_39, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_hands) === null || _$props$state6$player === void 0 ? void 0 : _$props$state6$player[player_id])), 1
+      key: user_id
+    }, [!((_$props$state$player_2 = $props.state.player_hands) !== null && _$props$state$player_2 !== void 0 && (_$props$state$player_3 = _$props$state$player_2[user_id]) !== null && _$props$state$player_3 !== void 0 && _$props$state$player_3.length) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_39, "Empty")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(JSON.stringify((_$props$state6 = $props.state) === null || _$props$state6 === void 0 ? void 0 : (_$props$state6$player = _$props$state6.player_hands) === null || _$props$state6$player === void 0 ? void 0 : _$props$state6$player[user_id])), 1
     /* TEXT */
     )]);
   }), 128
@@ -27058,7 +27069,7 @@ var PeerConnections = /*#__PURE__*/function () {
                 t.server.send({
                   type: 'mediaOffer',
                   offer: localPeerOffer,
-                  from: t.app.state.my_client_id,
+                  from: t.app.my_client_id,
                   to: peer_id,
                   // extras
                   stream_settings: t.stream.getVideoTracks()[0].getSettings()
@@ -27090,7 +27101,7 @@ var PeerConnections = /*#__PURE__*/function () {
       t.app.state.client_ids.forEach(function (client_id) {
         var _this$remote_peers;
 
-        if (client_id !== t.app.state.my_client_id && !((_this$remote_peers = _this.remote_peers) !== null && _this$remote_peers !== void 0 && _this$remote_peers[client_id])) {
+        if (client_id !== t.app.my_client_id && !((_this$remote_peers = _this.remote_peers) !== null && _this$remote_peers !== void 0 && _this$remote_peers[client_id])) {
           // one connection per peer
           _this.remote_peers[client_id] = _this.setupRTCPeerConnection(client_id); // offer the stream to the peer
 
@@ -27191,7 +27202,7 @@ var PeerConnections = /*#__PURE__*/function () {
                 t.server.send({
                   type: "mediaAnswer",
                   answer: peerAnswer,
-                  from: t.app.state.my_client_id,
+                  from: t.app.my_client_id,
                   to: FROM_PEER_ID,
                   // extras
                   stream_settings: t.stream.getVideoTracks()[0].getSettings()
@@ -27314,7 +27325,7 @@ var PeerConnections = /*#__PURE__*/function () {
     key: "onIceCandidateEvent",
     value: function onIceCandidateEvent(event, client_id) {
       // const ids = t.app.state.client_ids.slice();
-      // let my_index = ids.indexOf(t.app.state.my_client_id);
+      // let my_index = ids.indexOf(t.app.my_client_id);
       // ids.splice(my_index, 1);
       if (event.candidate) {
         // should we send to all peers or just one by one?
@@ -27570,7 +27581,7 @@ var SocketConnection = /*#__PURE__*/function () {
       var _this = this;
 
       this.client_id = null;
-      window.t.app.state.my_client_id = null;
+      window.t.app.my_client_id = null;
 
       try {
         this.ws = new WebSocket("wss://".concat(WSHOSTNAME, ":").concat(WEB_PORT));
@@ -27659,12 +27670,13 @@ var SocketConnection = /*#__PURE__*/function () {
           }
 
           this.client_id = decoded.your_client_id;
-          window.t.app.state.my_client_id = this.client_id;
-          window.t.app.state.player_type = decoded.player_or_spectator;
-          console.log('server says my id is', this.client_id, decoded.your_client_id); // todo: separate spectators
-
-          t.players[decoded.your_client_id] = new Player(decoded.your_client_id);
-          console.log('t.players now', t.players); // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
+          window.t.app.my_client_id = this.client_id; // window.t.app.state.player_type = decoded.player_or_spectator;
+          // console.log(
+          //   'server says my id is',
+          //   this.client_id,
+          //   decoded.your_client_id
+          // );
+          // document.querySelector('.my_client_id .value').textContent = JSON.stringify(this.client_id);
           // request video stream
           // setupVideoStream();
 
@@ -27694,10 +27706,10 @@ var SocketConnection = /*#__PURE__*/function () {
   }, {
     key: "send",
     value: function send(data) {
-      data.client_id = t.app.state.my_client_id;
+      data.client_id = t.app.my_client_id;
 
       if (data.type !== 'SET_PLAYER_CURSOR' && data.type !== 'SET_PLAYER_HEAD' && data.type !== 'HIGHLIGHT') {
-        console.log('sending', data, this.client_id, t.app.state.my_client_id);
+        console.log('sending', data, this.client_id, t.app.my_client_id);
       }
 
       if (!this.ws.readyState === 1) {
@@ -27713,21 +27725,21 @@ var SocketConnection = /*#__PURE__*/function () {
 }();
 
 var Player = /*#__PURE__*/function () {
-  function Player(player_id) {
+  function Player(user_id) {
     _classCallCheck(this, Player);
 
-    this.player_id = player_id; // todo support multiple hands
+    this.user_id = user_id; // todo support multiple hands
     // this.matches = [];
     // this.cards = []; // server tells us what cards the player is holding (t.app.state.player_hands)
 
-    this.pointer = new PlayerPointer(player_id);
-    this.head = new PlayerHead(player_id);
+    this.pointer = new PlayerPointer(user_id);
+    this.head = new PlayerHead(user_id);
     this.hand = new THREE.Group();
-    this.hand.name = 'hand_' + player_id;
+    this.hand.name = 'hand_' + user_id;
     t.scene.add(this.hand);
     var handZone = {
       group: this.hand,
-      name: 'hand_' + player_id
+      name: 'hand_' + user_id
     };
     Object.defineProperty(handZone, 'origin', {
       get: function get() {
@@ -27738,7 +27750,7 @@ var Player = /*#__PURE__*/function () {
     this.hand.position.y = 5;
     this.hand.position.z = -9;
     this.hand.rotation.z = THREE.MathUtils.degToRad(180);
-    t.game.layout.named_zones['hand_' + player_id] = handZone;
+    t.game.layout.named_zones['hand_' + user_id] = handZone;
   }
 
   _createClass(Player, [{
@@ -27891,7 +27903,7 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "getMyPlayer",
     value: function getMyPlayer() {
-      return this.players[t.app.state.my_client_id];
+      return this.players[t.app.my_client_id];
     }
   }, {
     key: "getCameraSet",
@@ -27904,7 +27916,7 @@ var Tabletop = /*#__PURE__*/function () {
     key: "opponentIDs",
     get: function get() {
       return t.app.state.client_ids.filter(function (id) {
-        return id !== t.app.state.my_client_id;
+        return id !== t.app.my_client_id;
       });
     }
   }, {
@@ -27925,7 +27937,7 @@ var Tabletop = /*#__PURE__*/function () {
     // setupRTCPeerConnections(){
     //   for(var i = 0; i<t.app.state.client_ids.length; i++){
     //     let client_id = t.app.state.client_ids[i];
-    //     if(client_id !== t.app.state.my_client_id){
+    //     if(client_id !== t.app.my_client_id){
     //       if(!t.webrtc_peer_connections[client_id]){
     //         t.offerStreamToPeer(client_id);
     //       }
@@ -28014,7 +28026,7 @@ var Tabletop = /*#__PURE__*/function () {
             t.stream = stream;
             t.video.srcObject = stream;
             t.video.play();
-            t.players[t.app.state.my_client_id].head.assignVideoToHead(t.video);
+            t.players[t.app.my_client_id].head.assignVideoToHead(t.video);
             resolve();
           })["catch"](function (error) {
             console.error('Unable to access the camera/webcam.', error);
@@ -28025,6 +28037,35 @@ var Tabletop = /*#__PURE__*/function () {
           reject();
         }
       });
+    }
+    /* this gets called with every tick from the server */
+    // maybe we throttle it
+
+  }, {
+    key: "updatePlayerInstances",
+    value: function updatePlayerInstances() {
+      // make sure we have a instance of a Player class
+      // to represent this player
+      for (var i in t.app.state.user_ids) {
+        var _t$players2;
+
+        var user_id = t.app.state.user_ids[i];
+
+        if (!((_t$players2 = t.players) !== null && _t$players2 !== void 0 && _t$players2[user_id])) {
+          t.players[user_id] = new Player(user_id);
+        }
+      } // destroy player if they left
+
+
+      for (var _user_id in t.players) {
+        var _t$app, _t$app$state, _t$app$state$user_id;
+
+        if (((_t$app = t.app) === null || _t$app === void 0 ? void 0 : (_t$app$state = _t$app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$user_id = _t$app$state.user_id) === null || _t$app$state$user_id === void 0 ? void 0 : _t$app$state$user_id.indexOf(_user_id)) === -1) {
+          t.players[_user_id].destroy();
+
+          delete t.players[_user_id];
+        }
+      }
     }
     /*
     // animate the cards within the hand to maintain spacing
@@ -28050,7 +28091,7 @@ var Tabletop = /*#__PURE__*/function () {
           let i_card = hand[a];
           let card = t.cards[i_card];
           camera.attach(card.mesh); // todo: only run this once (if parent isnt already camera)
-            let updateTo = player_id === t.app.state.my_client_id
+            let updateTo = player_id === t.app.my_client_id
             ? this.getUpdateToPlayersHand(player_id,a)
             : this.getUpdateToOpponentsHand(player_id,a);
           console.log(updateTo);
@@ -28069,34 +28110,17 @@ var Tabletop = /*#__PURE__*/function () {
   }, {
     key: "updatePlayerCursors",
     value: function updatePlayerCursors() {
-      for (var i in t.app.state.client_ids) {
-        var _t$players2;
+      // TODO: change this to be a continuous tweening function like
+      // cardsToZones
+      for (var i in t.app.state.player_cursors) {
+        var player_cursor_position = t.app.state.player_cursors[i]; // console.log(i===t.app.,player_cursor_position);
 
-        var player_id = t.app.state.client_ids[i];
-
-        if (!((_t$players2 = t.players) !== null && _t$players2 !== void 0 && _t$players2[player_id])) {
-          t.players[player_id] = new Player(player_id);
-        }
-      }
-
-      for (var b in t.players) {
-        var _t$app, _t$app$state, _t$app$state$client_i;
-
-        if (((_t$app = t.app) === null || _t$app === void 0 ? void 0 : (_t$app$state = _t$app.state) === null || _t$app$state === void 0 ? void 0 : (_t$app$state$client_i = _t$app$state.client_ids) === null || _t$app$state$client_i === void 0 ? void 0 : _t$app$state$client_i.indexOf(b)) === -1) {
-          t.players[b].destroy();
-          delete t.players[b];
-        }
-      }
-
-      for (var _i in t.app.state.player_cursors) {
-        var player_cursor_position = t.app.state.player_cursors[_i]; // console.log(i===t.app.,player_cursor_position);
-
-        if (_i !== t.app.state.my_client_id) {
-          var _t3, _t3$players, _t3$players$_i, _t3$players$_i$pointe;
+        if (i !== t.app.my_client_id) {
+          var _t3, _t3$players, _t3$players$i, _t3$players$i$pointer;
 
           // console.log('update opponent cursor');
           // only update other players, let mousemove drive local players cursor so it doesn't fight with server-streaming values
-          (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$players = _t3.players) === null || _t3$players === void 0 ? void 0 : (_t3$players$_i = _t3$players[_i]) === null || _t3$players$_i === void 0 ? void 0 : (_t3$players$_i$pointe = _t3$players$_i.pointer) === null || _t3$players$_i$pointe === void 0 ? void 0 : _t3$players$_i$pointe.tweenTo({
+          (_t3 = t) === null || _t3 === void 0 ? void 0 : (_t3$players = _t3.players) === null || _t3$players === void 0 ? void 0 : (_t3$players$i = _t3$players[i]) === null || _t3$players$i === void 0 ? void 0 : (_t3$players$i$pointer = _t3$players$i.pointer) === null || _t3$players$i$pointer === void 0 ? void 0 : _t3$players$i$pointer.tweenTo({
             pos_x: player_cursor_position.x,
             pos_y: player_cursor_position.y,
             pos_z: player_cursor_position.z
@@ -28105,7 +28129,9 @@ var Tabletop = /*#__PURE__*/function () {
           });
         }
       }
-    }
+    } // TODO: change this to be a continuous tweening function like
+    // cardsToZones
+
   }, {
     key: "updatePlayerHeads",
     value: function updatePlayerHeads() {
@@ -28113,7 +28139,7 @@ var Tabletop = /*#__PURE__*/function () {
         var _t$app2, _t$app2$state;
 
         // let player_id = t.app.state.client_ids[i];
-        if (player_id !== t.app.state.my_client_id) {
+        if (player_id !== t.app.my_client_id) {
           var _t4, _t4$players, _t4$players$player_id;
 
           // only render opponent heads
@@ -28145,66 +28171,56 @@ var Tabletop = /*#__PURE__*/function () {
           });
         }
       }
-    }
-  }, {
-    key: "getUpdateToPlayersHand",
-    value: function getUpdateToPlayersHand(player_id, a) {
-      var _t$app$state$player_h, _t$app$state2, _t$app$state2$player_;
+    } // getUpdateToPlayersHand(player_id,a){
+    //   const hand = t.app.state?.player_hands?.[player_id] ?? [];
+    //   let matches_count = hand.length/2;
+    //   let even = a % 2 == 0;
+    //   let lerp_max = .07 * matches_count
+    //   let updateTo = {}
+    //   updateTo.pos_x = lerp(
+    //     0, // 0 basis
+    //     lerp_max, // lerp max width
+    //     (1/matches_count)*(even?a+1:a+2)) // % of lerp
+    //     -(even?.1:.105) // slight offset for "paired" card
+    //     -(a*.01) // padding between cards
+    //     -(lerp_max) // center
+    //     +(.05)
+    //   updateTo.pos_y = -0.5 + (0.001 * a);
+    //   updateTo.pos_z = -1.0 + (0.001 * a);
+    //   updateTo.rot_x = 0.5;//1;
+    //   updateTo.rot_y = Math.PI;
+    //   updateTo.rot_z = Math.PI;
+    //   updateTo.scale_x = .09 * .65
+    //   updateTo.scale_y = .09
+    //   updateTo.scale_z = .09 //
+    //   return updateTo;
+    // }
+    // getUpdateToOpponentsHand(player_id,a){
+    //   // let player = t.players[player_id];
+    //   const hand = t.app.state?.player_hands?.[player_id] ?? [];
+    //   let matches_count = hand.length/2;
+    //   let even = a % 2 == 0;
+    //   let lerp_max = .07 * matches_count
+    //   let updateTo = {}
+    //   updateTo.pos_x = lerp(
+    //     0, // 0 basis
+    //     lerp_max, // lerp max width
+    //     (1/matches_count)*(even?a+1:a+2)) // % of lerp
+    //     +(even?.1:.105) // slight offset for "paired" card
+    //     +(a*.01) // padding between cards
+    //     +(lerp_max) // center
+    //     -(.05)
+    //   updateTo.pos_y = 0.5 + (0.001 * a);
+    //   updateTo.pos_z = 1.0 + (0.001 * a);
+    //   updateTo.rot_x = 0.5;//1;
+    //   updateTo.rot_y = Math.PI;
+    //   updateTo.rot_z = -Math.PI;
+    //   updateTo.scale_x = .09 * .65
+    //   updateTo.scale_y = .09
+    //   updateTo.scale_z = .09 //
+    //   return updateTo;
+    // }
 
-      var hand = (_t$app$state$player_h = (_t$app$state2 = t.app.state) === null || _t$app$state2 === void 0 ? void 0 : (_t$app$state2$player_ = _t$app$state2.player_hands) === null || _t$app$state2$player_ === void 0 ? void 0 : _t$app$state2$player_[player_id]) !== null && _t$app$state$player_h !== void 0 ? _t$app$state$player_h : [];
-      var matches_count = hand.length / 2;
-      var even = a % 2 == 0;
-      var lerp_max = .07 * matches_count;
-      var updateTo = {};
-      updateTo.pos_x = lerp(0, // 0 basis
-      lerp_max, // lerp max width
-      1 / matches_count * (even ? a + 1 : a + 2)) // % of lerp
-      - (even ? .1 : .105) // slight offset for "paired" card
-      - a * .01 // padding between cards
-      - lerp_max // center
-      + .05;
-      updateTo.pos_y = -0.5 + 0.001 * a;
-      updateTo.pos_z = -1.0 + 0.001 * a;
-      updateTo.rot_x = 0.5; //1;
-
-      updateTo.rot_y = Math.PI;
-      updateTo.rot_z = Math.PI;
-      updateTo.scale_x = .09 * .65;
-      updateTo.scale_y = .09;
-      updateTo.scale_z = .09; //
-
-      return updateTo;
-    }
-  }, {
-    key: "getUpdateToOpponentsHand",
-    value: function getUpdateToOpponentsHand(player_id, a) {
-      var _t$app$state$player_h2, _t$app$state3, _t$app$state3$player_;
-
-      // let player = t.players[player_id];
-      var hand = (_t$app$state$player_h2 = (_t$app$state3 = t.app.state) === null || _t$app$state3 === void 0 ? void 0 : (_t$app$state3$player_ = _t$app$state3.player_hands) === null || _t$app$state3$player_ === void 0 ? void 0 : _t$app$state3$player_[player_id]) !== null && _t$app$state$player_h2 !== void 0 ? _t$app$state$player_h2 : [];
-      var matches_count = hand.length / 2;
-      var even = a % 2 == 0;
-      var lerp_max = .07 * matches_count;
-      var updateTo = {};
-      updateTo.pos_x = lerp(0, // 0 basis
-      lerp_max, // lerp max width
-      1 / matches_count * (even ? a + 1 : a + 2)) // % of lerp
-      + (even ? .1 : .105) // slight offset for "paired" card
-      + a * .01 // padding between cards
-      + lerp_max // center
-      - .05;
-      updateTo.pos_y = 0.5 + 0.001 * a;
-      updateTo.pos_z = 1.0 + 0.001 * a;
-      updateTo.rot_x = 0.5; //1;
-
-      updateTo.rot_y = Math.PI;
-      updateTo.rot_z = -Math.PI;
-      updateTo.scale_x = .09 * .65;
-      updateTo.scale_y = .09;
-      updateTo.scale_z = .09; //
-
-      return updateTo;
-    }
   }, {
     key: "deck",
     get: function get() {
@@ -28362,9 +28378,9 @@ var PlayerHead = /*#__PURE__*/function (_TweenableMesh) {
   _createClass(PlayerHead, [{
     key: "player_is_me",
     get: function get() {
-      var _t$app$state4;
+      var _t$app$state2;
 
-      return this.player_id === ((_t$app$state4 = t.app.state) === null || _t$app$state4 === void 0 ? void 0 : _t$app$state4.my_client_id);
+      return this.player_id === ((_t$app$state2 = t.app.state) === null || _t$app$state2 === void 0 ? void 0 : _t$app$state2.my_client_id);
     }
   }, {
     key: "setupTexturesAndMaterials",
@@ -28446,11 +28462,11 @@ var PlayerPointer = /*#__PURE__*/function () {
     console.warn('new player pointer');
     scene.add(this.mesh);
     this.updateInterval = setInterval(function () {
-      var _t$app$state5;
+      var _t$app$state3;
 
       _this2.mesh.rotation.y -= .01; // todo: call this only on host change
 
-      _this2.mesh.material.color.setHex(_this2.player_id === ((_t$app$state5 = t.app.state) === null || _t$app$state5 === void 0 ? void 0 : _t$app$state5.player_turn) ? 0x0000ff : 0xff0000);
+      _this2.mesh.material.color.setHex(_this2.player_id === ((_t$app$state3 = t.app.state) === null || _t$app$state3 === void 0 ? void 0 : _t$app$state3.player_turn) ? 0x0000ff : 0xff0000);
     }, 16);
   }
 
@@ -28547,10 +28563,10 @@ var PlayerPointer = /*#__PURE__*/function () {
   }, {
     key: "setupMesh",
     value: function setupMesh() {
-      var _t$app$state6;
+      var _t$app$state4;
 
       this.mesh = new THREE.Mesh(new THREE.SphereGeometry(.5, 4, 4), new THREE.MeshBasicMaterial({
-        color: this.player_id === ((_t$app$state6 = t.app.state) === null || _t$app$state6 === void 0 ? void 0 : _t$app$state6.game_host) ? 0x0000ff : 0xff0000,
+        color: this.player_id === ((_t$app$state4 = t.app.state) === null || _t$app$state4 === void 0 ? void 0 : _t$app$state4.game_host) ? 0x0000ff : 0xff0000,
         wireframe: true,
         transparent: true,
         opacity: 0.5
@@ -28954,7 +28970,8 @@ var Deck = /*#__PURE__*/function () {
 
                         console.log((_card$mesh2 = card.mesh) === null || _card$mesh2 === void 0 ? void 0 : (_card$mesh2$parent = _card$mesh2.parent) === null || _card$mesh2$parent === void 0 ? void 0 : _card$mesh2$parent.name, zone.group.name);
                         card.zone_last_changed = performance.now();
-                        card.prev_zone_name = (_card$mesh3 = card.mesh) === null || _card$mesh3 === void 0 ? void 0 : (_card$mesh3$parent = _card$mesh3.parent) === null || _card$mesh3$parent === void 0 ? void 0 : _card$mesh3$parent.name; // when should we attach vs. add here?
+                        card.prev_zone_name = (_card$mesh3 = card.mesh) === null || _card$mesh3 === void 0 ? void 0 : (_card$mesh3$parent = _card$mesh3.parent) === null || _card$mesh3$parent === void 0 ? void 0 : _card$mesh3$parent.name;
+                        card.current_zone_name = zone.group.name; // when should we attach vs. add here?
 
                         zone.group.attach(card.mesh); // why is this timeout needed
 
@@ -29186,9 +29203,9 @@ var Round = /*#__PURE__*/function () {
   }, {
     key: "current_player",
     get: function get() {
-      var _t5, _t5$players, _t$app$state7;
+      var _t5, _t5$players, _t$app$state5;
 
-      return (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : _t5$players[(_t$app$state7 = t.app.state) === null || _t$app$state7 === void 0 ? void 0 : _t$app$state7.player_turn];
+      return (_t5 = t) === null || _t5 === void 0 ? void 0 : (_t5$players = _t5.players) === null || _t5$players === void 0 ? void 0 : _t5$players[(_t$app$state5 = t.app.state) === null || _t$app$state5 === void 0 ? void 0 : _t$app$state5.player_turn];
     }
   }]);
 
@@ -29258,12 +29275,12 @@ var Layout = /*#__PURE__*/function () {
     key: "convertClientHandsToUserHands",
     value: function convertClientHandsToUserHands() {
       // convert hand client id to user id
-      t.players[t.app.state.my_client_id].user_id = t.root.user.id;
-      t.players[t.app.state.my_client_id].hand.name = 'hand_' + t.root.user.id;
-      var handZone = t.game.layout.named_zones['hand_' + t.app.state.my_client_id];
+      t.players[t.app.my_client_id].user_id = t.root.user.id;
+      t.players[t.app.my_client_id].hand.name = 'hand_' + t.root.user.id;
+      var handZone = t.game.layout.named_zones['hand_' + t.app.my_client_id];
       handZone.name = 'hand_' + t.root.user.id;
       t.game.layout.named_zones['hand_' + t.root.user.id] = handZone;
-      t.game.layout.named_zones['hand_' + t.app.state.my_client_id] = null;
+      t.game.layout.named_zones['hand_' + t.app.my_client_id] = null;
     }
   }]);
 
@@ -29516,7 +29533,7 @@ function getOpponentID() {
   } else if (ids.length > 2) {
     console.error('need to figure out multipeer connections');
   } else {
-    var my_index = ids.indexOf(t.app.state.my_client_id);
+    var my_index = ids.indexOf(t.app.my_client_id);
     ids.splice(my_index, 1);
     console.warn('attempting media offer to peer:', ids[0], ids);
   }
@@ -29907,7 +29924,7 @@ function onMouseMove(_x9) {
 
 function _onMouseMove() {
   _onMouseMove = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.mark(function _callee10(evt) {
-    var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i2;
+    var intersects, _intersects$2, _intersects$2$object, _intersects$2$object$, card_id, card, _t$app$state$hovered, _t$app$state$hovered2, i, _t$app$state$hovered3, _t$app$state$hovered4, _i;
 
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__.wrap(function _callee10$(_context10) {
       while (1) {
@@ -29994,9 +30011,9 @@ function _onMouseMove() {
               }
             } else {
               if (t.app.state.hovered && (_t$app$state$hovered3 = t.app.state.hovered) !== null && _t$app$state$hovered3 !== void 0 && _t$app$state$hovered3[0]) {
-                _i2 = (_t$app$state$hovered4 = t.app.state.hovered) === null || _t$app$state$hovered4 === void 0 ? void 0 : _t$app$state$hovered4[0];
-                t.cards[_i2].mouseOver = false;
-                t.cards[_i2].hovered = false;
+                _i = (_t$app$state$hovered4 = t.app.state.hovered) === null || _t$app$state$hovered4 === void 0 ? void 0 : _t$app$state$hovered4[0];
+                t.cards[_i].mouseOver = false;
+                t.cards[_i].hovered = false;
               }
 
               t.server.send({
@@ -30074,7 +30091,9 @@ function updateServer(type, data) {
   // console.log('updateServer',{type,data})
   t.server.send({
     type: type,
-    data: data
+    data: data,
+    user_id: t.root.user.id,
+    game_id: t.root.game_selection
   });
 }
 
@@ -30082,13 +30101,13 @@ var cusorUpdateFN = getThrottledUpdateServer('SET_PLAYER_CURSOR', 128);
 var headUpdateFN = getThrottledUpdateServer('SET_PLAYER_HEAD', 128);
 
 function updateClientCursor() {
-  var _t$players3, _t$players3$t$app$sta, _t$players3$t$app$sta2;
+  var _t$players3, _t$players3$t$app$my_, _t$players3$t$app$my_2;
 
   // hit test to position pointer
   // mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
   // mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   // Toggle rotation bool for meshes that we clicked
-  var pointer = (_t$players3 = t.players) === null || _t$players3 === void 0 ? void 0 : (_t$players3$t$app$sta = _t$players3[t.app.state.my_client_id]) === null || _t$players3$t$app$sta === void 0 ? void 0 : (_t$players3$t$app$sta2 = _t$players3$t$app$sta.pointer) === null || _t$players3$t$app$sta2 === void 0 ? void 0 : _t$players3$t$app$sta2.mesh;
+  var pointer = (_t$players3 = t.players) === null || _t$players3 === void 0 ? void 0 : (_t$players3$t$app$my_ = _t$players3[t.app.my_client_id]) === null || _t$players3$t$app$my_ === void 0 ? void 0 : (_t$players3$t$app$my_2 = _t$players3$t$app$my_.pointer) === null || _t$players3$t$app$my_2 === void 0 ? void 0 : _t$players3$t$app$my_2.mesh;
 
   if (pointer) {
     var intersects = intersectsGroup([t.tableMesh].concat(_toConsumableArray(t.zonegroup.children))); // console.log('intersects',intersects);
@@ -30156,7 +30175,7 @@ function onTouchEnd(evt) {
 }
 
 function onMouseClick(evt) {
-  var _intersects$, _intersects$$object, _intersects$$object$u, _t$cards;
+  var _t7, _t7$root, _t7$root$player, _intersects$, _intersects$$object, _intersects$$object$u, _t$cards;
 
   if (t.root.show_modal) {
     return;
@@ -30168,6 +30187,11 @@ function onMouseClick(evt) {
   }
 
   if (t.app.state.ignore_clicks || t.client_ignore_clicks || t.deck.shuffling) {
+    return;
+  } // if we're not logged in, ignore it
+
+
+  if (!((_t7 = t) !== null && _t7 !== void 0 && (_t7$root = _t7.root) !== null && _t7$root !== void 0 && (_t7$root$player = _t7$root.player) !== null && _t7$root$player !== void 0 && _t7$root$player.id)) {
     return;
   }
 
@@ -30181,11 +30205,11 @@ function onMouseClick(evt) {
   //   drag_distance
   // })
   // console.log('is it my turn?',{
-  //   my_id:t.app.state.my_client_id,
+  //   my_id:t.app.my_client_id,
   //   player_turn:t.app.state.player_turn
   // })
 
-  if (t.app.state.my_client_id !== t.app.state.player_turn) {
+  if (t.app.my_client_id !== t.app.state.player_turn) {
     console.error('its not your turn'); // TODO: visual feedback (pulse cursor red or something)
 
     return;
@@ -30205,7 +30229,8 @@ function onMouseClick(evt) {
   // need to account for occluders too :/
 
 
-  var player_id = t.app.state.my_client_id;
+  var user_id = t.root.player.id; // t.app.my_client_id
+
   var intersects = intersectsGroup(t.debug_inspect_objects ? t.scene.children : t.zonegroup.children);
   var card_id = intersects === null || intersects === void 0 ? void 0 : (_intersects$ = intersects[0]) === null || _intersects$ === void 0 ? void 0 : (_intersects$$object = _intersects$.object) === null || _intersects$$object === void 0 ? void 0 : (_intersects$$object$u = _intersects$$object.userData) === null || _intersects$$object$u === void 0 ? void 0 : _intersects$$object$u.card_id; // console.log('click intersects',{intersects,card_id});
   // card is on the play field
@@ -30225,7 +30250,7 @@ function onMouseClick(evt) {
     // keep_testing = false;
     if ( // ignore if we already flipped this card over
     t.app.state.flipped.indexOf(card_id) > -1 // or if it's in the player hand
-    || t.app.state.player_hands[player_id].indexOf(card_id) > -1 // todo: or if it's in opponents hand
+    || t.app.state.player_hands[user_id].indexOf(card_id) > -1 // todo: or if it's in opponents hand
     // todo: or if it's not in a zone (intersecting only zonegroup.children kind of solves this one)
     ) {
       console.log('ignoring click', card_id);
