@@ -1,7 +1,7 @@
 <template>
     <div class="world-room-game-modal modal">
         <div class="modal-content">
-            <h2 class="mb-4">Where do you want to go?</h2>
+            <h2 class="mb-4">Game Switcher</h2>
             <h3>World</h3>
             <select v-model="world_selection" @change="onWorldSelectionChanged" >
                 <option :key="world.id" v-for="world in worlds" :value="world.id">{{world.name}}</option>
@@ -63,6 +63,8 @@
 
 
             <button v-if="game_selection !== 'new-game' && isHostOfSelectedGame" @click.prevent="restart_game">Restart Game</button>
+            <button @click.prevent="$emit('closeModal')">Cancel</button>
+
             <button
             :style="{
                 opacity:
@@ -75,7 +77,7 @@
                     room_selection &&
                     game_selection ? 'all' : 'none'
                 }"
-            @click.prevent="submitModal" :disabled="!world_selection ||!room_selection || !game_selection">Continue</button>
+            @click.prevent="$emit('closeModal')" :disabled="!world_selection ||!room_selection || !game_selection">Continue</button>
         </div>
     </div>
 </template>
@@ -83,10 +85,10 @@
 <script>
 export default {
     props:{
-        submitModal:{
-            type: Function,
-            required: true
-        },
+        // submitModal:{
+        //     type: Function,
+        //     required: true
+        // },
         // getRoomsForWorld:{
         //     type: Function,
         //     required: true

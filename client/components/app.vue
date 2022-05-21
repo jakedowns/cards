@@ -1,5 +1,8 @@
 <template>
     <div id="app">
+        <div style="pointer-events:all;" class="game-modal-toggle-icon" @click.prevent="togglePauseMenu">
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 48 48"><rect x="0" y="0" width="48" height="48" fill="none" stroke="none" /><mask id="svgIDa"><g fill="none" stroke="#fff" stroke-linejoin="round" stroke-width="4"><path fill="#fff" d="M28 28h16v16H28zM13 4l9 16H4l9-16Zm23 16a8 8 0 1 0 0-16a8 8 0 0 0 0 16Z"/><path stroke-linecap="round" d="m4 28l16 16m0-16L4 44"/></g></mask><path fill="currentColor" d="M0 0h48v48H0z" mask="url(#svgIDa)"/></svg>
+        </div>
         <div class="modal-wrapper" v-if="show_modal">
             <div class="modal-inner">
                 <LoginModal
@@ -16,7 +19,7 @@
 
                     v-if="show_pause_menu"
 
-                    :submitModal="submitModal"
+
 
                     :gameTypeName="gameTypeName"
 
@@ -45,6 +48,8 @@
                     @gameSelectionChanged="onGameSelectionChanged"
                     :isHostOfSelectedGame="isHostOfSelectedGame"
 
+
+
                     @closeModal="closeModal"
                 />
 
@@ -64,8 +69,15 @@
             <div class="modal-underlay"></div>
         </div>
 
+        <TopHud
+            :its_my_turn="its_my_turn"
+        />
 
+        <LeftHud
+            :state="state"
+        />
 
+        <!-- RightHUD -->
         <div id="debug" >
             <DebugOverlay
                 :calling="calling"
@@ -93,8 +105,7 @@
             />
         </div>
 
-
-
+        <!-- BottomHUD -->
         <AVHud
 
             ref="AVHud"
@@ -111,6 +122,11 @@
             :openPauseMenu="openPauseMenu"
             :toggleMute="toggleMute"
 
+            :is_streaming="is_streaming"
+
+            @toggleStream="toggleStream"
+            @toggleMicMute="toggleMicMute"
+
             @send-chat-message="sendChatMessage"
             :chat_messages="chat_messages"
 
@@ -124,8 +140,10 @@ import NameModal from './namemodal.vue'
 import PauseMenuModal from './PauseMenuModal.vue'
 import DebugOverlay from './DebugOverlay.vue'
 import AVHud from './AVHud.vue'
+import TopHud from './TopHud.vue'
+import LeftHud from './LeftHud.vue'
 import WorldSelectModal from './WorldSelectModal.vue'
-
+import {ref} from 'vue';
 export default {
 
     components:{
@@ -134,6 +152,8 @@ export default {
         PauseMenuModal,
         DebugOverlay,
         AVHud,
+        TopHud,
+        LeftHud,
         WorldSelectModal
     },
 
@@ -143,7 +163,7 @@ export default {
 
     setup(){
         return {
-            chat_messages: [],
+            chat_messages: ref([]),
 
             authenticated: false,
             show_login_loading: true,
@@ -164,8 +184,8 @@ export default {
 
             directus_loaded: false,
 
-            show_modal: true,
-            show_login_modal: true,
+            show_modal: ref(true),
+            show_login_modal: ref(true),
             show_name_modal: false,
             show_pause_menu: false,
             show_world_select_modal: false,
@@ -173,8 +193,9 @@ export default {
             show_spectator_joined_modal: false,
             show_game_in_progress_modal: false,
 
-            show_debug_info: false,
+            show_debug_info: ref(false),
             calling: false,
+            is_streaming: ref(false),
             show_end_call_button: false,
             camera_locked: false,
             messages: [],
@@ -311,6 +332,9 @@ export default {
     },
 
     methods:{
+        toggleStream(){
+
+        },
         resetCamera(){
             t.cameraman.goToView('overhead');
         },
@@ -320,6 +344,13 @@ export default {
         },
         toggleShowDebugInfo(){
             this.show_debug_info = !this.show_debug_info;
+        },
+        togglePauseMenu(){
+            if(this.show_pause_menu){
+                this.closeModal();
+            }else{
+                this.openPauseMenu();
+            }
         },
         openPauseMenu(){
             this.getWorlds();
@@ -444,6 +475,7 @@ export default {
                 }
             }
         },
+        // Sound FX Mute Toggle
         toggleMute(){
             this.audio_muted = !this.audio_muted;
 
@@ -469,7 +501,7 @@ export default {
             window.t.closeVideoStream();
             this.video_enabled = false;
         },
-        toggle_mic_mute(){
+        toggleMicMute(){
             this.mic_muted = !this.mic_muted;
         },
         // toggle_vid_mute(){
@@ -658,6 +690,7 @@ export default {
     }
 }
 .game-modal-toggle-icon {
+    z-index: 2;
     cursor: pointer;
     pointer-events: all;
     position: fixed;
@@ -669,16 +702,8 @@ export default {
         height: auto;
     }
 }
-#icon-video-enable, #icon-video-disable{
+.toggle-video{
     position: absolute;
-    bottom: 103px;
-    left: 90px;
-}
-#icon-video-enable svg {
-    width: 35px;
-    cursor: pointer;
-}
-#icon-video-disable {
     right: 21px;
     bottom: 103px;
 }
@@ -693,7 +718,9 @@ button {
 }
 .debug-inner {
     pointer-events: all;
-    margin-top: 100px;
+    margin-top: 170px;
+    text-align: right;
+    margin-right: 15px;
 }
 .modal-wrapper {
     width: 100%;
@@ -784,16 +811,20 @@ input[type=text],input[type=password]{
     background: transparent;
     position: fixed;
     top: 0;
-    left: 0;
+    // left: 0;
     // right: 0;
     bottom: auto;
 
     width: auto;
-    right: auto;
+    // right: auto;
 
-    // width: 30vw;
-    height: 100vh;
+    width: 200px;
+    height: auto;
     // pointer-events: none;
+
+    right: 0;
+    left: auto;
+
 }
 .details {
     z-index: 2;
@@ -855,10 +886,44 @@ input[type=text],input[type=password]{
     }
 }
 
-.debug-toggle {
+.svg-button {
     pointer-events: all;
+    width: 30px;
+    cursor: pointer;
 }
 
+.debug-toggle {
+
+    top: 100px;
+    right: 20px;
+    position: absolute;
+    height: 30px;
+    cursor: pointer;
+}
+
+.mic-toggle {
+    position: absolute;
+    bottom: 100px;
+    left: 140px;
+}
+
+.video-toggle {
+    position: absolute;
+    left: 80px;
+    bottom: 106px;
+}
+
+.stream-toggle {
+    position: absolute;
+    bottom: 90px;
+    left: 190px;
+    width: 50px;
+}
+
+svg {
+    width: 100%;
+    height: auto;
+}
 
 
 .hud {
