@@ -11,12 +11,6 @@ if (typeof module !== 'undefined' && module?.hot) {
 }
 
 // or
-if (import.meta.webpackHot) {
-  import.meta.webpackHot.accept('./client3d.mjs', function () {
-    // Do something with the updated library modue…
-    console.log('on hot update 2')
-  });
-}
 
 import {createApp} from 'vue'
 import App from './components/app.vue';
@@ -71,7 +65,6 @@ console.log('hostname?port?',[
     `${PORT}`
 ])
 
-import { Directus } from '@directus/sdk';
 class SocketConnection{
     constructor(){
         //this.connectWS();
@@ -1666,7 +1659,7 @@ class Game_PVPMemory{
     */
 }
 
-init();
+//init();
 
 function init(){
 
@@ -2669,4 +2662,10 @@ function resize(renderer) {
     renderer.setSize(width, height, false);
   }
   return needResize;
+}
+
+export default {
+  init,
+  render,
+  resize
 }
