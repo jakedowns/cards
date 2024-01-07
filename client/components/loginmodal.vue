@@ -62,7 +62,7 @@
 <script setup>
 import { reactive,ref } from 'vue'
 let submitting = ref(false);
-let authenticated = ref(false);
+let authenticated = ref(true);
 let show_forgot_password = ref(false);
 let error = ref('');
 let name = ref('');
@@ -112,7 +112,10 @@ export default {
     methods:{
         async checkIsAuthenticated(){
             // But, we need to authenticate if data is private
-            this.authenticated = false;
+            // this.authenticated = false;
+            // set the falsey ref to true
+            // this.authenticated = true;
+            console.warn('this.authenticated',this.authenticated);
 
             // Try to authenticate with token if exists
             // await t.server.directus.auth
@@ -136,7 +139,7 @@ export default {
             //     });
 
             // fake bypass for now
-            this.authenticated = true;
+            // this.authenticated = true;
             this.$emit('authenticated');
         },
         focusInput(){
@@ -161,20 +164,20 @@ export default {
             this.submitting = true;
             this.error = null;
             console.log('logging in');
-            await t.server.directus.auth.login({
-                email:this.email,
-                password:this.password
-            })
-            .then(() => {
-                // this.submitting = false;
-				this.authenticated = true;
-                this.$emit('authenticated');
-			})
-			.catch((err) => {
-                this.submitting = false;
-                console.error(err)
-				this.error = 'Invalid email or password';
-			});
+            // await t.server.directus.auth.login({
+            //     email:this.email,
+            //     password:this.password
+            // })
+            // .then(() => {
+            //     // this.submitting = false;
+			// 	this.authenticated = true;
+            //     this.$emit('authenticated');
+			// })
+			// .catch((err) => {
+            //     this.submitting = false;
+            //     console.error(err)
+			// 	this.error = 'Invalid email or password';
+			// });
         },
         onClickRegister(){
             this.submitting = true;

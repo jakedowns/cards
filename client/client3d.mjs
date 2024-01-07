@@ -1637,6 +1637,17 @@ class Game_PVPMemory{
 
 function init(){
 
+  // Dynamically add Google tag (gtag.js)
+  let scriptTag = document.createElement('script');
+  scriptTag.async = true;
+  scriptTag.src = 'https://www.googletagmanager.com/gtag/js?id=G-QJL8TTXHJR';
+  document.head.appendChild(scriptTag);
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-QJL8TTXHJR');
+
   // THREE.VertexColorShader = {
 
   //   uniforms: {
@@ -2655,6 +2666,8 @@ function intersectsGroup( group ){
   // return false;
   return intersects;
 }
+
+
 
 function pointsHelper( pointsArray ){
   var geometry = new THREE.BufferGeometry().setFromPoints( pointsArray );

@@ -397,7 +397,11 @@ export default {
                 this.show_login_loading = false;
                 return;
             }
-            t.app.state.my_user_id = this.user.id;
+            try{
+                t.app.state.my_user_id = this.user.id;
+            }catch(e){
+                console.error('error setting my_user_id',e);
+            }
 
             console.log('this user?', this.user);
 
