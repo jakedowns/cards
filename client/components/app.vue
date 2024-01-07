@@ -221,6 +221,7 @@ export default {
     },
 
     mounted(){
+        console.warn('app mounted', this, t);
         t.root = this;
         // console.log('vue app mounted');
         document.addEventListener('keyup', e => {
@@ -376,18 +377,19 @@ export default {
         async onLoginAuthenticated(){
 
             console.warn('TODO: if user has no name set, show name modal');
+            console.warn('TODO: used to use directus here, need to swap to our own api for .user hydration')
 
-            this.user = await t.server.directus.users.me.read({
-                fields:['first_name','id','fkid']
-            }).catch(e=>{
-                console.error('error getting user',e);
-            });
+            // this.user = await t.server.directus.users.me.read({
+            //     fields:['first_name','id','fkid']
+            // }).catch(e=>{
+            //     console.error('error getting user',e);
+            // });
 
-            t.server.send({
-                type:'CONNECT_AS_USER',
-                user_id:this.user.id,
-                name:this.user?.first_name
-            })
+            // t.server.send({
+            //     type:'CONNECT_AS_USER',
+            //     user_id:this.user.id,
+            //     name:this.user?.first_name
+            // })
 
 
 
@@ -399,13 +401,15 @@ export default {
 
             console.log('this user?', this.user);
 
-            const result = await t.server.directus.items('Sessions').readByQuery({
-                limit: 1,
+            // const result = await t.server.directus.items('Sessions').readByQuery({
+            //     limit: 1,
 
-                filter: {
-                    user: this.user.id
-                }
-            });
+            //     filter: {
+            //         user: this.user.id
+            //     }
+            // });
+            let result = null;
+            console.warn('todo: get user session from server')
 
             this.user_session = null; // reset
             if(result?.data?.length){
@@ -421,17 +425,18 @@ export default {
                     current_room: 'bbce1345-0718-4faf-812d-e8c9040e1341', // jakes room by default
                     current_game: 'f9222054-ea60-436f-9199-75b97781ec53' // food memory by default
                 }
-                await t.server.directus.items('Sessions').createOne({
-                    user: {id:this.user.id},
-                    current_world: this.user_session.current_world,
-                    current_room: this.user_session.current_room,
-                    current_game: this.user_session.current_game,
-                }).then(res => {
-                    console.log('user session created',res);
-                    // this.user_session = res;
-                }).catch((e)=>{
-                    console.error('error creating user session on server',e);
-                });
+                console.warn('todo: create user session on server')
+                // await t.server.directus.items('Sessions').createOne({
+                //     user: {id:this.user.id},
+                //     current_world: this.user_session.current_world,
+                //     current_room: this.user_session.current_room,
+                //     current_game: this.user_session.current_game,
+                // }).then(res => {
+                //     console.log('user session created',res);
+                //     // this.user_session = res;
+                // }).catch((e)=>{
+                //     console.error('error creating user session on server',e);
+                // });
             }
 
             this.world_selection = this.user_session?.current_world?.toString()
@@ -462,15 +467,16 @@ export default {
             }
         },
         SET_USER_SESSION(){
-            t.server.send({
-                type:'SET_USER_SESSION',
-                user_id:this?.user?.id,
-                session:{
-                    world_selection:this?.world_selection,
-                    room_selection:this?.room_selection,
-                    game_selection:this?.game_selection
-                }
-            })
+            console.warn('todo: set user session on server');
+            // t.server.send({
+            //     type:'SET_USER_SESSION',
+            //     user_id:this?.user?.id,
+            //     session:{
+            //         world_selection:this?.world_selection,
+            //         room_selection:this?.room_selection,
+            //         game_selection:this?.game_selection
+            //     }
+            // })
         },
         // Sound FX Mute Toggle
         toggleMute(){
@@ -565,17 +571,18 @@ export default {
                 console.error('user has no session. create one?');
                 return;
             }
-            await t.server.directus.items('Sessions').updateOne(this.user_session?.id,{
-                    // user: {id:this.user.id},
-                    current_world: this.user_session.current_world,
-                    current_room: this.user_session.current_room,
-                    current_game: this.user_session.current_game,
-                }).then(res => {
-                    console.log('user session updated',res);
-                    // this.user_session = res;
-                }).catch((e)=>{
-                    console.error('error updating user session on server',e);
-                });
+            console.warn('todo: update user session on server');
+            // await t.server.directus.items('Sessions').updateOne(this.user_session?.id,{
+            //         // user: {id:this.user.id},
+            //         current_world: this.user_session.current_world,
+            //         current_room: this.user_session.current_room,
+            //         current_game: this.user_session.current_game,
+            //     }).then(res => {
+            //         console.log('user session updated',res);
+            //         // this.user_session = res;
+            //     }).catch((e)=>{
+            //         console.error('error updating user session on server',e);
+            //     });
         },
         onGameSelectionChanged(game_id){
             this.game_selection = game_id;

@@ -4,16 +4,6 @@
         <title>CardBox</title>
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <!-- Importing Three.js as ES6 modules -->
-        <script type="module">
-            // import our .scss via Vite
-            import '../client/client.scss';
-
-            import * as THREE from './threejs/build/three.module.js';
-            // import { FBXLoader } from '../threejs/examples/jsm/loaders/FBXLoader.js';
-            // import { OrbitControls } from '../threejs/examples/jsm/controls/OrbitControls.js';
-            // import { Inflate } from '../threejs/examples/jsm/libs/inflate.module.min.js';
-        </script>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -52,10 +42,15 @@
         </style>
     </head>
     <body>
+        <a href="./client/2d-client/index.html" class="absolute t-0 l-0 text-red-600 color-red-600">Try the 2D mode</a>
         <div id="vue-layer"></div>
         <script type="module">
             // Importing all exports from 3dclient.mjs
             import * as client3D from '../client/client3d.mjs';
+            document.addEventListener('DOMContentLoaded', () => {
+                console.warn('3D client loaded', client3D)
+                client3D.default.init();
+            });
         </script>
     </body>
 </html>

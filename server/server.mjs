@@ -91,7 +91,7 @@ const server = https.createServer(server_options,(req, res) => {
     switch(req.url){
         case '/':
             // loadFile('/client/index.html',res); // index 2d
-            loadFile('/public/index.html',res); // index 3d
+            loadFile('./public/index.html',res); // index 3d
             break;
 
         default:

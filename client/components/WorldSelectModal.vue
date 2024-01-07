@@ -3,11 +3,15 @@
         <div class="modal-content">
             <h2 class="mb-4">Game Switcher</h2>
             <h3>World</h3>
+                <select :value="localWorldSelection" @change="onWorldSelectionChanged">
+                <option :key="world.id" v-for="world in worlds" :value="world.id">{{ world.name }}</option>
+            </select>
+            <!--
             <select v-model="world_selection" @change="onWorldSelectionChanged" >
                 <option :key="world.id" v-for="world in worlds" :value="world.id">{{world.name}}</option>
-                <!-- <option selected value="jakes-world-uuid">Jake's World</option> -->
-                <!-- <option value="new-world">New World</option> -->
-            </select>
+                <|!-- <option selected value="jakes-world-uuid">Jake's World</option> --|>
+                <|!-- <option value="new-world">New World</option> --|>
+            </select> -->
             <!-- <div v-if="world_selection === 'new-world'">
                 <label>pick a name for your new world</label>
                 <input type="text" placeholder="My New World Name" v-model="new_world_name">
@@ -20,7 +24,7 @@
                  pointerEvents: world_selection ? 'all' : 'none'
             }">
                 <h3>Room</h3>
-                <select v-model="room_selection" :disabled="!world_selection" @change="onRoomSelectionChanged">
+                <select v-bind="room_selection" :disabled="!world_selection" @change="onRoomSelectionChanged">
                     <option :key="room.id" v-for="room in rooms" :value="room.id">{{room.name}}</option>
                     <!-- <option value="new-room">New Room</option> -->
                 </select>
@@ -37,7 +41,7 @@
                  pointerEvents: world_selection && room_selection ? 'all' : 'none'
                 }">
                 <h3>Table / Game</h3>
-                <select v-model="game_selection" :disabled="!room_selection" @change="onRoomSelectionChanged">
+                <select v-bind="game_selection" :disabled="!room_selection" @change="onRoomSelectionChanged">
                     <option :key="game.id" v-for="game in games" :value="game.id">{{gameTypeName(game.game_type)}}</option>
                     <!-- <option value="new-game">New Game</option> -->
                 </select>
@@ -134,6 +138,13 @@ export default {
             required: true
         },
     },
+    data() {
+        return {
+            localWorldSelection: this.world_selection,
+            localRoomSelection: this.room_selection,
+            localGameSelection: this.game_selection,
+        };
+    },
     // setup(){
         // return {
         //     world_selection: null,
@@ -144,17 +155,19 @@ export default {
     // },
     methods: {
         onRoomSelectionChanged($event){
+            this.localRoomSelection = $event.target.value;
             // console.log($event);
             this.$emit('roomSelectionChanged',$event.target.value);
         },
         // todo: throttle
-        onWorldSelectionChanged($event){
-            // console.log("world selection changed",this.world_selection,$event.target.value);
-            // // save world selection to user's session on the server
-            // this.getRoomsForWorld(this.world_selection);
-            this.$emit('worldSelectionChanged',$event.target.value);
+        onWorldSelectionChanged(event) {
+            // Update the local data property
+            this.localWorldSelection = event.target.value;
+            // Emit an event to inform the parent component
+            this.$emit('update:worldSelection', this.localWorldSelection);
         },
         onGameSelectionChanged($event){
+            this.localGameSelection = $event.target.value;
             // console.log("world selection changed",this.world_selection,$event.target.value);
             // // save world selection to user's session on the server
             // this.getRoomsForWorld(this.world_selection);

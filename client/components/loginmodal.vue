@@ -124,16 +124,20 @@ export default {
             //     .catch((error) => {
             //         console.warn('not authenticated',error);
             //     });
-            await t.server.directus.users.me.read()
-                .then((res) => {
-                    console.log('me',res);
-                    this.authenticated = true;
-                    this.$emit('authenticated');
-                })
-                .catch((error) => {
-                    console.warn('not authenticated',error);
-                    this.$emit('notAuthenticated');
-                });
+            // await t.server.directus.users.me.read()
+            //     .then((res) => {
+            //         console.log('me',res);
+            //         this.authenticated = true;
+            //         this.$emit('authenticated');
+            //     })
+            //     .catch((error) => {
+            //         console.warn('not authenticated',error);
+            //         this.$emit('notAuthenticated');
+            //     });
+
+            // fake bypass for now
+            this.authenticated = true;
+            this.$emit('authenticated');
         },
         focusInput(){
             this.$nextTick(()=>{
