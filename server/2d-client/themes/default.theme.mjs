@@ -32,7 +32,7 @@ export default {
             // backdropFilter: 'blur(5px)',
         },
         backStyle: {
-            backgroundImage: 'url("./public/images/default-back.jpg")',
+            backgroundImage: 'url("./images/default-back.jpg")',
             backgroundSize: 'cover'
         }
     }

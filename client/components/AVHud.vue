@@ -62,7 +62,7 @@
             </div>
         </div>
         <div class="sounds">
-            <audio id="sound_effects" src="./public/sounds/flip.mp3" />
+            <audio id="sound_effects" src="./sounds/flip.mp3" />
         </div>
         <div class="videos">
             <!-- players webcam feed -->

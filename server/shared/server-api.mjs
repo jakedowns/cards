@@ -6,7 +6,7 @@ import DEFAULT_STATE from '../2d-client/default.state.mjs';
 import PlayerState from '../2d-client/player-states/4_26_2022_10_11_am_pst.mjs';
 
 // TODO: mysql or directus?
-import StartDirectus from '../../client/directus.mjs'
+// import StartDirectus from '../../client/directus.mjs'
 import { createReturnStatement } from '@vue/compiler-core';
 import { rule } from 'postcss';
 
@@ -15,24 +15,25 @@ class ServerAPI {
     constructor(SERVER_ID){
         this.SERVER_ID = SERVER_ID
         this.booted = false; // flag as true once we've attemtped to fetch state from directus
-        this.StartDirectus = StartDirectus;
+        // this.StartDirectus = StartDirectus;
     }
 
     bootForWorldServer(worldServer){
         this.worldServer = worldServer;
-        this.StartDirectus().then(directus=>{
-            this.directus = directus;
+        // this.StartDirectus().then(directus=>{
+        //     this.directus = directus;
 
-            // fetch state from server
-            this.getServerState().then(state=>{
-                // TODO: write state to Memory
-                // console.warn('TODO: write state to memory',state);
-                if(state?.worlds){
-                    this.worldServer.setStateFromServer(state.worlds)
-                }
-                this.booted = true;
-            })
-        })
+        //     // fetch state from server
+        //     this.getServerState().then(state=>{
+        //         // TODO: write state to Memory
+        //         // console.warn('TODO: write state to memory',state);
+        //         if(state?.worlds){
+        //             this.worldServer.setStateFromServer(state.worlds)
+        //         }
+        //         this.booted = true;
+        //     })
+        // })
+        this.booted = true;
     }
 
     request(req, res){
@@ -106,9 +107,10 @@ class ServerAPI {
 
     async getWorlds(req, res){
         // todo: just get authorized worlds
-        const worlds = await this.directus.items('Worlds').readByQuery({
-            limit: 10,
-        });
+        // const worlds = await this.directus.items('Worlds').readByQuery({
+        //     limit: 10,
+        // });
+        const worlds = []
         this.jsonResponse(worlds,res);
     }
 
@@ -117,10 +119,10 @@ class ServerAPI {
         let game_types = [];
 
         try{
-            games = await this.directus.items('Games').readByQuery({
-                limit: 10,
-                filterBy:{room:room_id}
-            })
+            // games = await this.directus.items('Games').readByQuery({
+            //     limit: 10,
+            //     filterBy:{room:room_id}
+            // })
 
         }catch(e){
             this.jsonError(500,e,res);
@@ -129,9 +131,9 @@ class ServerAPI {
 
         // todo: limit to types that are in the room
         try{
-            game_types = await this.directus.items('Game_Types').readByQuery({
-                limit: 10,
-            })
+            // game_types = await this.directus.items('Game_Types').readByQuery({
+            //     limit: 10,
+            // })
 
         }catch(e){
             this.jsonError(500,e,res);
@@ -149,10 +151,10 @@ class ServerAPI {
         this.world_selection = world_id;
 
         try{
-            rooms = await this.directus.items('rooms').readByQuery({
-                limit: 10,
-                filterBy:{world:world_id}
-            })
+            // rooms = await this.directus.items('rooms').readByQuery({
+            //     limit: 10,
+            //     filterBy:{world:world_id}
+            // })
 
         }catch(e){
             this.jsonError(500,e,res);
@@ -172,25 +174,25 @@ class ServerAPI {
             return;
         }
         const ROLE_ID = "d680f14d-0c72-4f9c-a737-ffc86c517e6b";
-        let invite_response = await this?.directus?.users?.invites?.send(data?.email,ROLE_ID)?.then(_invite_response=>{
-            console.log(_invite_response);
-            this.jsonResponse({success:true},res);
-        })?.catch(err=>{
-            console.log(err);
-            this.jsonError(500,err,res);
-        });
+        // let invite_response = await this?.directus?.users?.invites?.send(data?.email,ROLE_ID)?.then(_invite_response=>{
+        //     console.log(_invite_response);
+        //     this.jsonResponse({success:true},res);
+        // })?.catch(err=>{
+        //     console.log(err);
+        //     this.jsonError(500,err,res);
+        // });
     }
 
     async requestPWReset(req,res){
         const data = await this.getBody(req)
-        await this.directus.auth.password.request(data?.email)
-            .then((_res) => {
-                console.log(_res)
-                this.jsonResponse({success:true},res);
-			})
-			.catch((err) => {
-				this.jsonError(500,err,res);
-			});
+        // await this.directus.auth.password.request(data?.email)
+        //     .then((_res) => {
+        //         console.log(_res)
+        //         this.jsonResponse({success:true},res);
+		// 	})
+		// 	.catch((err) => {
+		// 		this.jsonError(500,err,res);
+		// 	});
     }
 
     getState(req, res){
@@ -212,7 +214,8 @@ class ServerAPI {
 
     async getGame(req, res){
         let game_id = req.url.split('/')[3];
-        const privateData = await directus.items('Games').readByQuery({ filterBy:{id:game_id} })
+        // const privateData = await directus.items('Games').readByQuery({ filterBy:{id:game_id} })
+        const privateData = {};
         // todo save to caching layer
         this.jsonResponse(privateData,res);
     }
@@ -232,21 +235,22 @@ class ServerAPI {
     }
 
     async getServerState(){
-        let remoteState = await this.directus.items('server_states').readOne(this.SERVER_ID).catch((err)=>{
-            console.error('error fetching server state',err);
-        });
+        // let remoteState = await this.directus.items('server_states').readOne(this.SERVER_ID).catch((err)=>{
+        //     console.error('error fetching server state',err);
+        // });
+        const remoteState = {}
         console.log('fetched remote server state', remoteState);
         return remoteState?.state ?? DEFAULT_STATE;
     }
 
     async saveServerState(state){
-        await this.directus.items('server_states').updateOne(this.SERVER_ID,{state})
-            .then((res)=>{
-                console.log('server state saved', res);
-            })
-            .catch((err)=>{
-                console.error('error saving server state', err);
-            })
+        // await this.directus.items('server_states').updateOne(this.SERVER_ID,{state})
+        //     .then((res)=>{
+        //         console.log('server state saved', res);
+        //     })
+        //     .catch((err)=>{
+        //         console.error('error saving server state', err);
+        //     })
     }
 }
 

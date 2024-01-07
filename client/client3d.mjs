@@ -1,26 +1,10 @@
+import * as THREE from '../public/threejs/build/three.module.js';
+import { OrbitControls } from '../public/threejs/examples/jsm/controls/OrbitControls.js'
+import { FBXLoader } from '../public/threejs/examples/jsm/loaders/FBXLoader.js';
+// P2P Layer
 import PeerConnections from './PeerConnections.mjs';
-
-// This example uses THREE.CatmullRomCurve3 to create a path for a custom Keyframe Track position animation.
-// AnimationClip creation function on line 136
-
-if (typeof module !== 'undefined' && module?.hot) {
-  module?.hot?.accept('./client3d.mjs', function () {
-    // Do something with the updated library module...
-    console.log('on hot update 1')
-  });
-}
-
-// or
-if (import.meta.webpackHot) {
-  import.meta.webpackHot.accept('./client3d.mjs', function () {
-    // Do something with the updated library modue…
-    console.log('on hot update 2')
-  });
-}
-
 import {createApp} from 'vue'
 import App from './components/app.vue';
-// Uncomment line 173 to see the curve helper
 console.clear();
 // Global Variables
 var canvas, scene, renderer, camera;
@@ -37,41 +21,24 @@ async function delay(t){
     return new Promise(resolve => setTimeout(resolve, t));
 }
 
-THREE.VertexColorShader = {
 
-  uniforms: {
-  },
-  vertexShader: [
-      "varying vec3 vColor;",
-      "void main() {",
-      "vColor = color;",
-      "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-      "}"
-  ].join("\n"),
-  fragmentShader: [
-      "varying vec3 vColor;",
-      "void main( void ) {",
-      "gl_FragColor = vec4( vColor.rgb, 1. );",
-      "}"
-  ].join("\n")
-};
 
 const colorDark = new THREE.Color( 0xb0b0b0 );
 const colorLight = new THREE.Color( 0xffffff );
 const animationDuration = 0.5; // seconds
 const reset_delay = 1000;
 
-const HOST = HOSTNAME;
-const WEB_PORT = HTTP_PORT;
-const PORT = WS_PORT;
-const WSHOSTNAME = WS_HOSTNAME;
+const HOST = typeof HOSTNAME !== 'undefined' ? HOSTNAME : "localhost";
+const WEB_PORT = typeof HTTP_PORT !== 'undefined' ? HTTP_PORT : "3000";
+const PORT = typeof WS_PORT !== 'undefined' ? WS_PORT : "433" /* default wss port */
+const WSHOSTNAME = typeof WS_HOSTNAME !== 'undefined' ? WS_HOSTNAME : HOST;
 console.log('hostname?port?',[
-    `${WSHOSTNAME}`,
-    // `${HOST}`,
-    `${PORT}`
-])
+  HOST,
+  WEB_PORT,
+  PORT,
+  WSHOSTNAME
+]);
 
-import { Directus } from '@directus/sdk';
 class SocketConnection{
     constructor(){
         //this.connectWS();
@@ -282,7 +249,7 @@ class SoundsManager{
     this.muted = false;
 
     this.sound_map = {
-      'flip': './public/sounds/flip.mp3',
+      'flip': './sounds/flip.mp3',
     }
 
   }
@@ -949,7 +916,7 @@ class Card {
     constructor(index,type){
         this.index = index;
         // http://'+HOST+':'+PORT+'
-        this.front_image = './public/images/decks/fruits/'+type+'.JPG';
+        this.front_image = './images/decks/fruits/'+type+'.JPG';
         this.deck_order_index = index; // what order is this card in the deck's available cards array? (saves repeat indexOf calls)
         this.setupTexturesAndMaterials();
         this.setupMesh();
@@ -981,7 +948,7 @@ class Card {
 
     setupMesh(){
         this.mesh = new THREE.Mesh(
-            new THREE.BoxBufferGeometry( 2.5 , 0.02 , 3.5 ),
+            new THREE.BoxGeometry( 2.5 , 0.02 , 3.5 ),
             [
                 this.darkMaterial, // left
                 this.darkMaterial, // right
@@ -1010,8 +977,8 @@ class Card {
         this.faceUpTexture = txtLoader.load(this.front_image);
         // back image
         // this.faceDownTexture = txtLoader.load('https://vignette3.wikia.nocookie.net/yugioh/images/9/94/Back-Anime-2.png/revision/latest?cb=20110624090942');
-        // this.faceDownTexture = txtLoader.load('./public/images/default-back.jpg');
-        this.faceDownTexture = txtLoader.load('./public/images/decks/fruits/BACK.jpg');
+        // this.faceDownTexture = txtLoader.load('./images/default-back.jpg');
+        this.faceDownTexture = txtLoader.load('./images/decks/fruits/BACK.jpg');
         // faceUpTexture.flipY = false;
         this.darkMaterial = new THREE.MeshBasicMaterial({
           color: 0x111111,
@@ -1666,9 +1633,39 @@ class Game_PVPMemory{
     */
 }
 
-init();
+//init();
 
 function init(){
+
+  // Dynamically add Google tag (gtag.js)
+  let scriptTag = document.createElement('script');
+  scriptTag.async = true;
+  scriptTag.src = 'https://www.googletagmanager.com/gtag/js?id=G-QJL8TTXHJR';
+  document.head.appendChild(scriptTag);
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-QJL8TTXHJR');
+
+  // THREE.VertexColorShader = {
+
+  //   uniforms: {
+  //   },
+  //   vertexShader: [
+  //       "varying vec3 vColor;",
+  //       "void main() {",
+  //       "vColor = color;",
+  //       "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+  //       "}"
+  //   ].join("\n"),
+  //   fragmentShader: [
+  //       "varying vec3 vColor;",
+  //       "void main( void ) {",
+  //       "gl_FragColor = vec4( vColor.rgb, 1. );",
+  //       "}"
+  //   ].join("\n")
+  // };
 
   scene = new THREE.Scene();
   renderer = new THREE.WebGLRenderer({
@@ -1683,7 +1680,8 @@ function init(){
 
   camera = new THREE.PerspectiveCamera(75, 1, 0.01, 5000);
   scene.add(camera);
-  controls = new THREE.OrbitControls(camera, canvas);
+  
+  controls = new OrbitControls(camera, canvas);
 
   window.addEventListener( 'mousemove', onMouseMove, false );
   window.addEventListener( 'click', onMouseClick, false );
@@ -1698,6 +1696,19 @@ function init(){
 
   // init our game instance as window.t
   window.t = new Tabletop();
+  let t_root = null;
+  Object.defineProperty(window.t,'root',{
+    get:function(){
+      if(t_root === null){
+        console.warn('t_root is null');
+      }
+      return t_root;
+    },
+    set:function(val){
+      console.warn('this is where t root finally gets set',val)
+      t_root = val;
+    }
+  })
   t.scene = scene;
   t.camera = camera;
 
@@ -1733,12 +1744,14 @@ function init(){
     }
   }
   checkReady(()=>{
-    t.server.directus = new Directus("https://u2ijwrng.directus.app",{
-      auth:{
-        mode:'json',
-        // autoRefresh: true,
-      }
-    })
+    // removing Directus :(
+    // maybe we'll revisit it
+    // t.server.directus = new Directus("https://u2ijwrng.directus.app",{
+    //   auth:{
+    //     mode:'json',
+    //     // autoRefresh: true,
+    //   }
+    // })
     // alert('mounting vue');
     t.app = createApp({
       components:{App},
@@ -1754,7 +1767,7 @@ function init(){
           }
       },
       mounted(){
-        t.root.directus_loaded = true
+        //t.root.directus_loaded = false; //true
       }
     }).mount('#vue-layer');
     // set it up
@@ -2006,8 +2019,8 @@ function getMeshTween(mesh,updateTo,options){
 
 function initRoomMeshes(){
 
-  const loader = new THREE.FBXLoader();
-				loader.load( './public/fbx/card-table.fbx', function ( object ) {
+  const loader = new FBXLoader();
+				loader.load( './fbx/card-table.fbx', function ( object ) {
           object.name="card-table"
 					// mixer = new THREE.AnimationMixer( object );
 
@@ -2050,6 +2063,7 @@ function initRoomMeshes(){
 
 				} );
 
+
   t.wallMaterial = new THREE.MeshStandardMaterial({
     color: '#244275',
     metalness: 0,
@@ -2058,7 +2072,7 @@ function initRoomMeshes(){
   })
 
   t.northWall = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry( 100, 50 ),
+    new THREE.PlaneGeometry( 100, 50 ),
     t.wallMaterial
   )
   t.northWall.name="northWall"
@@ -2108,7 +2122,7 @@ function initRoomMeshes(){
   t.southWall.position.z = -50;
 
   t.floor = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry( 100, 100 ),
+    new THREE.PlaneGeometry( 100, 100 ),
     new THREE.MeshStandardMaterial({
       metalness: 0,
       roughness: 1,
@@ -2123,7 +2137,7 @@ function initRoomMeshes(){
   t.floor.rotation.x = THREE.MathUtils.degToRad(-90);
 
   // t.floorMesh = new THREE.Mesh(
-  //   new THREE.PlaneBufferGeometry(50, 50),
+  //   new THREE.PlaneGeometry(50, 50),
   //   new THREE.MeshStandardMaterial({
   //     //map: txtLoader.load( "https://threejs.org/examples/textures/hardwood2_diffuse.jpg" ),
   //     metalness: 0,
@@ -2653,6 +2667,8 @@ function intersectsGroup( group ){
   return intersects;
 }
 
+
+
 function pointsHelper( pointsArray ){
   var geometry = new THREE.BufferGeometry().setFromPoints( pointsArray );
   var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
@@ -2669,4 +2685,10 @@ function resize(renderer) {
     renderer.setSize(width, height, false);
   }
   return needResize;
+}
+
+export default {
+  init,
+  render,
+  resize
 }

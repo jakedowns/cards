@@ -6,27 +6,23 @@
   "author": "jakedowns",
   "license": "MIT",
   "dependencies": {
-    "@directus/sdk": "^9.10.0",
+    "@vitejs/plugin-vue": "^5.0.2",
     "axios": "^0.26.1",
     "dotenv": "^16.0.0",
-    "laravel-mix": "^6.0.43",
     "sass-loader": "^12.6.0",
-    "vue": "^3.2.31",
-    "webpack": "^5.72.0",
+    "three": "^0.160.0",
+    "vite": "^5.0.11",
+    "vue": "^3.4.5",
     "ws": "^8.5.0"
   },
   "devDependencies": {
-    "@vue/compiler-sfc": "^3.2.31",
-    "babel": "^6.23.0",
-    "babel-cli": "^6.26.0",
-    "laravel-mix-tailwind": "^0.1.2",
     "mysql": "^2.18.1",
     "ngrok": "^4.3.1",
-    "sass": "^1.51.0",
-    "vue-loader": "^17.0.0",
-    "vue-template-compiler": "^2.6.14"
+    "sass": "^1.51.0"
   },
   "scripts": {
-    "build": "npx webpack --config webpack.config.js"
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
   }
 }

@@ -9,7 +9,7 @@ dotenv.config();
 const HTTP_PORT = process.env?.HTTP_PORT ?? 80;
 const WS_PORT = process.env?.WS_PORT ?? 81;
 const HMR_PORT = process.env?.HMR_PORT ?? 82;
-const HOSTNAME = '0.0.0.0'; // process.env?.HOSTNAME ??
+const HOSTNAME = process.env?.HOSTNAME ?? '0.0.0.0';
 const SSL_CERT_PATH = process.env?.SSL_CERT_PATH ?? '../ssl/server.crt';
 const SSL_KEY_PATH = process.env?.SSL_KEY_PATH ?? '../ssl/server.key';
 const SSL_CA_CERT_PATH = process.env?.SSL_CA_CERT_PATH ?? '../ssl/ca.crt';
@@ -91,7 +91,7 @@ const server = https.createServer(server_options,(req, res) => {
     switch(req.url){
         case '/':
             // loadFile('/client/index.html',res); // index 2d
-            loadFile('/public/index.html',res); // index 3d
+            loadFile('./public/index.html',res); // index 3d
             break;
 
         default:
