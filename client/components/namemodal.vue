@@ -25,13 +25,13 @@ export default {
     methods:{
         async onSubmit(){
             this.submitting = true;
-            let response = await t.server.directus.users.me.update({ first_name: this.first_name }, { fields: ['last_access'] }).then((res)=>{
+            //let response = await t.server.directus.users.me.update({ first_name: this.first_name }, { fields: ['last_access'] }).then((res)=>{
                 this.$emit('nameUpdated');
                 t.root.user.first_name = this.first_name;
-            }).catch((err)=>{
-                this.error = err.message;
-                this.submitting = false;
-            });
+            //}).catch((err)=>{
+            //    this.error = err.message;
+            //    this.submitting = false;
+            //});
         }
     }
 }
