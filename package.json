@@ -21,7 +21,7 @@
     "sass": "^1.51.0"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently 'vite' 'node server/server.mjs'",
     "build": "vite build",
     "serve": "vite preview"
   }

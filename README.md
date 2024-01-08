@@ -51,3 +51,44 @@ https://user-images.githubusercontent.com/1683122/166343608-b03ef7fe-cea6-4a36-b
   - testing porting to React Native
   - (maybe) test port to Unity / Unreal
 
+### Generating a self-signed cert in ubuntu (.cert,.key, & CA.cert)
+1. Open a terminal and navigate to the directory where you want to create the certificates.
+2. Generate a private key using the following command:
+   ```
+   openssl genrsa -out server.key 2048
+   ```
+   > This will create a 2048 bit private key and save it to a file named server.key.
+
+3. Generate a Certificate Signing Request (CSR) with the private key:
+   ```
+   openssl req -new -key server.key -out server.csr
+   ```
+   > You will be prompted to enter details for the certificate. These can be left as default.
+
+4. Generate a self-signed certificate with the private key and CSR:
+   ```
+   openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.cert
+   ```
+   > This will create a self-signed certificate valid for 365 days. The certificate will be saved to a file named server.cert.
+
+5. Finally, verify the certificate:
+   ```
+   openssl x509 -text -noout -in server.cert
+   ```
+   > This will output the details of the certificate. If everything is correct, your self-signed certificate is ready to use.
+
+6. Remember to update the `.env` file with the paths to your newly created `.cert`, `.key`, and `CA.cert` files.
+
+7. Generate a Certificate Authority (CA) certificate:
+   ```
+   openssl req -new -x509 -key server.key -out ca.cert
+   ```
+   > This will create a CA certificate using the server key. The certificate will be saved to a file named ca.cert.
+
+8. Finally, verify the CA certificate:
+   ```
+   openssl x509 -text -noout -in ca.cert
+   ```
+   > This will output the details of the CA certificate. If everything is correct, your CA certificate is ready to use.
+
+9. Remember to update the `.env` file with the paths to your newly created `.cert`, `.key`, and `CA.cert` files.
