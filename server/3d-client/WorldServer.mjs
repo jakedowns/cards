@@ -244,7 +244,13 @@ class WorldServer{
         if(['HIGHLIGHT','SET_PLAYER_CURSOR','SET_PLAYER_HEAD'].indexOf(decoded.type) === -1){
             console.log('client says',decoded);
         }
-        this.clients[client_id].last_seen = Date.now();
+        if(this.clients[client_id]){
+            this.clients[client_id].last_seen = Date.now();
+        }else{
+            console.error('client not found',client_id);
+            return;
+        }
+        
         switch(decoded.type){
 
             // todo:

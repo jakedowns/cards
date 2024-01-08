@@ -58,11 +58,11 @@
                 </div>
 
                 <div class="player-request-modal modal" v-if="show_player_request_modal">
-                    <div class="modal-content"><h2 class="mb-4">"Brent" wants to join your game!</h2><button>Allow (Continue)</button><button>Allow (New)</button><button>Ignore</button></div>
+                    <div class="modal-content"><h2 class="mb-4">"Joe" wants to join your game!</h2><button>Allow (Continue)</button><button>Allow (New)</button><button>Ignore</button></div>
                 </div>
 
                 <div class="spectator-joined-modal modal" v-if="show_spectator_joined_modal">
-                    <div class="modal-content"><h2 class="mb-4">"Brent" joined as a spectator</h2><button>Invite to play</button></div>
+                    <div class="modal-content"><h2 class="mb-4">"Joe" joined as a spectator</h2><button>Invite to play</button></div>
                 </div>
             </div>
 
@@ -368,6 +368,7 @@ export default {
             t.controls.enabled = true;
         },
         onNameUpdated(){
+            console.warn('onNameUpdated');
             this.show_name_modal = false;
             this.openPauseMenu()
         },
@@ -385,12 +386,21 @@ export default {
             //     console.error('error getting user',e);
             // });
 
+            this.user = {
+                id: 1,
+                first_name: 'Jake',
+                fkid: 1
+            }
+
             // t.server.send({
             //     type:'CONNECT_AS_USER',
             //     user_id:this.user.id,
             //     name:this.user?.first_name
             // })
-
+            socket.emit('CONNECT_AS_USER',{
+                user_id:this.user.id,
+                name:this.user?.first_name
+            })
 
 
             if(!this.user){
@@ -398,6 +408,9 @@ export default {
                 return;
             }
             try{
+                if(!t.app.state){
+                    t.app.state = {};
+                }
                 t.app.state.my_user_id = this.user.id;
             }catch(e){
                 console.error('error setting my_user_id',e);

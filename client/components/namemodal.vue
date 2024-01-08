@@ -15,6 +15,7 @@
 <script>
 import {ref} from 'vue'
 export default {
+    emits: ['nameUpdated'],
     setup(){
         return {
             submitting: ref(false),
@@ -25,12 +26,16 @@ export default {
     methods:{
         async onSubmit(){
             this.submitting = true;
+            console.warn('onsubmit',this,this.first_name);
             //let response = await t.server.directus.users.me.update({ first_name: this.first_name }, { fields: ['last_access'] }).then((res)=>{
-                this.$emit('nameUpdated');
                 t.root.user.first_name = this.first_name;
+                this.$emit('nameUpdated');
+                this.submitting = false;
             //}).catch((err)=>{
             //    this.error = err.message;
-            //    this.submitting = false;
+            //}).finally(()=>{
+                // always
+                //this.submitting = false;
             //});
         }
     }

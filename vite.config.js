@@ -15,8 +15,8 @@ export default defineConfig({
     },
     server: {
         // get from env
-        host: '0.0.0.0', //'mycards.site',
+        host: '0.0.0.0', //'cards.site',
         // Specify the port todo: get from env
-        port: 8089,
+        port: 4090,
     }
 });

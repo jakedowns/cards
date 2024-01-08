@@ -145,6 +145,7 @@ class SocketConnection{
               // note we don't alter t.players until user is read() from directus later in onLoginAuthenticated
               this.client_id = decoded.your_client_id;
               window.t.app.state.my_client_id = this.client_id;
+              console.warn('got welcome from server',this.client_id,decoded.your_client_id);
 
               if(prev_client_id && prev_client_id !== this.client_id){
                 console.warn('MY CLIENT ID CHANGED (SERVER RESTARTED?) NEED TO UPDATE OLD REFERENCES TO THE PREV ID')
@@ -301,10 +302,9 @@ class Tabletop{
         this.client_ignore_clicks = true;
         // table tops have uuids which can be shared / spectated / joined
         this.id = "id"+performance.now();
-
-        // t.server =
+        
         this.server = new SocketConnection();
-        // t.sounds =
+        
         this.sounds = new SoundsManager();
 
         this.peers = new PeerConnections();
@@ -2529,7 +2529,11 @@ function onMouseClick( evt ){
 
     // TODO: we need to only react to the card that is closest to the camera
     // need to account for occluders too :/
-    let user_id = t.app.state.my_user_id
+    if(!t?.app?.state?.my_client_id){
+      console.warn('no client id');
+      return;
+    }
+    const user_id = t.app.state.my_client_id;
     const intersects = intersectsGroup(t.debug_inspect_objects ? t.scene.children : t.zonegroup.children)
     let card_id = intersects?.[0]?.object?.userData?.card_id;
     // console.log('click intersects',{intersects,card_id});

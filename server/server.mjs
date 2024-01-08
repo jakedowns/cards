@@ -90,8 +90,15 @@ const server = https.createServer(server_options,(req, res) => {
     }
     switch(req.url){
         case '/':
+            // redirec to vite version on :4090
+            res.writeHead(302, {
+                'Location': `https://${req.headers.host}:4090/index.html`,
+                //add other headers here...
+            });
+            res.end();
+            return;
             // loadFile('/client/index.html',res); // index 2d
-            loadFile(resolve(__dirname, '/public/index.html'), res);
+            //loadFile(resolve(__dirname, '/public/index.html'), res);
             break;
 
         default:
@@ -102,9 +109,11 @@ const server = https.createServer(server_options,(req, res) => {
 
 });
 
+// don't do basic webserver, we're using Vite now
+// just do the websocket and api server
 server.listen(port, hostname, () => {
     // confirm startup
-  console.log(`Server running at https://${hostname}:${port}/`);
+  console.log(`API Server running at https://${hostname}:${port}/`);
 });
 
 // todo: split websocket into separate file
