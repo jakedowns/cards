@@ -559,11 +559,12 @@ export default {
         },
 
         getWorlds(){
-            axios.get('/api/worlds').then(res=>{
-                this.worlds = res.data.data;
-            }).catch(err=>{
-                console.error(err);
-            })
+            this.worlds = [];
+            // axios.get('/api/worlds').then(res=>{
+            //     this.worlds = res.data.data;
+            // }).catch(err=>{
+            //     console.error(err);
+            // })
         },
         async updateSessionOnServer(){
             // axios.post('/api/session').then(res=>{
