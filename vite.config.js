@@ -14,9 +14,9 @@ export default defineConfig({
         },
     },
     server: {
-        // Specify the host IP, use '0.0.0.0' to accept connections from all IPs
-        // host: '0.0.0.0',
-        // Specify the port
-        port: 3000, // Change to your desired port
+        // get from env
+        host: '0.0.0.0', //'mycards.site',
+        // Specify the port todo: get from env
+        port: 8089,
     }
 });

@@ -2,7 +2,7 @@ import https from 'https';
 import http from 'http';
 import {promises as fs} from 'fs';
 import {readFileSync} from 'fs';
-import { dirname } from 'path';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from "dotenv"
 dotenv.config();
@@ -91,7 +91,7 @@ const server = https.createServer(server_options,(req, res) => {
     switch(req.url){
         case '/':
             // loadFile('/client/index.html',res); // index 2d
-            loadFile('./public/index.html',res); // index 3d
+            loadFile(resolve(__dirname, '/public/index.html'), res);
             break;
 
         default:

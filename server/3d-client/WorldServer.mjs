@@ -616,7 +616,7 @@ class WorldServer{
         for(var game_id in this.games){
             let game = this.games[game_id];
 
-            console.log('GAME',game);
+            //console.log('GAME',game);
 
             if(!game){
                 continue;

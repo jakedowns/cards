@@ -28,10 +28,10 @@ const colorLight = new THREE.Color( 0xffffff );
 const animationDuration = 0.5; // seconds
 const reset_delay = 1000;
 
-const HOST = typeof HOSTNAME !== 'undefined' ? HOSTNAME : "localhost";
-const WEB_PORT = typeof HTTP_PORT !== 'undefined' ? HTTP_PORT : "3000";
-const PORT = typeof WS_PORT !== 'undefined' ? WS_PORT : "433" /* default wss port */
-const WSHOSTNAME = typeof WS_HOSTNAME !== 'undefined' ? WS_HOSTNAME : HOST;
+const HOST = import.meta.env.VITE_HOST || "localhost";
+const WEB_PORT = import.meta.env.VITE_WEB_PORT || "3000";
+const PORT = import.meta.env.VITE_WS_PORT || "433";
+const WSHOSTNAME = import.meta.env.VITE_WS_HOSTNAME || HOST;
 console.log('hostname?port?',[
   HOST,
   WEB_PORT,
