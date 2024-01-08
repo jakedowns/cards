@@ -34,8 +34,11 @@ https://user-images.githubusercontent.com/1683122/166343608-b03ef7fe-cea6-4a36-b
    - `npx mix --production` mix for a prod deploy
 
 5. in a separate terminal run `nodemon server/server.mjs` (if nodemon is not found, `npm i -g nodemon`) // can also use `forever`
-6. visit `https://cards.site:3090` (or whatever hostname/port config you gave it)
+6. visit `https://cards.site:4090` (or whatever hostname/port config you gave it)
 
+`for me, in WSL on windows, with vite, it's http://172.27.118.25:4090/public/index.html`
+
+`i need to figure out why hostname isn't working`
 
 ### Overview
 
